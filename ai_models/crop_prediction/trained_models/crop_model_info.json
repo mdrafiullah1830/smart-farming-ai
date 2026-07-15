@@ -1,0 +1,30 @@
+{
+  "model_name": "random_forest",
+  "accuracy": 0.655,
+  "n_classes": 12,
+  "classes": [
+    "banana",
+    "chili",
+    "jute",
+    "lentil",
+    "mango",
+    "mustard",
+    "onion",
+    "potato",
+    "rice",
+    "sugarcane",
+    "tomato",
+    "wheat"
+  ],
+  "feature_names": [
+    "temperature",
+    "humidity",
+    "rainfall",
+    "ph",
+    "nitrogen",
+    "phosphorus",
+    "potassium"
+  ],
+  "trained_at": "2026-06-23T19:59:56.402827",
+  "n_samples": 996
+}

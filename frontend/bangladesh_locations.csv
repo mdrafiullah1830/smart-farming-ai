@@ -1,0 +1,129 @@
+division,zilla,union,latitude,longitude
+Dhaka,Dhaka,Mohammadpur,23.7589,90.3679
+Dhaka,Dhaka,Gulshan,23.7925,90.4078
+Dhaka,Dhaka,Dhanmondi,23.7461,90.3742
+Dhaka,Dhaka,Mirpur,23.8042,90.3520
+Dhaka,Dhaka,Tejgaon,23.7586,90.3930
+Dhaka,Dhaka,Motijheel,23.7330,90.4170
+Dhaka,Dhaka,Lalbagh,23.7189,90.3925
+Dhaka,Dhaka,Old Dhaka,23.7104,90.4074
+Dhaka,Dhaka,Uttara,23.8759,90.3795
+Dhaka,Dhaka,Badda,23.7769,90.4253
+Dhaka,Narayanganj,Narayanganj Sadar,23.6226,90.4970
+Dhaka,Narayanganj,Fatullah,23.6122,90.4785
+Dhaka,Narayanganj,Adamjee,23.6083,90.4920
+Dhaka,Gazipur,Gazipur Sadar,24.0028,90.4260
+Dhaka,Gazipur,Tongi,23.9862,90.4060
+Dhaka,Gazipur,Kaliakair,23.9925,90.5938
+Dhaka,Gazipur,Sreepur,24.1800,90.4539
+Dhaka,Kishoreganj,Kishoreganj Sadar,24.4333,90.7833
+Dhaka,Kishoreganj,Bhairab,24.0500,90.9833
+Dhaka,Madaripur,Madaripur Sadar,23.1700,90.2000
+Dhaka,Manikganj,Manikganj Sadar,23.8700,90.0000
+Dhaka,Munshiganj,Munshiganj Sadar,23.5500,90.5000
+Dhaka,Narsingdi,Narsingdi Sadar,23.9300,90.7200
+Dhaka,Rajbari,Rajbari Sadar,23.7500,89.6000
+Dhaka,Shariatpur,Shariatpur Sadar,23.2000,90.4500
+Dhaka,Faridpur,Faridpur Sadar,23.5400,89.8300
+Chittagong,Chittagong,Chittagong Sadar,22.3569,91.7832
+Chittagong,Chittagong,Bakalia,22.3375,91.7730
+Chittagong,Chittagong,Hathazari,22.4333,91.7833
+Chittagong,Chittagong,Rangunia,22.4500,91.9500
+Chittagong,Chittagong,Raozan,22.5333,91.9000
+Chittagong,Chittagong,Boalkhali,22.2500,91.8833
+Chittagong,Cox's Bazar,Cox's Bazar Sadar,21.4272,92.0054
+Chittagong,Cx's Bazar,Ukhia,21.1833,92.1000
+Chittagong,Cumilla,Cumilla Sadar,23.4616,91.1836
+Chittagong,Cumilla,Debidwar,23.6000,91.2833
+Chittagong,Cumilla,Brahmanpara,23.6167,91.1167
+Chittagong,Feni,Feni Sadar,23.0200,91.4000
+Chittagong,Brahmanbaria,Brahmanbaria Sadar,23.9600,91.1100
+Chittagong,Chandpur,Chandpur Sadar,23.2200,90.6600
+Chittagong,Lakshmipur,Lakshmipur Sadar,22.9400,90.8300
+Chittagong,Noakhali,Noakhali Sadar,22.8700,91.1000
+Chittagong,Bandarban,Bandarban Sadar,22.2000,92.2200
+Chittagong,Rangamati,Rangamati Sadar,22.6400,92.2000
+Chittagong,Khagrachhari,Khagrachhari Sadar,23.1100,91.9800
+Rajshahi,Rajshahi,Rajshahi Sadar,24.3733,88.6004
+Rajshahi,Rajshahi,Boalia,24.3667,88.6000
+Rajshahi,Rajshahi,Rajpur,24.3833,88.5667
+Rajshahi,Bogra,Bogra Sadar,24.8500,89.3500
+Rajshahi,Bogra,Shibganj,24.8333,89.4000
+Rajshahi,Chapainawabganj,Chapainawabganj Sadar,24.6000,88.2800
+Rajshahi,Naogaon,Naogaon Sadar,24.8100,88.9300
+Rajshahi,Natore,Natore Sadar,24.4200,89.0000
+Rajshahi,Pabna,Pabna Sadar,24.0100,89.2400
+Rajshahi,Sirajganj,Sirajganj Sadar,24.4600,89.7100
+Rajshahi,Joypurhat,Joypurhat Sadar,25.1000,89.0300
+Rajshahi,Natore,Baraigram,24.3167,88.8667
+Rajshahi,Sirajganj,Ullapara,24.3167,89.5833
+Rajshahi,Pabna,Sujanagar,24.0833,89.4333
+Rajshahi,Bogra,Adamdighi,24.7667,89.2667
+Rajshahi,Naogaon,Manda,24.7667,88.7167
+Khulna,Khulna,Khulna Sadar,22.8456,89.5404
+Khulna,Khulna,Khalishpur,22.8667,89.5333
+Khulna,Khulna,Sonadanga,22.8333,89.5500
+Khulna,Jessore,Jessore Sadar,23.1700,89.2100
+Khulna,Jessore,Abhaynagar,23.0167,89.3333
+Khulna,Satkhira,Satkhira Sadar,21.7400,89.0700
+Khulna,Bagerhat,Bagerhat Sadar,22.6600,89.7900
+Khulna,Chuadanga,Chuadanga Sadar,23.6400,88.8600
+Khulna,Meherpur,Meherpur Sadar,23.7700,88.6300
+Khulna,Kushtia,Kushtia Sadar,23.9100,89.1300
+Khulna,Magura,Magura Sadar,23.4200,89.4200
+Khulna,Narail,Narail Sadar,23.1700,89.5100
+Khulna,Jhenaidah,Jhenaidah Sadar,23.5400,89.1500
+Khulna,Khulna,Digholia,22.7833,89.4833
+Khulna,Bagerhat,Rampal,22.5500,89.6667
+Sylhet,Sylhet,Sylhet Sadar,24.8945,91.8687
+Sylhet,Sylhet,Beanibazar,24.8236,92.1562
+Sylhet,Sylhet,Zakiganj,24.7833,92.1333
+Sylhet,Habiganj,Habiganj Sadar,24.3833,91.4167
+Sylhet,Moulvibazar,Moulvibazar Sadar,24.4800,91.7700
+Sylhet,Sunamganj,Sunamganj Sadar,25.0700,91.4000
+Sylhet,Sylhet,Bishwanath,24.7833,91.7000
+Sylhet,Sylhet,Dakshin Surma,24.9000,91.8333
+Sylhet,Habiganj,Lakhai,24.3000,91.3000
+Sylhet,Moulvibazar,Kamalganj,24.3500,91.8000
+Sylhet,Sunamganj,Dharampasha,25.1167,91.5333
+Barisal,Barisal,Barisal Sadar,22.7010,90.3533
+Barisal,Barisal,Bakerganj,22.5500,90.1667
+Barisal,Bhola,Bhola Sadar,22.6900,90.6400
+Barisal,Patuakhali,Patuakhali Sadar,22.3600,90.3300
+Barisal,Pirojpur,Pirojpur Sadar,22.5800,90.0000
+Barisal,Jhalokati,Jhalokati Sadar,22.6400,90.1900
+Barisal,Barguna,Barguna Sadar,22.1600,90.1200
+Barisal,Barisal,Agailjhara,22.5333,90.0833
+Barisal,Bhola,Char Fasson,22.1833,90.6833
+Barisal,Patuakhali,Dumki,22.4167,90.2333
+Barisal,Pirojpur,Nesarabad,22.7333,89.9167
+Mymensingh,Mymensingh,Mymensingh Sadar,24.7500,90.4000
+Mymensingh,Mymensingh,Islampur,24.9333,90.1667
+Mymensingh,Jamalpur,Jamalpur Sadar,24.9300,89.9500
+Mymensingh,Netrakona,Netrakona Sadar,24.8800,90.7300
+Mymensingh,Sherpur,Sherpur Sadar,25.0200,90.0200
+Mymensingh,Mymensingh,Fulbaria,24.6333,90.3500
+Mymensingh,Jamalpur,Madalganj,24.8667,89.7833
+Mymensingh,Netrakona,Mohanganj,24.8667,90.9167
+Mymensingh,Sherpur,Nakla,25.0833,89.9167
+Mymensingh,Mymensingh,Bhaluka,24.9333,90.5333
+Rangpur,Rangpur,Rangpur Sadar,25.7500,89.2500
+Rangpur,Rangpur,Gangachara,25.8667,89.2167
+Rangpur,Dinajpur,Dinajpur Sadar,25.6300,88.6300
+Rangpur,Kurigram,Kurigram Sadar,25.8100,89.6400
+Rangpur,Gaibandha,Gaibandha Sadar,25.3300,89.5400
+Rangpur,Lalmonirhat,Lalmonirhat Sadar,25.9200,89.4700
+Rangpur,Nilphamari,Nilphamari Sadar,25.9300,88.8500
+Rangpur,Panchagarh,Panchagarh Sadar,26.3400,88.5500
+Rangpur,Thakurgaon,Thakurgaon Sadar,26.0300,88.4700
+Rangpur,Rangpur,Mithapukur,25.5667,89.2833
+Rangpur,Dinajpur,Birganj,25.7167,88.7167
+Rangpur,Kurigram,Rajarhat,25.7667,89.8333
+Rangpur,Gaibandha,Sundarganj,25.5000,89.6167
+Rangpur,Lalmonirhat,Hatibandha,26.1167,89.3500
+Rangpur,Nilphamari,Saidpur,25.8000,88.9167
+Faridpur,Faridpur,Faridpur Sadar,23.5500,89.8300
+Faridpur,Faridpur,Boalmari,23.4333,89.6667
+Faridpur,Pabna,Pabna Sadar,24.0100,89.2400
+Faridpur,Pabna,Ishwardi,24.1333,89.0667
+Faridpur,Pabna,Bera,24.1333,89.3500

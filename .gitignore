@@ -1,0 +1,15 @@
+**/node_modules/
+**/venv/
+**/.venv/
+**/__pycache__/
+*.pyc
+.env
+.DS_Store
+soil report/
+soil report.zip
+soil analysis/
+*.zip
+*.dmg
+*.mp4
+soil_data.json
+*.pkl

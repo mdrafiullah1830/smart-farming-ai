@@ -1,0 +1,124 @@
+{
+  "LT Information": {
+    "": {
+      "files": 7,
+      "total_records": 3907
+    }
+  },
+  "climate information": {
+    "Extreme temperature": {
+      "files": 3,
+      "total_records": 1136
+    },
+    "thermal info": {
+      "files": 3,
+      "total_records": 1290
+    },
+    "kharif reference lpg": {
+      "files": 3,
+      "total_records": 1392
+    },
+    "pre-kharif tran..": {
+      "files": 3,
+      "total_records": 1216
+    }
+  },
+  "AEZ Information": {
+    "": {
+      "files": 5,
+      "total_records": 3331
+    }
+  },
+  "GST Information": {
+    "": {
+      "files": 4,
+      "total_records": 4587
+    }
+  },
+  "soil information": {
+    "acid sulphate phase": {
+      "files": 3,
+      "total_records": 1074
+    },
+    "aklaine phase": {
+      "files": 3,
+      "total_records": 1070
+    },
+    "firm:hard ploughpan": {
+      "files": 3,
+      "total_records": 1468
+    },
+    "disastrous flood hazard": {
+      "files": 3,
+      "total_records": 1394
+    },
+    "slope": {
+      "files": 3,
+      "total_records": 1355
+    },
+    "drainage": {
+      "files": 3,
+      "total_records": 2665
+    },
+    "disastrous strom surge hazard": {
+      "files": 3,
+      "total_records": 1071
+    },
+    "disastrous river erosion hazard": {
+      "files": 3,
+      "total_records": 1394
+    },
+    "soil depth": {
+      "files": 3,
+      "total_records": 35747
+    },
+    "soil consistency": {
+      "files": 3,
+      "total_records": 1668
+    },
+    "soil reaction": {
+      "files": 3,
+      "total_records": 1726
+    },
+    "soil premeability": {
+      "files": 3,
+      "total_records": 1856
+    },
+    "calcic phase": {
+      "files": 3,
+      "total_records": 1053
+    },
+    "hazard frequency": {
+      "files": 3,
+      "total_records": 2648
+    },
+    "top soil texture": {
+      "files": 3,
+      "total_records": 3594
+    },
+    "soil salinity": {
+      "files": 3,
+      "total_records": 1187
+    },
+    "natural nutrient": {
+      "files": 3,
+      "total_records": 1394
+    },
+    "soil mosture": {
+      "files": 3,
+      "total_records": 2095
+    },
+    "erosion status": {
+      "files": 3,
+      "total_records": 1057
+    },
+    "flooding depth": {
+      "files": 3,
+      "total_records": 2827
+    },
+    "relief": {
+      "files": 3,
+      "total_records": 1388
+    }
+  }
+}

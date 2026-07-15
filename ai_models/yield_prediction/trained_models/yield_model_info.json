@@ -1,0 +1,31 @@
+{
+  "model_name": "gradient_boosting",
+  "r2_score": 0.8993953784271396,
+  "feature_names": [
+    "crop_encoded",
+    "temperature",
+    "humidity",
+    "rainfall",
+    "ph",
+    "nitrogen",
+    "area_acres",
+    "irrigation_used",
+    "season_encoded"
+  ],
+  "crop_classes": [
+    "chili",
+    "jute",
+    "onion",
+    "potato",
+    "rice",
+    "tomato",
+    "wheat"
+  ],
+  "season_classes": [
+    "kharif",
+    "rabi",
+    "summer"
+  ],
+  "trained_at": "2026-06-23T20:00:14.825132",
+  "n_samples": 1000
+}

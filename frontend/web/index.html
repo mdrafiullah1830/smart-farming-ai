@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smart Farming AI - বাংলাদেশ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+:root {
+  --primary:#16a34a;--primary-dark:#15803d;--primary-light:#22c55e;--primary-glow:rgba(34,197,94,.3);
+  --accent:#f59e0b;--accent-dark:#d97706;--accent-glow:rgba(245,158,11,.3);
+  --error:#ef4444;--info:#3b82f6;--purple:#8b5cf6;--purple-glow:rgba(139,92,246,.3);
+  --bg:#0a0a0a;--surface:#ffffff;--surface-glass:rgba(255,255,255,.08);
+  --text:#0f172a;--text-light:#ffffff;--text-secondary:#94a3b8;
+  --border:rgba(255,255,255,.1);
+  --radius:16px;--radius-lg:24px;--radius-xl:32px;
+  --shadow:0 25px 50px -12px rgba(0,0,0,.25);
+  --glow-primary:0 0 60px rgba(34,197,94,.4);
+  --glow-accent:0 0 60px rgba(245,158,11,.4);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-serif;background:var(--bg);color:var(--text-light);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.bg-map{position:fixed;top:0;left:0;width:100%;height:100%;background:url('bangladesh-map.png') center center no-repeat;background-size:50% auto;opacity:0.15;filter:brightness(2);pointer-events:none;z-index:1}
+
+/* ===== ANIMATED BACKGROUND ===== */
+.bg-gradient{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;background:linear-gradient(135deg,#0a0a0a 0%,#0d1117 25%,#0a0a0a 50%,#111827 75%,#0a0a0a 100%);background-size:400% 400%;animation:gradientShift 15s ease infinite}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* Floating orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.4;pointer-events:none;z-index:-1;animation:orbFloat 20s ease-in-out infinite}
+.orb-1{width:400px;height:400px;background:var(--primary-glow);top:-100px;left:-100px;animation-delay:0s}
+.orb-2{width:300px;height:300px;background:var(--accent-glow);bottom:-50px;right:-50px;animation-delay:-5s}
+.orb-3{width:250px;height:250px;background:var(--purple-glow);top:40%;left:60%;animation-delay:-10s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-30px) scale(1.05)}50%{transform:translate(-20px,20px) scale(.95)}75%{transform:translate(20px,10px) scale(1.02)}}
+
+/* Particle grid */
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:rgba(34,197,94,.3);border-radius:50%;animation:particleFloat linear infinite}
+@keyframes particleFloat{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100vh) rotate(720deg);opacity:0}}
+
+/* ===== TOAST ===== */
+.toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:400px}
+.toast{padding:14px 20px;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:600;font-family:inherit;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;animation:fadeDown .3s ease;pointer-events:auto;backdrop-filter:blur(20px);border:1px solid var(--border)}
+.toast.info{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.3)}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== NAVBAR ===== */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;backdrop-filter:blur(20px);background:rgba(10,10,10,.6);border-bottom:1px solid var(--border)}
+.navbar.scrolled{background:rgba(10,10,10,.95);padding:12px 24px;box-shadow:0 4px 30px rgba(0,0,0,.3)}
+.nav-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;color:#fff}
+.nav-brand .icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--glow-primary)}
+.nav-links{display:flex;align-items:center;gap:20px}
+.nav-links a{font-size:14px;color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;transition:all .2s;cursor:pointer}
+.nav-links a:hover{color:#fff}
+.lang-toggle{display:inline-flex;align-items:center;background:rgba(255,255,255,.08);border-radius:20px;padding:3px;gap:0;border:1px solid var(--border)}
+.lang-toggle .lang-btn{padding:6px 14px;border-radius:18px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s;font-family:inherit;background:transparent;color:rgba(255,255,255,.5)}
+.lang-toggle .lang-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(22,163,74,.4)}
+.nav-cta{padding:10px 24px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:all .3s;font-family:inherit;display:flex;align-items:center;gap:8px}
+.nav-cta:hover{background:var(--primary-light);transform:translateY(-2px);box-shadow:var(--glow-primary)}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 60px;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:100px;font-size:13px;font-weight:600;color:var(--primary-light);margin-bottom:32px;animation:fadeInUp .8s ease}
+.hero-badge .dot{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.2)}}
+.hero h1{font-size:clamp(40px,8vw,72px);font-weight:900;line-height:1.1;margin-bottom:24px;animation:fadeInUp .8s ease .1s both}
+.hero h1 .gradient-text{background:linear-gradient(135deg,var(--primary-light),var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:gradientText 3s ease infinite}
+@keyframes gradientText{0%,100%{background-position:0% center}50%{background-position:200% center}}
+.hero p{font-size:clamp(16px,2.5vw,20px);color:var(--text-secondary);max-width:600px;line-height:1.8;margin-bottom:48px;animation:fadeInUp .8s ease .2s both}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* Hero actions */
+.hero-actions{display:flex;gap:16px;margin-bottom:64px;animation:fadeInUp .8s ease .3s both;flex-wrap:wrap;justify-content:center}
+.hero-btn{padding:18px 36px;border-radius:var(--radius);font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .3s;border:none;display:flex;align-items:center;gap:10px}
+.hero-btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 4px 20px rgba(22,163,74,.4)}
+.hero-btn-primary:hover{transform:translateY(-4px);box-shadow:0 8px 40px rgba(22,163,74,.5)}
+.hero-btn-ghost{background:var(--surface-glass);color:#fff;border:1px solid var(--border);backdrop-filter:blur(10px)}
+.hero-btn-ghost:hover{background:rgba(255,255,255,.15);transform:translateY(-4px)}
+
+/* Hero stats */
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--surface-glass);border-radius:var(--radius-lg);overflow:hidden;max-width:800px;width:100%;backdrop-filter:blur(20px);border:1px solid var(--border);animation:fadeInUp .8s ease .4s both}
+.hero-stat{padding:28px 20px;text-align:center;background:rgba(255,255,255,.03);transition:all .3s;cursor:default}
+.hero-stat:hover{background:rgba(34,197,94,.08)}
+.hero-stat .value{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--primary-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-stat .label{font-size:13px;color:var(--text-secondary);margin-top:6px;font-weight:500}
+
+/* Scroll indicator */
+.scroll-indicator{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(10px)}}
+.scroll-indicator .mouse{width:26px;height:40px;border:2px solid rgba(255,255,255,.3);border-radius:13px;display:flex;justify-content:center;padding-top:8px}
+.scroll-indicator .wheel{width:4px;height:10px;background:rgba(255,255,255,.6);border-radius:2px;animation:scrollWheel 1.5s ease-in-out infinite}
+@keyframes scrollWheel{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(8px)}}
+
+/* ===== FEATURES SECTION ===== */
+.section{padding:100px 24px;position:relative}
+.section-header{text-align:center;margin-bottom:64px}
+.section-label{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:100px;font-size:12px;font-weight:700;color:var(--primary-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px}
+.section-title{font-size:clamp(32px,5vw,48px);font-weight:900;line-height:1.2;margin-bottom:16px}
+.section-title .gradient-text{background:linear-gradient(135deg,var(--primary-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-desc{font-size:18px;color:var(--text-secondary);max-width:600px;margin:0 auto;line-height:1.7}
+
+/* Feature grid */
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1200px;margin:0 auto}
+.feature-card{background:var(--surface-glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius-xl);padding:36px;transition:all .4s;cursor:pointer;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent),var(--purple));opacity:0;transition:opacity .3s}
+.feature-card:hover{transform:translateY(-8px);border-color:rgba(34,197,94,.3);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:64px;height:64px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;transition:all .3s}
+.feature-card:hover .feature-icon{transform:scale(1.1) rotate(5deg)}
+.feature-card h3{font-size:20px;font-weight:700;margin-bottom:10px;color:#fff}
+.feature-card p{font-size:14px;color:var(--text-secondary);line-height:1.7}
+.feature-card .arrow{display:flex;align-items:center;gap:6px;color:var(--primary-light);font-size:14px;font-weight:600;margin-top:20px;opacity:0;transform:translateX(-10px);transition:all .3s}
+.feature-card:hover .arrow{opacity:1;transform:translateX(0)}
+
+/* Feature icon colors */
+.fi-green{background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.05));color:var(--primary-light)}
+.fi-blue{background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(59,130,246,.05));color:var(--info)}
+.fi-orange{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05));color:var(--accent)}
+.fi-purple{background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(139,92,246,.05));color:var(--purple)}
+.fi-red{background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:var(--error)}
+.fi-teal{background:linear-gradient(135deg,rgba(20,184,166,.15),rgba(20,184,166,.05));color:#14b8a6}
+
+/* ===== HOW IT WORKS ===== */
+.steps-container{display:flex;gap:32px;max-width:1000px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+.step{text-align:center;flex:1;min-width:250px;max-width:300px;position:relative}
+.step-number{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#fff;margin:0 auto 24px;box-shadow:var(--glow-primary);transition:all .3s}
+.step:hover .step-number{transform:scale(1.1);box-shadow:0 0 80px rgba(34,197,94,.5)}
+.step h3{font-size:20px;font-weight:700;margin-bottom:10px;color:#fff}
+.step p{font-size:14px;color:var(--text-secondary);line-height:1.7}
+.step-connector{display:none;position:absolute;top:40px;right:-20px;width:40px;height:2px;background:linear-gradient(90deg,var(--primary),transparent)}
+
+/* ===== AI SHOWCASE ===== */
+.ai-showcase{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.ai-content h2{font-size:clamp(28px,4vw,40px);font-weight:900;line-height:1.2;margin-bottom:20px}
+.ai-content p{font-size:16px;color:var(--text-secondary);line-height:1.8;margin-bottom:32px}
+.ai-features{display:flex;flex-direction:column;gap:16px}
+.ai-feature{display:flex;align-items:flex-start;gap:14px;padding:16px;background:var(--surface-glass);border:1px solid var(--border);border-radius:var(--radius);transition:all .3s}
+.ai-feature:hover{border-color:rgba(34,197,94,.3);transform:translateX(8px)}
+.ai-feature .icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ai-feature h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.ai-feature p{font-size:13px;color:var(--text-secondary);line-height:1.5}
+
+/* AI visual */
+.ai-visual{position:relative}
+.ai-card{background:var(--surface-glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius-xl);padding:32px;position:relative;overflow:hidden}
+.ai-card::before{content:'';position:absolute;top:-50%;right:-50%;width:200px;height:200px;background:radial-gradient(circle,var(--primary-glow),transparent);border-radius:50%;animation:glow 4s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.6;transform:scale(1.2)}}
+.ai-card-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;position:relative;z-index:1}
+.ai-card-header .icon{width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.ai-card-header h3{font-size:18px;font-weight:700}
+.ai-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;z-index:1}
+.ai-metric{padding:16px;background:rgba(255,255,255,.03);border-radius:var(--radius);border:1px solid var(--border)}
+.ai-metric .value{font-size:28px;font-weight:900;color:var(--primary-light)}
+.ai-metric .label{font-size:12px;color:var(--text-secondary);margin-top:4px}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;max-width:1200px;margin:0 auto}
+.testimonial-card{background:var(--surface-glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius-xl);padding:32px;transition:all .3s}
+.testimonial-card:hover{transform:translateY(-4px);border-color:rgba(34,197,94,.3)}
+.testimonial-stars{color:var(--accent);font-size:18px;margin-bottom:16px;letter-spacing:2px}
+.testimonial-text{font-size:15px;color:var(--text-secondary);line-height:1.7;margin-bottom:24px;font-style:italic}
+.testimonial-author{display:flex;align-items:center;gap:14px}
+.testimonial-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.testimonial-info h4{font-size:14px;font-weight:700;color:#fff}
+.testimonial-info p{font-size:12px;color:var(--text-secondary);margin-top:2px}
+
+/* ===== CTA SECTION ===== */
+.cta-section{padding:100px 24px;text-align:center}
+.cta-box{max-width:800px;margin:0 auto;background:linear-gradient(135deg,rgba(22,163,74,.1),rgba(245,158,11,.05));border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-xl);padding:64px 48px;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;top:-100px;right:-100px;width:300px;height:300px;background:radial-gradient(circle,var(--primary-glow),transparent);border-radius:50%}
+.cta-box h2{font-size:clamp(28px,4vw,42px);font-weight:900;margin-bottom:16px;color:#fff;position:relative;z-index:1}
+.cta-box p{font-size:18px;color:var(--text-secondary);margin-bottom:36px;position:relative;z-index:1}
+.cta-btn{padding:18px 48px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:var(--radius);font-size:18px;font-weight:700;cursor:pointer;transition:all .3s;font-family:inherit;display:inline-flex;align-items:center;gap:10px;position:relative;z-index:1;box-shadow:0 4px 20px rgba(22,163,74,.4)}
+.cta-btn:hover{transform:translateY(-4px);box-shadow:0 8px 40px rgba(22,163,74,.5)}
+
+/* ===== FOOTER ===== */
+.footer{padding:48px 24px;border-top:1px solid var(--border);text-align:center}
+.footer p{font-size:13px;color:var(--text-secondary)}
+.footer a{color:var(--primary-light);text-decoration:none}
+
+/* ===== ANIMATIONS ===== */
+.reveal{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.4,0,.2,1)}
+.reveal.active{opacity:1;transform:translateY(0)}
+
+/* ===== MOBILE ===== */
+.mobile-menu{display:none;position:fixed;top:0;right:-100%;width:80%;height:100%;background:rgba(10,10,10,.98);z-index:200;transition:right .3s;padding:80px 24px 24px}
+.mobile-menu.active{right:0}
+.mobile-menu a{display:block;padding:16px 0;font-size:18px;color:rgba(255,255,255,.8);text-decoration:none;border-bottom:1px solid var(--border);font-weight:500}
+.menu-toggle{display:none;width:44px;height:44px;border-radius:12px;background:var(--surface-glass);border:1px solid var(--border);color:#fff;font-size:24px;cursor:pointer;align-items:center;justify-content:center}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .menu-toggle{display:flex}
+  .ai-showcase{grid-template-columns:1fr}
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .step-connector{display:none}
+  .feature-grid{grid-template-columns:1fr}
+  .testimonials-grid{grid-template-columns:1fr}
+  .cta-box{padding:48px 24px}
+}
+</style>
+</head>
+<body>
+<div class="bg-map"></div>
+<div class="bg-gradient"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="particles" id="particles"></div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="nav-brand">
+    <div class="icon">&#127806;</div>
+    <span>Smart Farming AI</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features" data-i18n="navFeatures">বৈশিষ্ট্য</a>
+    <a href="#how-it-works" data-i18n="navHow">কিভাবে কাজ করে</a>
+    <a href="#ai" data-i18n="navAI">AI প্রযুক্তি</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('bn')" id="langBtnBn">বাং</button>
+      <button class="lang-btn" onclick="setLang('en')" id="langBtnEn">EN</button>
+    </div>
+  </div>
+  <button class="nav-cta" onclick="goToDashboard()">
+    <span data-i18n="getStarted">শুরু করুন</span>
+    <span class="material-icons-round" style="font-size:18px">arrow_forward</span>
+  </button>
+  <button class="menu-toggle" onclick="toggleMobileMenu()">
+    <span class="material-icons-round">menu</span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features" onclick="toggleMobileMenu()" data-i18n="navFeatures">বৈশিষ্ট্য</a>
+  <a href="#how-it-works" onclick="toggleMobileMenu()" data-i18n="navHow">কিভাবে কাজ করে</a>
+  <a href="#ai" onclick="toggleMobileMenu()" data-i18n="navAI">AI প্রযুক্তি</a>
+  <div style="padding:20px 0">
+    <button class="nav-cta" onclick="goToDashboard()" style="width:100%">
+      <span data-i18n="getStarted">শুরু করুন</span>
+      <span class="material-icons-round" style="font-size:18px">arrow_forward</span>
+    </button>
+  </div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    <span data-i18n="badge">AI-চালিত কৃষি প্ল্যাটফর্ম</span>
+  </div>
+  
+  <h1>
+    <span data-i18n="heroTitle1">স্মার্ট ফার্মিং</span><br>
+    <span class="gradient-text" data-i18n="heroTitle2">কৃষির ভবিষ্যৎ</span>
+  </h1>
+  
+  <p data-i18n="heroDesc">বাংলাদেশের কৃষকদের জন্য AI-চালিত স্মার্ট কৃষি সমাধান। মাটি বিশ্লেষণ, ফসল সুপারিশ, রোগ সনাক্তকরণ এবং বাজার বিশ্লেষণ — সব একসাথে।</p>
+  
+  <div class="hero-actions">
+    <button class="hero-btn hero-btn-primary" onclick="goToDashboard()">
+      <span data-i18n="startNow">এখনই শুরু করুন</span>
+      <span class="material-icons-round" style="font-size:20px">rocket_launch</span>
+    </button>
+    <button class="hero-btn hero-btn-ghost" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+      <span class="material-icons-round" style="font-size:20px">play_circle</span>
+      <span data-i18n="watchDemo">ডেমো দেখুন</span>
+    </button>
+  </div>
+  
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="value" data-count="63">0</div><div class="label" data-i18n="districts">জেলা</div></div>
+    <div class="hero-stat"><div class="value" data-count="86590">0</div><div class="label" data-i18n="soilRecords">মাটির রেকর্ড</div></div>
+    <div class="hero-stat"><div class="value" data-count="10000">0</div><div class="label" data-i18n="farmers">কৃষক ব্যবহারকারী</div></div>
+    <div class="hero-stat"><div class="value">24/7</div><div class="label" data-i18n="service">AI সেবা</div></div>
+  </div>
+  
+  <div class="scroll-indicator">
+    <div class="mouse"><div class="wheel"></div></div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="section" id="features">
+  <div class="section-header reveal">
+    <div class="section-label">
+      <span class="material-icons-round" style="font-size:14px">auto_awesome</span>
+      <span data-i18n="featuresLabel">ফিচারসমূহ</span>
+    </div>
+    <h2 class="section-title"><span data-i18n="featuresTitle">শক্তিশালী</span> <span class="gradient-text" data-i18n="featuresTitle2">বৈশিষ্ট্যসমূহ</span></h2>
+    <p class="section-desc" data-i18n="featuresDesc">আপনার কৃষি কাজকে সহজ ও লাভজনক করতে আমাদের আধুনিক AI প্রযুক্তি</p>
+  </div>
+  
+  <div class="feature-grid">
+    <div class="feature-card reveal" onclick="goToDashboard()">
+      <div class="feature-icon fi-blue">&#127780;&#65039;</div>
+      <h3 data-i18n="feature1Title">রিয়েল-টাইম আবহাওয়া</h3>
+      <p data-i18n="feature1Desc">৬৩টি জেলার সরাসরি আবহাওয়ার তথ্য, ৭ দিনের পূর্বাভাস এবং কৃষি পরামর্শ।</p>
+      <div class="arrow"><span class="material-icons-round" style="font-size:16px">arrow_forward</span> <span data-i18n="explore">এক্সপ্লোর করুন</span></div>
+    </div>
+    
+    <div class="feature-card reveal" onclick="goToDashboard()">
+      <div class="feature-icon fi-green">&#127793;</div>
+      <h3 data-i18n="feature2Title">মাটি বিশ্লেষণ</h3>
+      <p data-i18n="feature2Desc">৮৬,৫৯০+ মাটির রেকর্ড, NPK পরিসংখ্যান এবং সার সুপারিশ।</p>
+      <div class="arrow"><span class="material-icons-round" style="font-size:16px">arrow_forward</span> <span data-i18n="explore">এক্সপ্লোর করুন</span></div>
+    </div>
+    
+    <div class="feature-card reveal" onclick="goToDashboard()">
+      <div class="feature-icon fi-orange">&#127806;</div>
+      <h3 data-i18n="feature3Title">AI ফসল সুপারিশ</h3>
+      <p data-i18n="feature3Desc">আপনার মাটি ও আবহাওয়ার উপর ভিত্তি করে AI সেরা ফসল সুপারিশ করে।</p>
+      <div class="arrow"><span class="material-icons-round" style="font-size:16px">arrow_forward</span> <span data-i18n="explore">এক্সপ্লোর করুন</span></div>
+    </div>
+    
+    <div class="feature-card reveal" onclick="goToDashboard()">
+      <div class="feature-icon fi-red">&#128300;</div>
+      <h3 data-i18n="feature4Title">রোগ সনাক্তকরণ</h3>
+      <p data-i18n="feature4Desc">ছবি আপলোড করে AI-এর মাধ্যমে ফসলের রোগ শনাক্ত ও চিকিৎসা পরামর্শ।</p>
+      <div class="arrow"><span class="material-icons-round" style="font-size:16px">arrow_forward</span> <span data-i18n="explore">এক্সপ্লোর করুন</span></div>
+    </div>
+    
+    <div class="feature-card reveal" onclick="goToDashboard()">
+      <div class="feature-icon fi-purple">&#129302;</div>
+      <h3 data-i18n="feature5Title">AI চ্যাটবট</h3>
+      <p data-i18n="feature5Desc">বাংলায় কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন, AI উত্তর দেবে।</p>
+      <div class="arrow"><span class="material-icons-round" style="font-size:16px">arrow_forward</span> <span data-i18n="explore">এক্সপ্লোর করুন</span></div>
+    </div>
+    
+    <div class="feature-card reveal" onclick="goToDashboard()">
+      <div class="feature-icon fi-teal">&#128200;</div>
+      <h3 data-i18n="feature6Title">বাজার বিশ্লেষণ</h3>
+      <p data-i18n="feature6Desc">সর্বশেষ ফসলের দাম, ট্রেন্ড এবং লাভজনক ফসলের তথ্য।</p>
+      <div class="arrow"><span class="material-icons-round" style="font-size:16px">arrow_forward</span> <span data-i18n="explore">এক্সপ্লোর করুন</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="section" id="how-it-works" style="background:linear-gradient(180deg,transparent,rgba(22,163,74,.03),transparent)">
+  <div class="section-header reveal">
+    <div class="section-label">
+      <span class="material-icons-round" style="font-size:14px">route</span>
+      <span data-i18n="howLabel">কিভাবে কাজ করে</span>
+    </div>
+    <h2 class="section-title" data-i18n="howTitle">মাত্র ৩টি ধাপে <span class="gradient-text" data-i18n="howTitle2">শুরু করুন</span></h2>
+    <p class="section-desc" data-i18n="howDesc">সহজ প্রক্রিয়ায় আপনার কৃষি কাজকে স্মার্ট করুন</p>
+  </div>
+  
+  <div class="steps-container">
+    <div class="step reveal">
+      <div class="step-number">1</div>
+      <h3 data-i18n="step1Title">অবস্থান নির্বাচন</h3>
+      <p data-i18n="step1Desc">আপনার জেলা বা মানচিত্রে ট্যাপ করে অবস্থান নির্বাচন করুন।</p>
+      <div class="step-connector"></div>
+    </div>
+    <div class="step reveal">
+      <div class="step-number">2</div>
+      <h3 data-i18n="step2Title">AI বিশ্লেষণ</h3>
+      <p data-i18n="step2Desc">AI আপনার মাটি, আবহাওয়া এবং বাজার বিশ্লেষণ করবে।</p>
+      <div class="step-connector"></div>
+    </div>
+    <div class="step reveal">
+      <div class="step-number">3</div>
+      <h3 data-i18n="step3Title">সুপারিশ পান</h3>
+      <p data-i18n="step3Desc">ফসল সুপারিশ, সার পরিকল্পনা এবং বাজার তথ্য পান।</p>
+    </div>
+  </div>
+</section>
+
+<!-- AI Section -->
+<section class="section" id="ai">
+  <div class="ai-showcase reveal">
+    <div class="ai-content">
+      <div class="section-label">
+        <span class="material-icons-round" style="font-size:14px">psychology</span>
+        <span data-i18n="aiLabel">AI প্রযুক্তি</span>
+      </div>
+      <h2 data-i18n="aiTitle">কৃষিতে <span class="gradient-text" data-i18n="aiTitle2">কৃত্রিম বুদ্ধিমত্তা</span></h2>
+      <p data-i18n="aiDesc">আমাদের AI মডেল বাংলাদেশের কৃষি প্রেক্ষাপটে প্রশিক্ষিত, যা স্থানীয় মাটি ও আবহাওয়ার তথ্য ব্যবহার করে সঠিক সুপারিশ দেয়।</p>
+      <div class="ai-features">
+        <div class="ai-feature">
+          <div class="icon fi-green">&#127806;</div>
+          <div><h4 data-i18n="aiFeat1Title">ফসল সুপারিশ</h4><p data-i18n="aiFeat1Desc">Random Forest + XGBoost মডেল, ৬৬% নির্ভুলতা</p></div>
+        </div>
+        <div class="ai-feature">
+          <div class="icon fi-orange">&#127805;</div>
+          <div><h4 data-i18n="aiFeat2Title">ফলন পূর্বাভাস</h4><p data-i18n="aiFeat2Desc">Gradient Boosting মডেল, R²=0.90 নির্ভুলতা</p></div>
+        </div>
+        <div class="ai-feature">
+          <div class="icon fi-blue">&#127780;&#65039;</div>
+          <div><h4 data-i18n="aiFeat3Title">আবহাওয়া বিশ্লেষণ</h4><p data-i18n="aiFeat3Desc">OpenWeatherMap API থেকে রিয়েল-টাইম তথ্য</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-visual">
+      <div class="ai-card">
+        <div class="ai-card-header">
+          <div class="icon">&#129302;</div>
+          <div>
+            <h3 data-i18n="aiCardTitle">AI Performance</h3>
+            <p style="font-size:12px;color:var(--text-secondary)" data-i18n="aiCardSub">মডেল পারফরম্যান্স</p>
+          </div>
+        </div>
+        <div class="ai-metrics">
+          <div class="ai-metric"><div class="value">66%</div><div class="label" data-i18n="metric1">ফসল নির্ভুলতা</div></div>
+          <div class="ai-metric"><div class="value">90%</div><div class="label" data-i18n="metric2">ফলন R² স্কোর</div></div>
+          <div class="ai-metric"><div class="value">86K+</div><div class="label" data-i18n="metric3">মাটির রেকর্ড</div></div>
+          <div class="ai-metric"><div class="value">63</div><div class="label" data-i18n="metric4">কভারেজ জেলা</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section">
+  <div class="section-header reveal">
+    <div class="section-label">
+      <span class="material-icons-round" style="font-size:14px">groups</span>
+      <span data-i18n="testLabel">মতামত</span>
+    </div>
+    <h2 class="section-title" data-i18n="testTitle">কৃষকরা <span class="gradient-text" data-i18n="testTitle2">কী বলছেন</span></h2>
+  </div>
+  
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testimonial-text" data-i18n="test1">"এই অ্যাপ আমার ধানের ফসল ৩০% বাড়িয়ে দিয়েছে। AI সুপারিশ খুবই সঠিক!"</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar fi-green">&#129489;</div>
+        <div class="testimonial-info"><h4 data-i18n="test1Name">রহিম উদ্দিন</h4><p data-i18n="test1Loc">ঢাকা, বাংলাদেশ</p></div>
+      </div>
+    </div>
+    
+    <div class="testimonial-card reveal">
+      <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testimonial-text" data-i18n="test2">"মাটি বিশ্লেষণ ফিচারটি অসাধারণ। এখন আমি সঠিক সার ব্যবহার করতে পারি।"</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar fi-orange">&#129489;</div>
+        <div class="testimonial-info"><h4 data-i18n="test2Name">করিমা বেগম</h4><p data-i18n="test2Loc">রাজশাহী, বাংলাদেশ</p></div>
+      </div>
+    </div>
+    
+    <div class="testimonial-card reveal">
+      <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testimonial-text" data-i18n="test3">"AI চ্যাটবট খুব সাহায্য করে। বাংলায় কৃষি পরামর্শ পাওয়া সহজ হয়েছে।"</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar fi-blue">&#129489;</div>
+        <div class="testimonial-info"><h4 data-i18n="test3Name">আব্দুল হাকিম</h4><p data-i18n="test3Loc">চট্টগ্রাম, বাংলাদেশ</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="cta-box reveal">
+    <h2 data-i18n="ctaTitle">আজই শুরু করুন <span class="gradient-text" data-i18n="ctaTitle2">স্মার্ট কৃষি</span></h2>
+    <p data-i18n="ctaDesc">বাংলাদেশের হাজার হাজার কৃষক ইতিমধ্যে এই প্ল্যাটফর্ম ব্যবহার করছেন।</p>
+    <button class="cta-btn" onclick="goToDashboard()">
+      <span data-i18n="ctaBtn">এখনই যোগ দিন</span>
+      <span class="material-icons-round" style="font-size:20px">arrow_forward</span>
+    </button>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>&copy; 2026 Smart Farming AI. <span data-i18n="footerText">বাংলাদেশের কৃষকদের জন্য তৈরি &#10084;&#65039;</span></p>
+</footer>
+
+<script>
+var currentLang = localStorage.getItem('sfLang') || 'bn';
+
+var T = {
+  bn: {
+    navFeatures:'বৈশিষ্ট্য', navHow:'কিভাবে কাজ করে', navAI:'AI প্রযুক্তি',
+    badge:'AI-চালিত কৃষি প্ল্যাটফর্ম',
+    heroTitle1:'স্মার্ট ফার্মিং', heroTitle2:'কৃষির ভবিষ্যৎ',
+    heroDesc:'বাংলাদেশের কৃষকদের জন্য AI-চালিত স্মার্ট কৃষি সমাধান। মাটি বিশ্লেষণ, ফসল সুপারিশ, রোগ সনাক্তকরণ এবং বাজার বিশ্লেষণ — সব একসাথে।',
+    startNow:'এখনই শুরু করুন', watchDemo:'ডেমো দেখুন',
+    districts:'জেলা', soilRecords:'মাটির রেকর্ড', farmers:'কৃষক ব্যবহারকারী', service:'AI সেবা',
+    featuresLabel:'ফিচারসমূহ', featuresTitle:'শক্তিশালী', featuresTitle2:'বৈশিষ্ট্যসমূহ', featuresDesc:'আপনার কৃষি কাজকে সহজ ও লাভজনক করতে আমাদের আধুনিক AI প্রযুক্তি',
+    feature1Title:'রিয়েল-টাইম আবহাওয়া', feature1Desc:'৬৩টি জেলার সরাসরি আবহাওয়ার তথ্য, ৭ দিনের পূর্বাভাস এবং কৃষি পরামর্শ।',
+    feature2Title:'মাটি বিশ্লেষণ', feature2Desc:'৮৬,৫৯০+ মাটির রেকর্ড, NPK পরিসংখ্যান এবং সার সুপারিশ।',
+    feature3Title:'AI ফসল সুপারিশ', feature3Desc:'আপনার মাটি ও আবহাওয়ার উপর ভিত্তি করে AI সেরা ফসল সুপারিশ করে।',
+    feature4Title:'রোগ সনাক্তকরণ', feature4Desc:'ছবি আপলোড করে AI-এর মাধ্যমে ফসলের রোগ শনাক্ত ও চিকিৎসা পরামর্শ।',
+    feature5Title:'AI চ্যাটবট', feature5Desc:'বাংলায় কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন, AI উত্তর দেবে।',
+    feature6Title:'বাজার বিশ্লেষণ', feature6Desc:'সর্বশেষ ফসলের দাম, ট্রেন্ড এবং লাভজনক ফসলের তথ্য।',
+    explore:'এক্সপ্লোর করুন',
+    howLabel:'কিভাবে কাজ করে', howTitle:'মাত্র ৩টি ধাপে', howTitle2:'শুরু করুন', howDesc:'সহজ প্রক্রিয়ায় আপনার কৃষি কাজকে স্মার্ট করুন',
+    step1Title:'অবস্থান নির্বাচন', step1Desc:'আপনার জেলা বা মানচিত্রে ট্যাপ করে অবস্থান নির্বাচন করুন।',
+    step2Title:'AI বিশ্লেষণ', step2Desc:'AI আপনার মাটি, আবহাওয়া এবং বাজার বিশ্লেষণ করবে।',
+    step3Title:'সুপারিশ পান', step3Desc:'ফসল সুপারিশ, সার পরিকল্পনা এবং বাজার তথ্য পান।',
+    aiLabel:'AI প্রযুক্তি', aiTitle:'কৃষিতে', aiTitle2:'কৃত্রিম বুদ্ধিমত্তা', aiDesc:'আমাদের AI মডেল বাংলাদেশের কৃষি প্রেক্ষাপটে প্রশিক্ষিত, যা স্থানীয় মাটি ও আবহাওয়ার তথ্য ব্যবহার করে সঠিক সুপারিশ দেয়।',
+    aiFeat1Title:'ফসল সুপারিশ', aiFeat1Desc:'Random Forest + XGBoost মডেল, ৬৬% নির্ভুলতা',
+    aiFeat2Title:'ফলন পূর্বাভাস', aiFeat2Desc:'Gradient Boosting মডেল, R²=0.90 নির্ভুলতা',
+    aiFeat3Title:'আবহাওয়া বিশ্লেষণ', aiFeat3Desc:'OpenWeatherMap API থেকে রিয়েল-টাইম তথ্য',
+    aiCardTitle:'AI Performance', aiCardSub:'মডেল পারফরম্যান্স',
+    metric1:'ফসল নির্ভুলতা', metric2:'ফলন R² স্কোর', metric3:'মাটির রেকর্ড', metric4:'কভারেজ জেলা',
+    testLabel:'মতামত', testTitle:'কৃষকরা', testTitle2:'কী বলছেন',
+    test1:'"এই অ্যাপ আমার ধানের ফসল ৩০% বাড়িয়ে দিয়েছে। AI সুপারিশ খুবই সঠিক!"',
+    test1Name:'রহিম উদ্দিন', test1Loc:'ঢাকা, বাংলাদেশ',
+    test2:'"মাটি বিশ্লেষণ ফিচারটি অসাধারণ। এখন আমি সঠিক সার ব্যবহার করতে পারি।"',
+    test2Name:'করিমা বেগম', test2Loc:'রাজশাহী, বাংলাদেশ',
+    test3:'"AI চ্যাটবট খুব সাহায্য করে। বাংলায় কৃষি পরামর্শ পাওয়া সহজ হয়েছে।"',
+    test3Name:'আব্দুল হাকিম', test3Loc:'চট্টগ্রাম, বাংলাদেশ',
+    ctaTitle:'আজই শুরু করুন', ctaTitle2:'স্মার্ট কৃষি', ctaDesc:'বাংলাদেশের হাজার হাজার কৃষক ইতিমধ্যে এই প্ল্যাটফর্ম ব্যবহার করছেন।',
+    ctaBtn:'এখনই যোগ দিন',
+    getStarted:'শুরু করুন', footerText:'বাংলাদেশের কৃষকদের জন্য তৈরি',
+    langChanged:'ভাষা বাংলা নির্বাচিত হয়েছে'
+  },
+  en: {
+    navFeatures:'Features', navHow:'How It Works', navAI:'AI Technology',
+    badge:'AI-Powered Agriculture Platform',
+    heroTitle1:'Smart Farming', heroTitle2:'Future of Agriculture',
+    heroDesc:'AI-powered smart agriculture solution for Bangladesh farmers. Soil analysis, crop recommendation, disease detection and market analysis — all in one place.',
+    startNow:'Start Now', watchDemo:'Watch Demo',
+    districts:'Districts', soilRecords:'Soil Records', farmers:'Farmer Users', service:'AI Service',
+    featuresLabel:'Features', featuresTitle:'Powerful', featuresTitle2:'Features', featuresDesc:'Modern AI technology to make your farming easier and more profitable',
+    feature1Title:'Real-Time Weather', feature1Desc:'Live weather data for 63 districts, 7-day forecast and farming advice.',
+    feature2Title:'Soil Analysis', feature2Desc:'86,590+ soil records, NPK statistics and fertilizer recommendations.',
+    feature3Title:'AI Crop Recommendation', feature3Desc:'AI recommends the best crops based on your soil and weather.',
+    feature4Title:'Disease Detection', feature4Desc:'Upload photos to detect crop diseases with AI and get treatment advice.',
+    feature5Title:'AI Chatbot', feature5Desc:'Ask any agriculture question in Bangla, AI will answer.',
+    feature6Title:'Market Analysis', feature6Desc:'Latest crop prices, trends and profitable crop information.',
+    explore:'Explore',
+    howLabel:'How It Works', howTitle:'Get Started in', howTitle2:'3 Simple Steps', howDesc:'Make your farming smart with a simple process',
+    step1Title:'Select Location', step1Desc:'Select your district or tap on the map to choose location.',
+    step2Title:'AI Analysis', step2Desc:'AI will analyze your soil, weather and market data.',
+    step3Title:'Get Recommendations', step3Desc:'Get crop suggestions, fertilizer plan and market insights.',
+    aiLabel:'AI Technology', aiTitle:'Artificial Intelligence', aiTitle2:'in Agriculture', aiDesc:'Our AI models are trained on Bangladesh agricultural context, using local soil and weather data for accurate recommendations.',
+    aiFeat1Title:'Crop Recommendation', aiFeat1Desc:'Random Forest + XGBoost model, 66% accuracy',
+    aiFeat2Title:'Yield Prediction', aiFeat2Desc:'Gradient Boosting model, R²=0.90 accuracy',
+    aiFeat3Title:'Weather Analysis', aiFeat3Desc:'Real-time data from OpenWeatherMap API',
+    aiCardTitle:'AI Performance', aiCardSub:'Model Performance',
+    metric1:'Crop Accuracy', metric2:'Yield R² Score', metric3:'Soil Records', metric4:'District Coverage',
+    testLabel:'Testimonials', testTitle:'What Farmers', testTitle2:'Are Saying',
+    test1:'"This app increased my rice yield by 30%. The AI recommendations are very accurate!"',
+    test1Name:'Rahim Uddin', test1Loc:'Dhaka, Bangladesh',
+    test2:'"The soil analysis feature is amazing. Now I can use the right fertilizers."',
+    test2Name:'Karima Begum', test2Loc:'Rajshahi, Bangladesh',
+    test3:'"The AI chatbot is very helpful. Getting farming advice in Bangla is now easy."',
+    test3Name:'Abdul Hakim', test3Loc:'Chittagong, Bangladesh',
+    ctaTitle:'Start Today', ctaTitle2:'Smart Farming', ctaDesc:'Thousands of Bangladesh farmers are already using this platform.',
+    ctaBtn:'Join Now',
+    getStarted:'Get Started', footerText:'Made for Bangladesh farmers',
+    langChanged:'Language set to English'
+  }
+};
+
+function t(k){return(T[currentLang]&&T[currentLang][k])||k}
+
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(function(e){
+    var k=e.getAttribute('data-i18n');
+    if(T[currentLang]&&T[currentLang][k])e.textContent=T[currentLang][k];
+  });
+  document.documentElement.lang=currentLang;
+  document.getElementById('langBtnBn').classList.toggle('active',currentLang==='bn');
+  document.getElementById('langBtnEn').classList.toggle('active',currentLang==='en');
+}
+
+function setLang(lang){
+  currentLang=lang;
+  localStorage.setItem('sfLang',lang);
+  applyTranslations();
+  showToast(t('langChanged'),'info');
+}
+
+function showToast(msg,type){
+  var c=document.getElementById('toastContainer');
+  var el=document.createElement('div');
+  el.className='toast '+(type||'info');
+  el.textContent=msg;
+  c.appendChild(el);
+  setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){if(el.parentNode)c.removeChild(el)},300)},2500);
+}
+
+function goToDashboard(tab){
+  if(tab){window.location.href='dashboard.html#'+tab}else{window.location.href='dashboard.html'}
+}
+
+function toggleMobileMenu(){
+  document.getElementById('mobileMenu').classList.toggle('active');
+}
+
+// Navbar scroll
+window.addEventListener('scroll',function(){
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// Counter animation
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(function(el){
+    var target=parseInt(el.getAttribute('data-count'));
+    var current=0;
+    var increment=target/60;
+    var timer=setInterval(function(){
+      current+=increment;
+      if(current>=target){current=target;clearInterval(timer)}
+      el.textContent=current>=1000?(current/1000).toFixed(1)+'K+':Math.floor(current)+'+';
+    },30);
+  });
+}
+
+// Scroll reveal
+function revealOnScroll(){
+  document.querySelectorAll('.reveal').forEach(function(el){
+    var rect=el.getBoundingClientRect();
+    if(rect.top<window.innerHeight-100){el.classList.add('active')}
+  });
+}
+
+// Particles
+function createParticles(){
+  var container=document.getElementById('particles');
+  for(var i=0;i<50;i++){
+    var p=document.createElement('div');
+    p.className='particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(Math.random()*20+10)+'s';
+    p.style.animationDelay=(Math.random()*20)+'s';
+    p.style.width=p.style.height=(Math.random()*3+1)+'px';
+    container.appendChild(p);
+  }
+}
+
+// Init
+applyTranslations();
+createParticles();
+setTimeout(animateCounters,500);
+window.addEventListener('scroll',revealOnScroll);
+revealOnScroll();
+</script>
+</body>
+</html>

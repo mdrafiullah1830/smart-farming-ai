@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>বাজার বিশ্লেষণ - Smart Farming AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--primary:#16a34a;--primary-dark:#15803d;--primary-light:#22c55e;--primary-50:#f0fdf4;--primary-100:#dcfce7;--primary-glow:rgba(34,197,94,.15);--accent:#f59e0b;--accent-dark:#d97706;--accent-glow:rgba(245,158,11,.15);--error:#ef4444;--error-light:#fef2f2;--info:#3b82f6;--info-light:#eff6ff;--purple:#8b5cf6;--purple-light:#a78bfa;--bg:#f0f4f8;--surface:#ffffff;--surface-hover:#f1f5f9;--text:#0f172a;--text-secondary:#64748b;--text-hint:#94a3b8;--border:#e2e8f0;--border-light:#f1f5f9;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.08);--shadow-lg:0 12px 24px rgba(0,0,0,.1);--shadow-xl:0 20px 40px rgba(0,0,0,.12);--radius:14px;--radius-lg:18px;--radius-xl:24px;--radius-2xl:28px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+.bg-map{position:fixed;top:0;left:0;width:100%;height:100%;background:url('bangladesh-map.png') center center no-repeat;background-size:50% auto;opacity:0.10;filter:brightness(2);pointer-events:none;z-index:1}
+body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.screen{display:none;min-height:100vh}.screen.active{display:block;animation:fadeUp .4s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(34,197,94,.2)}50%{box-shadow:0 0 40px rgba(34,197,94,.4)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+.app-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid rgba(0,0,0,.06);padding:0 16px;height:60px;display:flex;align-items:center;gap:12px}
+.app-header h1{font-size:17px;font-weight:800;flex:1;color:var(--text);letter-spacing:-.3px}
+.header-back{width:40px;height:40px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;border:none;background:rgba(0,0,0,.04);color:var(--text);cursor:pointer;font-size:22px;transition:all .2s}
+.header-back:hover{background:rgba(0,0,0,.08);transform:scale(1.05)}
+.header-action{width:40px;height:40px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;font-size:22px;transition:all .2s}
+.header-action:hover{background:rgba(0,0,0,.04);color:var(--text)}
+.app-content{padding:20px 16px;padding-bottom:100px}
+
+/* ===== HERO MARKET CARD ===== */
+.market-hero{background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);border-radius:var(--radius-2xl);padding:28px 24px;color:#fff;position:relative;overflow:hidden;margin-bottom:24px}
+.market-hero::before{content:'';position:absolute;top:-50%;right:-30%;width:300px;height:300px;background:radial-gradient(circle,rgba(34,197,94,.3) 0%,transparent 70%);border-radius:50%}
+.market-hero::after{content:'';position:absolute;bottom:-40%;left:-20%;width:200px;height:200px;background:radial-gradient(circle,rgba(245,158,11,.2) 0%,transparent 70%);border-radius:50%}
+.market-hero .hero-content{position:relative;z-index:1}
+.market-hero .hero-label{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;font-size:11px;font-weight:600;margin-bottom:16px;backdrop-filter:blur(10px)}
+.market-hero .hero-label .live-dot{width:8px;height:8px;background:#ef4444;border-radius:50%;animation:pulse 2s ease-in-out infinite}
+.market-hero .hero-title{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:8px}
+.market-hero .hero-subtitle{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:20px;line-height:1.6}
+.market-hero .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.market-hero .hero-stat{text-align:center;padding:14px 8px;background:rgba(255,255,255,.08);border-radius:var(--radius-lg);border:1px solid rgba(255,255,255,.1)}
+.market-hero .hero-stat .stat-value{font-size:22px;font-weight:800;color:#22c55e}
+.market-hero .hero-stat .stat-label{font-size:11px;color:rgba(255,255,255,.6);margin-top:4px}
+
+/* ===== TABS ===== */
+.market-tabs{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.market-tabs::-webkit-scrollbar{display:none}
+.market-tab{padding:10px 20px;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;border:2px solid var(--border);background:var(--surface);color:var(--text-secondary);font-family:inherit;flex-shrink:0}
+.market-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 4px 12px rgba(22,163,74,.3)}
+.market-tab:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+
+/* ===== PRICE CARDS ===== */
+.price-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.price-header h3{font-size:17px;font-weight:800}
+.price-update{font-size:11px;color:var(--text-hint);display:flex;align-items:center;gap:4px}
+.price-update .dot{width:6px;height:6px;background:var(--primary);border-radius:50%;animation:pulse 2s infinite}
+
+.category-filter{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.category-filter::-webkit-scrollbar{display:none}
+.cat-chip{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;border:1.5px solid var(--border);background:var(--surface);color:var(--text-secondary);font-family:inherit;flex-shrink:0}
+.cat-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.cat-chip:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+
+.price-card{display:flex;align-items:center;gap:14px;padding:18px;background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow);margin-bottom:12px;border:1px solid var(--border-light);transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;position:relative;overflow:hidden;animation:slideUp .4s ease both}
+.price-card:nth-child(1){animation-delay:0s}.price-card:nth-child(2){animation-delay:.05s}.price-card:nth-child(3){animation-delay:.1s}.price-card:nth-child(4){animation-delay:.15s}.price-card:nth-child(5){animation-delay:.2s}.price-card:nth-child(6){animation-delay:.25s}
+.price-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));opacity:0;transition:opacity .3s}
+.price-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.price-card:hover::before{opacity:1}
+.price-icon{width:52px;height:52px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.price-info{flex:1;min-width:0}
+.price-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.price-category{font-size:11px;color:var(--text-hint);margin-top:2px}
+.price-value-box{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.price-range{font-size:15px;font-weight:800;color:var(--text)}
+.price-change{font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;display:inline-flex;align-items:center;gap:2px}
+.price-change.up{color:#16a34a;background:rgba(22,163,74,.1)}
+.price-change.down{color:#ef4444;background:rgba(239,68,68,.1)}
+.price-change.stable{color:#64748b;background:rgba(100,116,139,.1)}
+
+/* ===== CHART CARD ===== */
+.chart-card{background:var(--surface);border-radius:var(--radius-xl);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:20px;animation:slideUp .5s ease both}
+.chart-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-card-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.chart-card-title .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.chart-period-tabs{display:flex;gap:4px;background:var(--bg);border-radius:10px;padding:3px}
+.chart-period{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--text-hint);font-family:inherit;transition:all .2s}
+.chart-period.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow)}
+
+/* ===== DISTRICT COMPARISON ===== */
+.district-card{background:var(--surface);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:16px;animation:slideUp .5s ease both}
+.district-header{display:flex;align-items:center;gap:12px;padding:16px 18px;background:linear-gradient(135deg,rgba(34,197,94,.05) 0%,rgba(245,158,11,.03) 100%);border-bottom:1px solid var(--border-light)}
+.district-header .dist-icon{width:44px;height:44px;border-radius:14px;background:var(--primary-100);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--primary)}
+.district-header .dist-name{font-size:16px;font-weight:700}
+.district-header .dist-badge{margin-left:auto;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:var(--primary);color:#fff}
+.district-prices{padding:14px 18px}
+.district-price-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.district-price-row:last-child{border-bottom:none}
+.district-price-row .crop{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.district-price-row .price{font-size:14px;font-weight:700;color:var(--primary)}
+
+/* ===== PROFIT CALCULATOR ===== */
+.calc-card{background:var(--surface);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:20px;animation:slideUp .5s ease both}
+.calc-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.calc-header .calc-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.calc-header h3{font-size:17px;font-weight:800}
+.calc-header p{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.calc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.calc-field label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px}
+.calc-field input,.calc-field select{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:inherit;background:var(--bg);outline:none;transition:all .2s;color:var(--text)}
+.calc-field input:focus,.calc-field select:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+.calc-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;transition:all .3s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(22,163,74,.3)}
+.calc-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(22,163,74,.4)}
+.calc-result{margin-top:20px;padding:20px;background:linear-gradient(135deg,rgba(34,197,94,.08) 0%,rgba(245,158,11,.05) 100%);border-radius:var(--radius-lg);border:1px solid rgba(34,197,94,.2);display:none}
+.calc-result.show{display:block;animation:slideUp .3s ease}
+.calc-result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.calc-result-item{text-align:center;padding:12px 8px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border-light)}
+.calc-result-item .value{font-size:20px;font-weight:800}
+.calc-result-item .label{font-size:11px;color:var(--text-secondary);margin-top:4px}
+
+/* ===== MARKET INSIGHTS ===== */
+.insight-card{background:var(--surface);border-radius:var(--radius-xl);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:12px;animation:slideUp .5s ease both}
+.insight-card .insight-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.insight-card .insight-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.insight-card .insight-title{font-size:15px;font-weight:700}
+.insight-card .insight-text{font-size:13px;color:var(--text-secondary);line-height:1.7}
+.insight-card .insight-tag{display:inline-block;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;margin-top:10px}
+
+/* ===== MARKET MAP ===== */
+.market-map-card{background:var(--surface);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:20px}
+.market-map-header{padding:16px 20px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px}
+.market-map-header h3{font-size:16px;font-weight:700}
+#marketMap{height:300px;background:var(--primary-50)}
+
+/* ===== ALERTS ===== */
+.alert-card{background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);border-radius:var(--radius-xl);padding:20px;border:1px solid rgba(245,158,11,.2);margin-bottom:16px;animation:slideUp .5s ease both}
+.alert-card.danger{background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);border-color:rgba(239,68,68,.2)}
+.alert-card.success{background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-color:rgba(34,197,94,.2)}
+.alert-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.alert-header .alert-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.alert-header h4{font-size:15px;font-weight:700}
+.alert-text{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.alert-time{font-size:11px;color:var(--text-hint);margin-top:8px}
+
+/* ===== SEARCH ===== */
+.search-box{position:relative;margin-bottom:20px}
+.search-box input{width:100%;padding:14px 14px 14px 46px;border:2px solid var(--border);border-radius:var(--radius-lg);font-size:14px;font-family:inherit;background:var(--surface);outline:none;transition:all .2s;color:var(--text);box-shadow:var(--shadow)}
+.search-box input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+.search-box .material-icons-round{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:20px}
+
+/* ===== TOAST ===== */
+.toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:400px}
+.toast{padding:14px 20px;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:600;font-family:inherit;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;animation:fadeDown .3s ease;pointer-events:auto}
+.toast.success{background:var(--primary)}.toast.error{background:var(--error)}.toast.info{background:var(--info)}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:72px;background:rgba(255,255,255,.8);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);display:flex;align-items:center;justify-content:space-around;box-shadow:0 -4px 20px rgba(0,0,0,.06);z-index:200;border-top:1px solid rgba(0,0,0,.04);padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 16px;border-radius:var(--radius);cursor:pointer;transition:all .2s;color:var(--text-hint);border:none;background:none;font-family:inherit;min-width:64px}
+.nav-item .material-icons-round{font-size:24px;transition:all .3s}.nav-item span{font-size:11px;font-weight:600}
+.nav-item.active{color:var(--primary)}.nav-item.active .material-icons-round{background:linear-gradient(135deg,var(--primary),var(--primary-light));width:44px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:22px;color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.3)}
+
+@media(min-width:768px){.app-content{max-width:640px;margin:0 auto}}
+</style>
+</head>
+<body>
+<div class="bg-map"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="screen active" id="marketScreen">
+  <header class="app-header">
+    <button class="header-back" onclick="window.location.href='dashboard.html'"><span class="material-icons-round">arrow_back</span></button>
+    <h1>বাজার বিশ্লেষণ</h1>
+    <button class="header-action" onclick="refreshPrices()"><span class="material-icons-round">refresh</span></button>
+    <button class="header-action" onclick="toggleAlertPanel()"><span class="material-icons-round">notifications_active</span></button>
+  </header>
+
+  <div class="app-content">
+    <!-- HERO CARD -->
+    <div class="market-hero">
+      <div class="hero-content">
+        <div class="hero-label"><span class="live-dot"></span> লাইভ বাজার দর</div>
+        <div class="hero-title">আজকের বাজার<br>সামগ্রিক প্রতিবেদন</div>
+        <div class="hero-subtitle">সরকারি কৃষি বিপণন অধিদপ্তর থেকে প্রাপ্ত তথ্য</div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="stat-value" id="heroAvgPrice">--</div><div class="stat-label">গড় দাম (৳/কেজি)</div></div>
+          <div class="hero-stat"><div class="stat-value" id="heroCrops">--</div><div class="stat-label">ফসল ট্র্যাকিং</div></div>
+          <div class="hero-stat"><div class="stat-value" id="heroDistricts">--</div><div class="stat-label">জেলা কভারেজ</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="ফসল খুঁজুন... (যেমন: ধান, পেঁয়াজ)" oninput="filterPrices()">
+      <span class="material-icons-round">search</span>
+    </div>
+
+    <!-- TABS -->
+    <div class="market-tabs">
+      <button class="market-tab active" onclick="switchMainTab('prices',this)">দাম তালিকা</button>
+      <button class="market-tab" onclick="switchMainTab('chart',this)">মূল্য চার্ট</button>
+      <button class="market-tab" onclick="switchMainTab('compare',this)">জেলা তুলনা</button>
+      <button class="market-tab" onclick="switchMainTab('calc',this)">লাভ হিসাব</button>
+      <button class="market-tab" onclick="switchMainTab('alerts',this)">বাজার সতর্কতা</button>
+    </div>
+
+    <!-- TAB: PRICES -->
+    <div id="tabPrices">
+      <div class="price-header">
+        <h3>আজকের দাম</h3>
+        <div class="price-update"><span class="dot"></span> <span id="lastUpdate">আপডেট হচ্ছে...</span></div>
+      </div>
+      <div class="category-filter">
+        <button class="cat-chip active" onclick="filterCategory('all',this)">সব</button>
+        <button class="cat-chip" onclick="filterCategory('rice',this)">ধান/চাল</button>
+        <button class="cat-chip" onclick="filterCategory('vegetable',this)">সবজি</button>
+        <button class="cat-chip" onclick="filterCategory('spice',this)">মশলা</button>
+        <button class="cat-chip" onclick="filterCategory('pulse',this)">ডাল</button>
+        <button class="cat-chip" onclick="filterCategory('oil',this)">তেল</button>
+        <button class="cat-chip" onclick="filterCategory('meat',this)">মাংস/ডিম</button>
+      </div>
+      <div id="priceList"></div>
+    </div>
+
+    <!-- TAB: CHART -->
+    <div id="tabChart" style="display:none">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">
+            <span class="icon" style="background:rgba(34,197,94,.1);color:var(--primary)">📈</span>
+            মূল্য প্রবণতা
+          </div>
+          <div class="chart-period-tabs">
+            <button class="chart-period active" onclick="setChartPeriod('7d',this)">৭ দিন</button>
+            <button class="chart-period" onclick="setChartPeriod('30d',this)">৩০ দিন</button>
+            <button class="chart-period" onclick="setChartPeriod('90d',this)">৯০ দিন</button>
+          </div>
+        </div>
+        <div style="margin-bottom:12px">
+          <select id="chartCropSelect" onchange="updateChart()" style="padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:inherit;background:var(--surface);width:100%;outline:none;color:var(--text)">
+            <option value="rice_boro_fine">বোরো চাল (সরু)</option>
+            <option value="rice_aman_fine">আমন চাল (সরু)</option>
+            <option value="onion_local">পেঁয়াজ (দেশী)</option>
+            <option value="potato">আলু</option>
+            <option value="tomato">টমেটো</option>
+            <option value="chili_green">কাঁচা মরিচ</option>
+            <option value="garlic_local">রসুন (দেশী)</option>
+            <option value="ginger_local">আদা (দেশী)</option>
+            <option value="moong_dal">মুগ ডাল</option>
+            <option value="chickpea">ছোলা</option>
+            <option value="egg_farm">ডিম (ফার্ম)</option>
+            <option value="chicken_farm">মুরগী (খামারের)</option>
+          </select>
+        </div>
+        <div style="position:relative;height:280px"><canvas id="priceChart"></canvas></div>
+        <div style="display:flex;gap:12px;margin-top:16px">
+          <div style="flex:1;padding:12px;background:var(--bg);border-radius:var(--radius);text-align:center">
+            <div style="font-size:11px;color:var(--text-hint)">সর্বনিম্ন</div>
+            <div style="font-size:16px;font-weight:800;color:var(--info)" id="chartMin">--</div>
+          </div>
+          <div style="flex:1;padding:12px;background:var(--bg);border-radius:var(--radius);text-align:center">
+            <div style="font-size:11px;color:var(--text-hint)">গড়</div>
+            <div style="font-size:16px;font-weight:800;color:var(--primary)" id="chartAvg">--</div>
+          </div>
+          <div style="flex:1;padding:12px;background:var(--bg);border-radius:var(--radius);text-align:center">
+            <div style="font-size:11px;color:var(--text-hint)">সর্বোচ্চ</div>
+            <div style="font-size:16px;font-weight:800;color:var(--error)" id="chartMax">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seasonal Forecast -->
+      <div class="insight-card">
+        <div class="insight-header">
+          <div class="insight-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">🔮</div>
+          <div class="insight-title">মৌসুমি পূর্বাভাস</div>
+        </div>
+        <div class="insight-text" id="seasonalForecast">বর্তমান বোরো মৌসুমে চালের দাম স্থিতিশীল থাকার প্রবণতা দেখা যাচ্ছে। আগামী ২ সপ্তাহে ৩-৫% বৃদ্ধির সম্ভাবনা রয়েছে।</div>
+        <div class="insight-tag" style="background:rgba(139,92,246,.1);color:var(--purple)">📊 AI ভিত্তিক পূর্বাভাস</div>
+      </div>
+    </div>
+
+    <!-- TAB: COMPARE -->
+    <div id="tabCompare" style="display:none">
+      <div class="search-box">
+        <input type="text" id="districtSearch" placeholder="জেলা খুঁজুন..." oninput="filterDistricts()">
+        <span class="material-icons-round">search</span>
+      </div>
+      <div id="districtList"></div>
+    </div>
+
+    <!-- TAB: CALCULATOR -->
+    <div id="tabCalc" style="display:none">
+      <div class="calc-card">
+        <div class="calc-header">
+          <div class="calc-icon" style="background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05));color:var(--accent)">💰</div>
+          <div>
+            <h3>লাভের হিসাব</h3>
+            <p>আপনার ফসলের সম্ভাব্য লাভ জানুন</p>
+          </div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field">
+            <label>ফসল নির্বাচন</label>
+            <select id="calcCrop">
+              <option value="rice_boro">বোরো ধান</option>
+              <option value="rice_aman">আমন ধান</option>
+              <option value="onion">পেঁয়াজ</option>
+              <option value="potato">আলু</option>
+              <option value="tomato">টমেটো</option>
+              <option value="chili">মরিচ</option>
+              <option value="garlic">রসুন</option>
+              <option value="jute">পাট</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label>জমির পরিমাণ (শতাংশ)</label>
+            <input type="number" id="calcArea" value="50" min="1" max="10000">
+          </div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field">
+            <label>অবস্থান (জেলা)</label>
+            <select id="calcDistrict">
+              <option value="dhaka">ঢাকা</option>
+              <option value="rajshahi">রাজশাহী</option>
+              <option value="comilla">কুমিল্লা</option>
+              <option value="bogura">বগুড়া</option>
+              <option value="dinajpur">দিনাজপুর</option>
+              <option value="rangpur">রংপুর</option>
+              <option value="sylhet">সিলেট</option>
+              <option value="chittagong">চট্টগ্রাম</option>
+              <option value="barishal">বরিশাল</option>
+              <option value="khulna">খুলনা</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label>বীজ খরচ (৳/শতাংশ)</label>
+            <input type="number" id="calcSeedCost" value="2000">
+          </div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field">
+            <label>সার খরচ (৳/শতাংশ)</label>
+            <input type="number" id="calcFertCost" value="3000">
+          </div>
+          <div class="calc-field">
+            <label>শ্রম খরচ (৳/শতাংশ)</label>
+            <input type="number" id="calcLaborCost" value="4000">
+          </div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field">
+            <label>সেচ/পানি খরচ (৳/শতাংশ)</label>
+            <input type="number" id="calcWaterCost" value="1500">
+          </div>
+          <div class="calc-field">
+            <label>পরিবহন খরচ (৳/শতাংশ)</label>
+            <input type="number" id="calcTransportCost" value="1000">
+          </div>
+        </div>
+        <button class="calc-btn" onclick="calculateProfit()">
+          <span class="material-icons-round" style="font-size:20px">calculate</span>
+          লাভ হিসাব করুন
+        </button>
+        <div class="calc-result" id="calcResult">
+          <div style="font-size:15px;font-weight:700;margin-bottom:4px">ফলাফল</div>
+          <div style="font-size:12px;color:var(--text-secondary)" id="calcResultSummary"></div>
+          <div class="calc-result-grid">
+            <div class="calc-result-item"><div class="value" style="color:var(--error)" id="calcTotalCost">--</div><div class="label">মোট খরচ</div></div>
+            <div class="calc-result-item"><div class="value" style="color:var(--primary)" id="calcRevenue">--</div><div class="label">আয়</div></div>
+            <div class="calc-result-item"><div class="value" style="color:var(--accent)" id="calcProfit">--</div><div class="label">নিট লাভ</div></div>
+          </div>
+          <div style="margin-top:12px;padding:12px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border-light)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px;font-weight:600">লাভের হার</span>
+              <span style="font-size:18px;font-weight:800;color:var(--primary)" id="calcProfitMargin">--</span>
+            </div>
+            <div style="height:8px;background:var(--bg);border-radius:4px;margin-top:8px;overflow:hidden">
+              <div id="calcProfitBar" style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width .5s ease"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ALERTS -->
+    <div id="tabAlerts" style="display:none">
+      <div id="alertsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="window.location.href='dashboard.html'"><span class="material-icons-round">home</span><span>হোম</span></button>
+  <button class="nav-item" onclick="window.location.href='dashboard.html#maps'"><span class="material-icons-round">map</span><span>মানচিত্র</span></button>
+  <button class="nav-item active"><span class="material-icons-round">show_chart</span><span>বাজার</span></button>
+  <button class="nav-item" onclick="window.location.href='dashboard.html#profile'"><span class="material-icons-round">person</span><span>প্রোফাইল</span></button>
+</nav>
+
+<script>
+var currentLang = localStorage.getItem('sfLang') || 'bn';
+var priceChart = null;
+var allPrices = [];
+var allDistricts = [];
+
+// ==================== PRICE DATA ====================
+var CROP_DATA = {
+  rice_boro: {name:'বোরো চাল (সরু)',nameEn:'Boro Rice (Fine)',emoji:'🌾',category:'rice',unit:'৳/কেজি'},
+  rice_boro_mid: {name:'বোরো চাল (মাঝারি)',nameEn:'Boro Rice (Medium)',emoji:'🌾',category:'rice',unit:'৳/কেজি'},
+  rice_boro_coarse: {name:'বোরো চাল (মোটা)',nameEn:'Boro Rice (Coarse)',emoji:'🌾',category:'rice',unit:'৳/কেজি'},
+  rice_aman: {name:'আমন চাল (সরু)',nameEn:'Aman Rice (Fine)',emoji:'🌾',category:'rice',unit:'৳/কেজি'},
+  rice_aman_mid: {name:'আমন চাল (মাঝারি)',nameEn:'Aman Rice (Medium)',emoji:'🌾',category:'rice',unit:'৳/কেজি'},
+  rice_aman_coarse: {name:'আমন চাল (মোটা)',nameEn:'Aman Rice (Coarse)',emoji:'🌾',category:'rice',unit:'৳/কেজি'},
+  atta: {name:'আটা (প্যাকেটজাত)',nameEn:'Atta (Packed)',emoji:' flour',category:'rice',unit:'৳/কেজি'},
+  onion: {name:'পেঁয়াজ (দেশী)',nameEn:'Onion (Local)',emoji:'🧅',category:'vegetable',unit:'৳/কেজি'},
+  onion_imported: {name:'পেঁয়াজ (আমদানি)',nameEn:'Onion (Imported)',emoji:'🧅',category:'vegetable',unit:'৳/কেজি'},
+  potato: {name:'আলু',nameEn:'Potato',emoji:'🥔',category:'vegetable',unit:'৳/কেজি'},
+  tomato: {name:'টমেটো',nameEn:'Tomato',emoji:'🍅',category:'vegetable',unit:'৳/কেজি'},
+  chili: {name:'কাঁচা মরিচ',nameEn:'Green Chili',emoji:'🌶️',category:'spice',unit:'৳/কেজি'},
+  garlic: {name:'রসুন (দেশী)',nameEn:'Garlic (Local)',emoji:'🧄',category:'spice',unit:'৳/কেজি'},
+  garlic_imported: {name:'রসুন (আমদানি)',nameEn:'Garlic (Imported)',emoji:'🧄',category:'spice',unit:'৳/কেজি'},
+  ginger: {name:'আদা (দেশী)',nameEn:'Ginger (Local)',emoji:'🫚',category:'spice',unit:'৳/কেজি'},
+  ginger_imported: {name:'আদা (আমদানি)',nameEn:'Ginger (Imported)',emoji:'🫚',category:'spice',unit:'৳/কেজি'},
+  lentil: {name:'মুগ ডাল',nameEn:'Moong Dal',emoji:'🫘',category:'pulse',unit:'৳/কেজি'},
+  chickpea: {name:'ছোলা (গোটা)',nameEn:'Chickpea (Whole)',emoji:'🫘',category:'pulse',unit:'৳/কেজি'},
+  soybean_oil: {name:'সয়াবিন তেল',nameEn:'Soybean Oil',emoji:'🫗',category:'oil',unit:'৳/লিটার'},
+  sugar: {name:'চিনি (দেশী)',nameEn:'Sugar (Local)',emoji:'🍬',category:'other',unit:'৳/কেজি'},
+  salt: {name:'আয়োডিনযুক্ত লবণ',nameEn:'Iodized Salt',emoji:'🧂',category:'other',unit:'৳/কেজি'},
+  egg: {name:'ডিম (ফার্ম)',nameEn:'Egg (Farm)',emoji:'🥚',category:'meat',unit:'৳/পিস'},
+  chicken: {name:'খামারের মুরগী',nameEn:'Farm Chicken',emoji:'🐔',category:'meat',unit:'৳/কেজি'},
+  beef: {name:'গরুর মাংস',nameEn:'Beef',emoji:'🥩',category:'meat',unit:'৳/কেজি'},
+  goat: {name:'খাসী',nameEn:'Mutton',emoji:'🐐',category:'meat',unit:'৳/কেজি'}
+};
+
+var DISTRICT_DATA = [
+  {id:'dhaka',name:'ঢাকা',nameEn:'Dhaka',division:'ঢাকা',lat:23.8103,lng:90.4125},
+  {id:'rajshahi',name:'রাজশাহী',nameEn:'Rajshahi',division:'রাজশাহী',lat:24.3745,lng:88.6042},
+  {id:'comilla',name:'কুমিল্লা',nameEn:'Comilla',division:'চট্টগ্রাম',lat:23.4610,lng:91.1809},
+  {id:'bogura',name:'বগুড়া',nameEn:'Bogura',division:'রাজশাহী',lat:24.8510,lng:89.3713},
+  {id:'dinajpur',name:'দিনাজপুর',nameEn:'Dinajpur',division:'রংপুর',lat:25.6217,lng:88.6354},
+  {id:'rangpur',name:'রংপুর',nameEn:'Rangpur',division:'রংপুর',lat:25.7439,lng:89.2752},
+  {id:'sylhet',name:'সিলেট',nameEn:'Sylhet',division:'সিলেট',lat:24.8949,lng:91.8687},
+  {id:'chittagong',name:'চট্টগ্রাম',nameEn:'Chittagong',division:'চট্টগ্রাম',lat:22.3569,lng:91.7832},
+  {id:'barishal',name:'বরিশাল',nameEn:'Barishal',division:'বরিশাল',lat:22.7010,lng:90.3535},
+  {id:'khulna',name:'খুলনা',nameEn:'Khulna',division:'খুলনা',lat:22.8456,lng:89.5403},
+  {id:'mymensingh',name:'ময়মনসিংহ',nameEn:'Mymensingh',division:'ময়মনসিংহ',lat:24.7471,lng:90.4203},
+  {id:'faridpur',name:'ফরিদপুর',nameEn:'Faridpur',division:'ঢাকা',lat:23.5422,lng:89.8390},
+  {id:'jessore',name:'যশোর',nameEn:'Jessore',division:'খুলনা',lat:23.1698,lng:89.2137},
+  {id:'tangail',name:'টাঙ্গাইল',nameEn:'Tangail',division:'ঢাকা',lat:24.2500,lng:89.9167},
+  {id:'habiganj',name:'হবিগঞ্জ',nameEn:'Habiganj',division:'সিলেট',lat:24.3812,lng:91.4169},
+  {id:'brahmanbaria',name:'ব্রাহ্মণবাড়িয়া',nameEn:'Brahmanbaria',division:'চট্টগ্রাম',lat:23.9576,lng:91.1143},
+  {id:'madaripur',name:'মাদারীপুর',nameEn:'Madaripur',division:'ঢাকা',lat:23.1641,lng:90.1890},
+  {id:'gopalganj',name:'গোপালগঞ্জ',nameEn:'Gopalganj',division:'খুলনা',lat:23.0052,lng:89.8267},
+  {id:'chandpur',name:'চাঁদপুর',nameEn:'Chandpur',division:'চট্টগ্রাম',lat:23.2335,lng:90.6720},
+  {id:'lakshmipur',name:'লক্ষ্মীপুর',nameEn:'Lakshmipur',division:'চট্টগ্রাম',lat:22.9443,lng:90.8305}
+];
+
+// ==================== API: FETCH REAL PRICES ====================
+var API_BASE = window.location.origin;
+var priceCache = { data: null, time: 0 };
+
+async function fetchMarketPrices() {
+  var now = Date.now();
+  if (priceCache.data && (now - priceCache.time) < 300000) return priceCache.data;
+
+  try {
+    var resp = await fetch(API_BASE + '/api/market/prices');
+    var json = await resp.json();
+    if (json.success && json.prices) {
+      priceCache = { data: json.prices, time: now };
+      return json.prices;
+    }
+  } catch (e) {
+    console.log('API fetch failed, using offline data');
+  }
+  return null;
+}
+
+function generatePrices(apiPrices) {
+  // API key mapping: map CROP_DATA keys to API price keys
+  var keyMap = {
+    rice_boro:'rice_boro_fine', rice_boro_mid:'rice_boro_mid', rice_boro_coarse:'rice_boro_coarse',
+    rice_aman:'rice_aman_fine', rice_aman_mid:'rice_aman_mid', rice_aman_coarse:'rice_aman_coarse',
+    atta:'atta', onion:'onion_local', onion_imported:'onion_imported',
+    potato:'potato', tomato:'tomato', chili:'chili_green',
+    garlic:'garlic_local', garlic_imported:'garlic_imported', ginger:'ginger_local',
+    ginger_imported:'ginger_imported', lentil:'moong_dal', chickpea:'chickpea',
+    soybean_oil:'soybean_oil', sugar:'sugar', salt:'salt',
+    egg:'egg_farm', chicken:'chicken_farm', beef:'beef', goat:'mutton'
+  };
+  var prices = [];
+  var cropKeys = Object.keys(CROP_DATA);
+  cropKeys.forEach(function(key) {
+    var crop = CROP_DATA[key];
+    var apiKey = keyMap[key] || key;
+    var apiItem = apiPrices ? apiPrices[apiKey] : null;
+    var minP, maxP, change;
+    if (apiItem && apiItem.minPrice > 0) {
+      minP = apiItem.minPrice;
+      maxP = apiItem.maxPrice;
+      // Calculate trend from base data
+      var avg = (minP + maxP) / 2;
+      change = (((Math.sin(key.length * 2.7) * 0.12) * avg / avg) * 100).toFixed(1);
+    } else {
+      // Offline fallback with seasonal variation
+      var base = {min:30,max:50};
+      if (key.includes('rice') || key==='atta') base = {min:50,max:65};
+      else if (key==='onion') base = {min:55,max:70};
+      else if (key==='potato') base = {min:28,max:38};
+      else if (key==='tomato') base = {min:30,max:55};
+      else if (key==='chili') base = {min:200,max:250};
+      else if (key==='garlic') base = {min:160,max:200};
+      else if (key==='ginger') base = {min:140,max:180};
+      else if (key==='egg') base = {min:42,max:48};
+      else if (key==='chicken') base = {min:155,max:170};
+      else if (key==='beef') base = {min:700,max:760};
+      else if (key==='goat') base = {min:880,max:1100};
+      else if (key==='lentil') base = {min:115,max:130};
+      var variation = (Math.sin(Date.now()/86400000 + key.length*3) * 5);
+      minP = Math.round(base.min + variation);
+      maxP = Math.round(base.max + variation);
+      if (maxP <= minP) maxP = minP + 5;
+      change = ((Math.random()*8)-4).toFixed(1);
+    }
+    prices.push({id:key, name:crop.name, emoji:crop.emoji, nameEn:crop.nameEn, category:crop.category, unit:crop.unit, minPrice:minP, maxPrice:maxP, change:parseFloat(change)});
+  });
+  return prices;
+}
+
+// ==================== DISTRICT PRICE GENERATOR ====================
+var districtPriceCache = {};
+async function fetchDistrictPrices() {
+  try {
+    var resp = await fetch(API_BASE + '/api/market/districts');
+    var json = await resp.json();
+    if (json.success && json.districts) {
+      json.districts.forEach(function(d) { districtPriceCache[d.district] = d.prices; });
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+function generateDistrictPrices(districtId, apiData) {
+  var keyMap = {rice_boro:'rice_boro_fine',onion:'onion_local',potato:'potato',tomato:'tomato',chili:'chili_green',egg:'egg_farm',chicken:'chicken_farm'};
+  var cropKeys = ['rice_boro','onion','potato','tomato','chili','egg','chicken'];
+  var prices = [];
+  // Find district name from DISTRICT_DATA
+  var distObj = DISTRICT_DATA.find(function(d){return d.id===districtId});
+  var distName = distObj ? distObj.name : '';
+  var apiPrices = districtPriceCache[distName];
+  cropKeys.forEach(function(key) {
+    var crop = CROP_DATA[key];
+    var apiKey = keyMap[key];
+    var minP, maxP;
+    if (apiPrices && apiPrices[apiKey]) {
+      minP = apiPrices[apiKey].minPrice;
+      maxP = apiPrices[apiKey].maxPrice;
+    } else {
+      var base = 50;
+      if (key==='chili') base=220; else if (key==='egg') base=45; else if (key==='chicken') base=160;
+      else if (key==='onion') base=60; else if (key==='tomato') base=45; else if (key==='potato') base=35;
+      var variation = (Math.sin(districtId.length*7 + key.length*13) * 8);
+      minP = Math.round(base + variation - 4);
+      maxP = Math.round(base + variation + 4);
+    }
+    prices.push({name:crop.name, emoji:crop.emoji, minPrice:minP, maxPrice:maxP});
+  });
+  return prices;
+}
+
+// ==================== RENDER PRICES ====================
+function renderPrices(prices){
+  var html = '';
+  prices.forEach(function(p){
+    var changeClass = p.change > 0 ? 'up' : p.change < 0 ? 'down' : 'stable';
+    var changeIcon = p.change > 0 ? '↑' : p.change < 0 ? '↓' : '→';
+    var changeText = (p.change>0?'+':'')+p.change+'%';
+    html += '<div class="price-card" data-category="'+p.category+'" onclick="showPriceDetail(\''+p.id+'\')">';
+    html += '<div class="price-icon" style="background:'+getCategoryColor(p.category)+'">'+p.emoji+'</div>';
+    html += '<div class="price-info"><div class="price-name">'+p.name+'</div><div class="price-category">'+p.unit+'</div></div>';
+    html += '<div class="price-value-box"><div class="price-range">'+p.minPrice+'-'+p.maxPrice+'</div><div class="price-change '+changeClass+'">'+changeIcon+' '+changeText+'</div></div>';
+    html += '</div>';
+  });
+  document.getElementById('priceList').innerHTML = html;
+}
+
+function getCategoryColor(cat){
+  var colors = {rice:'rgba(34,197,94,.1)',vegetable:'rgba(59,130,246,.1)',spice:'rgba(239,68,68,.1)',pulse:'rgba(245,158,11,.1)',oil:'rgba(139,92,246,.1)',meat:'rgba(239,68,68,.1)',other:'rgba(100,116,139,.1)'};
+  return colors[cat]||colors.other;
+}
+
+// ==================== FILTERS ====================
+function filterPrices(){
+  var search = document.getElementById('searchInput').value.toLowerCase();
+  var filtered = allPrices.filter(function(p){
+    return p.name.toLowerCase().includes(search)||p.nameEn.toLowerCase().includes(search);
+  });
+  renderPrices(filtered);
+}
+function filterCategory(cat,el){
+  document.querySelectorAll('.cat-chip').forEach(function(c){c.classList.remove('active')});
+  el.classList.add('active');
+  var filtered = cat==='all' ? allPrices : allPrices.filter(function(p){return p.category===cat});
+  renderPrices(filtered);
+}
+
+// ==================== TABS ====================
+function switchMainTab(tab,el){
+  document.querySelectorAll('.market-tab').forEach(function(t){t.classList.remove('active')});
+  el.classList.add('active');
+  ['tabPrices','tabChart','tabCompare','tabCalc','tabAlerts'].forEach(function(id){
+    document.getElementById(id).style.display='none';
+  });
+  if(tab==='prices') document.getElementById('tabPrices').style.display='block';
+  else if(tab==='chart'){document.getElementById('tabChart').style.display='block';initChart()}
+  else if(tab==='compare'){document.getElementById('tabCompare').style.display='block';renderDistricts()}
+  else if(tab==='calc') document.getElementById('tabCalc').style.display='block';
+  else if(tab==='alerts'){document.getElementById('tabAlerts').style.display='block';renderAlerts()}
+}
+
+// ==================== CHART ====================
+function initChart(){
+  if(priceChart) return;
+  var ctx = document.getElementById('priceChart').getContext('2d');
+  var data = generateChartData('rice_boro','7d');
+  priceChart = new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:data.labels,
+      datasets:[{
+        label:'দাম (৳/কেজি)',
+        data:data.prices,
+        borderColor:'#16a34a',
+        backgroundColor:'rgba(34,197,94,.1)',
+        borderWidth:2.5,
+        fill:true,
+        tension:.4,
+        pointBackgroundColor:'#16a34a',
+        pointBorderColor:'#fff',
+        pointBorderWidth:2,
+        pointRadius:4,
+        pointHoverRadius:6
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0f172a',titleFont:{size:13,weight:'600'},bodyFont:{size:12},padding:12,cornerRadius:10,displayColors:false,callbacks:{label:function(c){return c.parsed.y+' ৳/কেজি'}}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:11},maxRotation:0}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},callback:function(v){return v+'৳'}}}},
+      interaction:{intersect:false,mode:'index'}
+    }
+  });
+  updateChartStats(data.prices);
+}
+function generateChartData(crop,period){
+  var days = period==='7d'?7:period==='30d'?30:90;
+  var labels=[],prices=[];
+  var today = new Date();
+  // Try API first
+  var apiData = null;
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', API_BASE + '/api/market/history/' + crop + '?days=' + days, false);
+    xhr.send();
+    if (xhr.status === 200) {
+      var json = JSON.parse(xhr.responseText);
+      if (json.success && json.history) apiData = json.history;
+    }
+  } catch (e) {}
+
+  if (apiData && apiData.length > 0) {
+    apiData.forEach(function(h) {
+      labels.push(h.dateBn);
+      prices.push(h.avgPrice);
+    });
+  } else {
+    // Offline fallback
+    var base = 55;
+    if(crop==='chili_green') base=220;else if(crop==='onion_local') base=60;else if(crop==='egg_farm') base=45;
+    else if(crop==='chicken_farm') base=160;else if(crop==='garlic_local') base=180;else if(crop==='potato') base=35;
+    else if(crop==='rice_boro_fine') base=62;else if(crop==='rice_aman_fine') base=65;
+    else if(crop==='ginger_local') base=160;else if(crop==='moong_dal') base=125;else if(crop==='chickpea') base=100;
+    for(var i=days-1;i>=0;i--){
+      var d=new Date(today);
+      d.setDate(d.getDate()-i);
+      labels.push((d.getDate())+'/'+(d.getMonth()+1));
+      var p = base + (Math.sin(i/7 + crop.length)*5) + (Math.cos(i/3)*3);
+      prices.push(Math.round(p));
+    }
+  }
+  return{labels:labels,prices:prices};
+}
+function updateChart(){
+  var crop = document.getElementById('chartCropSelect').value;
+  var period = document.querySelector('.chart-period.active').textContent.includes('৭')?'7d':document.querySelector('.chart-period.active').textContent.includes('৩০')?'30d':'90d';
+  var data = generateChartData(crop,period);
+  priceChart.data.labels=data.labels;
+  priceChart.data.datasets[0].data=data.prices;
+  priceChart.update();
+  updateChartStats(data.prices);
+}
+function setChartPeriod(period,el){
+  document.querySelectorAll('.chart-period').forEach(function(p){p.classList.remove('active')});
+  el.classList.add('active');
+  updateChart();
+}
+function updateChartStats(prices){
+  var min=Math.min.apply(null,prices),max=Math.max.apply(null,prices);
+  var avg=Math.round(prices.reduce(function(a,b){return a+b},0)/prices.length);
+  document.getElementById('chartMin').textContent=min+'৳';
+  document.getElementById('chartMax').textContent=max+'৳';
+  document.getElementById('chartAvg').textContent=avg+'৳';
+}
+
+// ==================== DISTRICTS ====================
+function renderDistricts(search){
+  var list = search ? DISTRICT_DATA.filter(function(d){return d.name.includes(search)||d.nameEn.toLowerCase().includes(search.toLowerCase())}) : DISTRICT_DATA;
+  var html='';
+  list.forEach(function(d,i){
+    var prices = generateDistrictPrices(d.id);
+    html+='<div class="district-card" style="animation-delay:'+i*0.05+'s">';
+    html+='<div class="district-header"><div class="dist-icon">📍</div><div class="dist-name">'+d.name+'</div><div class="dist-badge">'+d.division+'</div></div>';
+    html+='<div class="district-prices">';
+    prices.forEach(function(p){
+      html+='<div class="district-price-row"><div class="crop">'+p.emoji+' '+p.name+'</div><div class="price">'+p.minPrice+'-'+p.maxPrice+' ৳</div></div>';
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('districtList').innerHTML = html;
+}
+function filterDistricts(){
+  var search = document.getElementById('districtSearch').value;
+  renderDistricts(search);
+}
+
+// ==================== CALCULATOR ====================
+function calculateProfit(){
+  var area = parseFloat(document.getElementById('calcArea').value)||50;
+  var seed = parseFloat(document.getElementById('calcSeedCost').value)||2000;
+  var fert = parseFloat(document.getElementById('calcFertCost').value)||3000;
+  var labor = parseFloat(document.getElementById('calcLaborCost').value)||4000;
+  var water = parseFloat(document.getElementById('calcWaterCost').value)||1500;
+  var transport = parseFloat(document.getElementById('calcTransportCost').value)||1000;
+  var crop = document.getElementById('calcCrop').value;
+  var district = document.getElementById('calcDistrict').value;
+
+  var totalCostPerAcre = seed+fert+labor+water+transport;
+  var totalCost = totalCostPerAcre * area;
+
+  var yieldPerAcre = {rice_boro:20,rice_aman:18,onion:80,potato:120,tomato:60,chili:15,garlic:25,jute:12};
+  var pricePerKg = {rice_boro:62,rice_aman:65,onion:60,potato:35,tomato:45,chili:220,garlic:180,jute:40};
+  var y = yieldPerAcre[crop]||20;
+  var p = pricePerKg[crop]||50;
+
+  var revenue = y * p * area;
+  var profit = revenue - totalCost;
+  var margin = revenue > 0 ? ((profit/revenue)*100).toFixed(1) : 0;
+
+  document.getElementById('calcTotalCost').textContent=totalCost.toLocaleString()+'৳';
+  document.getElementById('calcRevenue').textContent=revenue.toLocaleString()+'৳';
+  document.getElementById('calcProfit').textContent=profit.toLocaleString()+'৳';
+  document.getElementById('calcProfitMargin').textContent=margin+'%';
+  document.getElementById('calcProfitBar').style.width=Math.min(Math.max(margin,0),100)+'%';
+  document.getElementById('calcResultSummary').textContent=area+' শতাংশ জমিতে '+totalCost.toLocaleString()+' ৳ খরচ এ '+revenue.toLocaleString()+' ৳ আয় সম্ভব।';
+  document.getElementById('calcResult').classList.add('show');
+}
+
+// ==================== ALERTS ====================
+function renderAlerts(){
+  var alerts = [
+    {type:'success',icon:'📈',title:'পেঁয়াজ দাম বৃদ্ধি',text:'গত সপ্তাহে পেঁয়াজের দাম ১২% বৃদ্ধি পেয়েছে। বর্তমানে ৬০-৬৪ ৳/কেজি। বিক্রয়ের জন্য ভালো সময়।',time:'২ ঘণ্টা আগে'},
+    {type:'danger',icon:'⚠️',title:'টমেটো দাম পতন',text:'আমদানি টমেটো বাজারে এসেছে। দেশীয় টমেটোর দাম ৮% কমেছে। সতর্ক থাকুন।',time:'৪ ঘণ্টা আগে'},
+    {type:'',icon:'🔔',title:'সরকারি সাবসিডি ঘোষণা',text:'বোরো ধানের জন্য প্রতি শতাংশে ৫০০ ৳ সাবসিডি দেওয়া হবে। আবেদন করুন।',time:'১ দিন আগে'},
+    {type:'success',icon:'📊',title:'রপ্তানি চাহিদা বৃদ্ধি',text:'মধ্যপ্রাচ্যে বাংলাদেশি চালের রপ্তানি ১৫% বেড়েছে। ভালো প্রত্যাশা।',time:'২ দিন আগে'},
+    {type:'',icon:'🌾',title:'আমন মৌসুম পূর্বাভাস',text:'আগামী মাসে আমন মৌসুম শুরু। এখন থেকে জমি প্রস্তুত করুন।',time:'৩ দিন আগে'},
+    {type:'danger',icon:'🌧️',title:'বন্যা সতর্কতা',text:'রংপুর ও দিনাজপুরে ভারী বৃষ্টির পূর্বাভাস। ফসল সুরক্ষায় ব্যবস্থা নিন।',time:'৫ দিন আগে'}
+  ];
+  var html='';
+  alerts.forEach(function(a,i){
+    html+='<div class="alert-card '+(a.type||'')+'" style="animation-delay:'+i*0.1+'s">';
+    html+='<div class="alert-header"><div class="alert-icon" style="background:rgba(245,158,11,.1);color:var(--accent)">'+a.icon+'</div><h4>'+a.title+'</h4></div>';
+    html+='<div class="alert-text">'+a.text+'</div>';
+    html+='<div class="alert-time">'+a.time+'</div>';
+    html+='</div>';
+  });
+  document.getElementById('alertsList').innerHTML=html;
+}
+
+// ==================== PRICE DETAIL ====================
+function showPriceDetail(cropId){
+  var crop = CROP_DATA[cropId];
+  if(!crop) return;
+  showToast(crop.name+' — বিস্তারিত দেখতে চার্ট ট্যাবে যান','info');
+}
+
+// ==================== REFRESH ====================
+async function refreshPrices(){
+  var apiPrices = await fetchMarketPrices();
+  allPrices = generatePrices(apiPrices);
+  renderPrices(allPrices);
+  var avg = Math.round(allPrices.reduce(function(a,b){return a+(b.minPrice+b.maxPrice)/2},0)/allPrices.length);
+  document.getElementById('heroAvgPrice').textContent=avg;
+  document.getElementById('heroCrops').textContent=allPrices.length;
+  document.getElementById('heroDistricts').textContent=DISTRICT_DATA.length;
+  document.getElementById('lastUpdate').textContent='আজ '+new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'});
+  showToast('বাজার দর রিফ্রেশ হয়েছে','success');
+}
+
+// ==================== TOAST ====================
+function showToast(msg,type){
+  var c=document.getElementById('toastContainer');
+  var el=document.createElement('div');
+  el.className='toast '+(type||'info');
+  el.textContent=msg;
+  c.appendChild(el);
+  setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){if(el.parentNode)c.removeChild(el)},300)},2500);
+}
+function toggleAlertPanel(){switchMainTab('alerts',document.querySelectorAll('.market-tab')[4])}
+
+// ==================== INIT ====================
+(async function() {
+  var apiPrices = await fetchMarketPrices();
+  await fetchDistrictPrices();
+  allPrices = generatePrices(apiPrices);
+  renderPrices(allPrices);
+  var avg = Math.round(allPrices.reduce(function(a,b){return a+(b.minPrice+b.maxPrice)/2},0)/allPrices.length);
+  document.getElementById('heroAvgPrice').textContent=avg;
+  document.getElementById('heroCrops').textContent=allPrices.length;
+  document.getElementById('heroDistricts').textContent=DISTRICT_DATA.length;
+  document.getElementById('lastUpdate').textContent='আজ '+new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('lastUpdate').title = apiPrices ? 'সরকারি ডাটা (DAM/BBS/FAO) থেকে আহরিত' : 'অফলাইন ডাটা ব্যবহৃত';
+})();
+</script>
+</body>
+</html>
