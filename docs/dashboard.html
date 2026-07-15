@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>স্মার্ট ফার্মিং AI - ড্যাশবোর্ড</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="bd_districts.js"></script>
+<style>
+:root{--primary:#16a34a;--primary-dark:#15803d;--primary-light:#22c55e;--primary-50:#f0fdf4;--primary-100:#dcfce7;--primary-glow:rgba(34,197,94,.15);--accent:#f59e0b;--accent-dark:#d97706;--accent-glow:rgba(245,158,11,.15);--error:#ef4444;--error-light:#fef2f2;--info:#3b82f6;--info-light:#eff6ff;--purple:#8b5cf6;--bg:#f0f4f8;--surface:#ffffff;--surface-hover:#f1f5f9;--text:#0f172a;--text-secondary:#64748b;--text-hint:#94a3b8;--border:#e2e8f0;--border-light:#f1f5f9;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);--shadow-lg:0 12px 24px rgba(0,0,0,.1),0 4px 8px rgba(0,0,0,.05);--shadow-xl:0 20px 40px rgba(0,0,0,.12);--radius:14px;--radius-lg:18px;--radius-xl:24px;--radius-2xl:28px;--nav-height:72px;--header-height:60px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+.bg-map{position:fixed;top:0;left:0;width:100%;height:100%;background:url('bangladesh-map.png') center center no-repeat;background-size:50% auto;opacity:0.10;filter:brightness(2);pointer-events:none;z-index:1}
+body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;background-image:radial-gradient(at 100% 0%,rgba(34,197,94,.05) 0%,transparent 50%),radial-gradient(at 0% 100%,rgba(59,130,246,.03) 0%,transparent 50%)}
+html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-serif}
+.screen{display:none;min-height:100vh}.screen.active{display:block;animation:fadeUp .4s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(34,197,94,.2)}50%{box-shadow:0 0 40px rgba(34,197,94,.4)}}
+
+.app-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid rgba(0,0,0,.06);padding:0 16px;height:var(--header-height);display:flex;align-items:center;gap:12px}
+.app-header h1{font-size:17px;font-weight:800;flex:1;color:var(--text);letter-spacing:-.3px}
+.header-back{width:40px;height:40px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;border:none;background:rgba(0,0,0,.04);color:var(--text);cursor:pointer;font-size:22px;transition:all .2s}
+.header-back:hover{background:rgba(0,0,0,.08);transform:scale(1.05)}
+.header-action{width:40px;height:40px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;font-size:22px;transition:all .2s;position:relative}
+.header-action:hover{background:rgba(0,0,0,.04);color:var(--text)}
+.header-action .badge{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--error);border-radius:50%;border:2px solid var(--surface);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}}
+.lang-toggle{display:inline-flex;align-items:center;background:rgba(0,0,0,.04);border-radius:20px;padding:3px;border:1px solid rgba(0,0,0,.06)}
+.lang-toggle .lang-btn{padding:5px 12px;border-radius:18px;font-size:11px;font-weight:700;border:none;cursor:pointer;transition:all .2s;font-family:inherit;background:transparent;color:var(--text-hint)}
+.lang-toggle .lang-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(22,163,74,.3)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);letter-spacing:-.2px}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(22,163,74,.4)}
+.btn-block{width:100%}
+.btn .spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:none}
+.btn.loading .spinner{display:block}.btn.loading span{opacity:0}
+
+.form-group{margin-bottom:20px}.form-label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.input-wrapper{position:relative;display:flex;align-items:center}
+.input-wrapper .material-icons-round{position:absolute;left:14px;color:var(--text-hint);font-size:20px;pointer-events:none}
+.input-wrapper input{width:100%;padding:14px 14px 14px 46px;border:2px solid var(--border);border-radius:var(--radius);font-size:15px;font-family:inherit;background:var(--surface);outline:none;transition:all .2s;color:var(--text)}
+.input-wrapper input:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-100)}
+.form-select{width:100%;padding:14px 14px 14px 46px;border:2px solid var(--border);border-radius:var(--radius);font-size:15px;font-family:inherit;background:var(--surface);outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;color:var(--text)}
+.form-select:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-100)}
+.select-wrapper{position:relative}
+.select-wrapper .material-icons-round{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:20px;pointer-events:none}
+.select-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:20px;pointer-events:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.04);transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));opacity:0;transition:opacity .3s}
+.card:hover::before{opacity:1}
+.card-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.card-icon{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;transition:all .3s}
+.card:hover .card-icon{transform:scale(1.08)}
+.card-icon.green{background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(34,197,94,.05));color:var(--primary)}.card-icon.orange{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.05));color:var(--accent-dark)}.card-icon.blue{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(59,130,246,.05));color:var(--info)}.card-icon.red{background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(239,68,68,.05));color:var(--error)}
+.card-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.3px}.card-subtitle{font-size:13px;color:var(--text-secondary);margin-top:2px}
+
+.section{padding:0 16px;margin-bottom:28px}.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.section-title{font-size:18px;font-weight:700;color:var(--text)}
+.section-link{font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-height);background:rgba(255,255,255,.8);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);display:flex;align-items:center;justify-content:space-around;box-shadow:0 -4px 20px rgba(0,0,0,.06);z-index:200;border-top:1px solid rgba(0,0,0,.04);padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 16px;border-radius:var(--radius);cursor:pointer;transition:all .2s;color:var(--text-hint);border:none;background:none;font-family:inherit;min-width:64px}
+.nav-item .material-icons-round{font-size:24px;transition:all .3s}.nav-item span{font-size:11px;font-weight:600;transition:all .2s}
+.nav-item.active{color:var(--primary)}.nav-item.active .material-icons-round{background:linear-gradient(135deg,var(--primary),var(--primary-light));width:44px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:22px;color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.3)}
+
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.quick-action{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 8px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);border:1px solid rgba(0,0,0,.04);font-family:inherit;position:relative;overflow:hidden}
+.quick-action::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));opacity:0;transition:opacity .3s}
+.quick-action:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.quick-action:hover::before{opacity:1}
+.icon-circle{width:52px;height:52px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:26px;transition:all .3s}
+.quick-action:hover .icon-circle{transform:scale(1.12) rotate(5deg)}
+.quick-action .label{font-size:12px;font-weight:600;color:var(--text-secondary);text-align:center;line-height:1.3}
+
+.feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.feature-card{padding:20px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);border:1px solid rgba(0,0,0,.04);font-family:inherit;text-align:left;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));opacity:0;transition:opacity .3s}
+.feature-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.feature-card:hover::before{opacity:1}
+.feature-card .feature-icon{width:52px;height:52px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px;transition:all .3s}
+.feature-card:hover .feature-icon{transform:scale(1.1)}
+.feature-card .feature-title{font-size:15px;font-weight:800;margin-bottom:4px;color:var(--text);letter-spacing:-.3px}.feature-card .feature-desc{font-size:12px;color:var(--text-secondary);line-height:1.5}
+
+.cta-banner{background:linear-gradient(135deg,#7c3aed 0%,#a855f7 50%,#ec4899 100%);border-radius:var(--radius-xl);padding:24px;color:#fff;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(124,58,237,.3)}
+.cta-banner::before{content:'';position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.1);border-radius:50%}
+.cta-banner::after{content:'';position:absolute;bottom:-30px;left:-10px;width:100px;height:100px;background:rgba(255,255,255,.08);border-radius:50%}
+.cta-banner:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(124,58,237,.4)}
+.cta-banner .cta-icon{font-size:44px;position:relative;z-index:1}.cta-banner .cta-text{position:relative;z-index:1}
+.cta-banner .cta-text h3{font-size:17px;font-weight:800;letter-spacing:-.3px}.cta-banner .cta-text p{font-size:13px;opacity:.9;margin-top:4px}
+
+.weather-current{background:linear-gradient(160deg,#0ea5e9 0%,#38bdf8 50%,#7dd3fc 100%);border-radius:var(--radius-xl);padding:28px;color:#fff;position:relative;overflow:hidden;cursor:pointer}
+.weather-current::before{content:'';position:absolute;top:-30%;right:-15%;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,.15) 0%,transparent 70%);border-radius:50%}
+.weather-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+.weather-temp{font-size:64px;font-weight:800;line-height:1}.weather-condition{font-size:18px;font-weight:600;margin-top:4px}
+.weather-location{font-size:13px;opacity:.8;margin-top:4px;display:flex;align-items:center;gap:4px}
+.weather-icon{font-size:64px;position:relative;z-index:1}
+.weather-details{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.2);position:relative;z-index:1}
+.weather-detail{text-align:center}.weather-detail .value{font-size:16px;font-weight:700}.weather-detail .label{font-size:11px;opacity:.75;margin-top:2px}
+.forecast-list{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.forecast-list::-webkit-scrollbar{display:none}
+.forecast-item{flex-shrink:0;width:88px;text-align:center;padding:16px 10px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);border:1px solid var(--border-light)}
+.forecast-item .day{font-size:12px;font-weight:600;color:var(--text-secondary)}.forecast-item .icon{font-size:32px;margin:10px 0}.forecast-item .temp{font-size:14px;font-weight:700}
+
+.npk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.npk-card{text-align:center;padding:20px 12px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);border:1px solid var(--border-light)}
+.npk-card .npk-value{font-size:28px;font-weight:800}.npk-card .npk-label{font-size:12px;color:var(--text-secondary);margin-top:4px;font-weight:500}.npk-card .npk-unit{font-size:11px;color:var(--text-hint);margin-top:2px}
+
+.crop-result{padding:20px;background:var(--primary-50);border-radius:var(--radius-lg);margin-bottom:12px;border-left:4px solid var(--primary);animation:fadeUp .3s ease}
+.crop-result .crop-name{font-size:17px;font-weight:700;color:var(--primary-dark)}.crop-result .confidence{display:inline-block;padding:4px 12px;background:var(--primary);color:#fff;border-radius:20px;font-size:11px;font-weight:700;margin-top:8px}.crop-result .crop-desc{font-size:13px;color:var(--text-secondary);margin-top:10px;line-height:1.6}
+
+.market-item{display:flex;align-items:center;gap:14px;padding:18px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);margin-bottom:10px;border:1px solid var(--border-light)}
+.market-item .crop-icon{width:52px;height:52px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--primary-50)}
+.market-item .crop-info{flex:1}.market-item .crop-name{font-size:15px;font-weight:700}.market-item .crop-price{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.market-item .crop-change{font-size:13px;font-weight:700;padding:5px 12px;border-radius:20px}
+.market-item .crop-change.up{color:var(--primary);background:var(--primary-100)}.market-item .crop-change.down{color:var(--error);background:var(--error-light)}
+
+.chat-container{display:flex;flex-direction:column;height:calc(100vh - var(--header-height) - var(--nav-height))}
+.chat-messages{flex:1;overflow-y:auto;padding:16px}
+.chat-message{display:flex;gap:10px;margin-bottom:16px;animation:fadeUp .3s ease}.chat-message.user{flex-direction:row-reverse}
+.chat-avatar{width:40px;height:40px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+.chat-message.bot .chat-avatar{background:var(--primary-100);color:var(--primary)}.chat-message.user .chat-avatar{background:var(--info-light);color:var(--info)}
+.chat-bubble{max-width:78%;padding:14px 18px;border-radius:var(--radius-lg);font-size:14px;line-height:1.6}
+.chat-message.bot .chat-bubble{background:var(--surface);box-shadow:var(--shadow);border-bottom-left-radius:4px;border:1px solid var(--border-light)}
+.chat-message.user .chat-bubble{background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.chat-input-area{display:flex;gap:8px;padding:12px 16px;background:var(--surface);border-top:1px solid var(--border-light)}
+.chat-input-area input{flex:1;padding:12px 18px;border:2px solid var(--border);border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:all .2s;background:var(--bg)}
+.chat-input-area input:focus{border-color:var(--primary);background:var(--surface)}
+.send-btn{width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:22px}
+.send-btn:hover{background:var(--primary-dark);transform:scale(1.05)}
+
+.notification-item{display:flex;gap:14px;padding:18px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);margin-bottom:10px;border:1px solid var(--border-light)}
+.notification-item.unread{border-left:4px solid var(--primary);background:var(--primary-50)}
+.notification-item .notif-icon{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px}
+.notification-item .notif-content{flex:1}.notification-item .notif-title{font-size:14px;font-weight:700}.notification-item .notif-text{font-size:13px;color:var(--text-secondary);margin-top:4px;line-height:1.5}.notification-item .notif-time{font-size:11px;color:var(--text-hint);margin-top:8px}
+
+.profile-header{text-align:center;padding:32px 24px;background:linear-gradient(160deg,#15803d 0%,#16a34a 50%,#22c55e 100%);border-radius:0 0 var(--radius-2xl) var(--radius-2xl);color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
+.profile-header::before{content:'';position:absolute;top:-40%;right:-20%;width:250px;height:250px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%}
+.profile-avatar{width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:40px;border:3px solid rgba(255,255,255,.3);position:relative;z-index:1}
+.profile-header h2{font-size:22px;font-weight:700;position:relative;z-index:1}.profile-header p{font-size:14px;opacity:.85;margin-top:4px;position:relative;z-index:1}
+.profile-menu-item{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--surface);border-radius:var(--radius-lg);margin:0 16px 10px;cursor:pointer;transition:all .2s;border:1px solid var(--border-light);box-shadow:var(--shadow)}
+.profile-menu-item:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.profile-menu-item .menu-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--primary-100);color:var(--primary)}
+.profile-menu-item .menu-text{flex:1;font-weight:600;font-size:14px;color:var(--text)}.profile-menu-item .menu-arrow{color:var(--text-hint);font-size:22px}
+.profile-menu-item.danger .menu-icon{background:var(--error-light);color:var(--error)}.profile-menu-item.danger .menu-text{color:var(--error)}
+
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius-xl);padding:48px 24px;text-align:center;cursor:pointer;transition:all .25s;background:var(--surface)}
+.upload-area:hover{border-color:var(--primary);background:var(--primary-50)}
+.upload-area .material-icons-round{font-size:56px;color:var(--primary);margin-bottom:14px}
+.upload-area p{font-size:15px;color:var(--text-secondary);font-weight:500}.upload-area .upload-hint{font-size:12px;color:var(--text-hint);margin-top:8px}
+.upload-preview{margin-top:16px;position:relative;display:inline-block;width:100%}
+.upload-preview img{width:100%;max-height:280px;object-fit:cover;border-radius:var(--radius-lg)}
+.upload-preview .remove-img{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
+
+.disease-result{padding:24px;background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);margin-top:20px;border:1px solid var(--border-light);animation:fadeUp .3s ease}
+.disease-result .disease-name{font-size:22px;font-weight:800;color:var(--error)}.disease-result .disease-confidence{font-size:14px;color:var(--text-secondary);margin-top:4px}.disease-result .disease-desc{font-size:14px;margin-top:14px;line-height:1.7;color:var(--text-secondary)}
+.treatment-list{margin-top:14px;padding-left:20px}.treatment-list li{font-size:13px;color:var(--text-secondary);margin-bottom:8px;line-height:1.6}
+
+.section-tabs{display:flex;gap:8px;margin-bottom:18px}
+.section-tab{padding:10px 20px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;border:2px solid var(--border);background:var(--surface);color:var(--text-secondary);font-family:inherit}
+.section-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+.map-placeholder{height:320px;background:linear-gradient(135deg,var(--primary-50) 0%,#dbeafe 100%);border-radius:var(--radius-xl);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--primary);border:1px solid var(--border-light)}
+.map-placeholder .material-icons-round{font-size:56px;margin-bottom:10px}.map-placeholder p{font-size:15px;font-weight:600}
+.leaflet-control-zoom a{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important}
+.leaflet-popup-content-wrapper{border-radius:var(--radius)!important;box-shadow:var(--shadow-lg)!important}
+.leaflet-popup-content{margin:12px 16px!important;font-family:'Noto Sans Bengali','Inter',sans-serif!important}
+.leaflet-popup-content b{font-size:14px}
+.leaflet-control-attribution{font-size:10px!important}
+.leaflet-control-attribution a{color:var(--primary)!important}
+#leafletMap{min-height:400px;background:#e8f4e8}
+.map-tab{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;border:2px solid var(--border);background:var(--surface);color:var(--text-secondary);font-family:inherit;flex-shrink:0}
+.map-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.map-tab-content{animation:fadeUp .3s ease}
+.map-data-card{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--border-light);box-shadow:var(--shadow)}
+.map-data-card .card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.map-data-card .card-value{font-size:22px;font-weight:800;color:var(--primary)}
+.map-data-card .card-label{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.map-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.map-stat{text-align:center;padding:12px 8px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border-light)}
+.map-stat .stat-value{font-size:18px;font-weight:800;color:var(--text)}
+.map-stat .stat-label{font-size:10px;color:var(--text-secondary);margin-top:2px}
+.map-crop-chip{display:inline-block;padding:5px 12px;background:var(--primary-100);color:var(--primary);border-radius:16px;font-size:11px;font-weight:600;margin:3px}
+.map-market-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:6px}
+.map-market-item .crop-icon{font-size:20px}
+.map-market-item .crop-name{font-size:13px;font-weight:600;flex:1}
+.map-market-item .crop-price{font-size:13px;font-weight:700;color:var(--primary)}
+.map-market-item .crop-change{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.map-market-item .crop-change.up{color:var(--primary);background:var(--primary-100)}
+.map-market-item .crop-change.down{color:var(--error);background:var(--error-light)}
+.optgroup-label{font-weight:700;color:var(--text);font-size:14px;padding:6px 0}
+
+.toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:400px}
+.toast{padding:14px 20px;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:600;font-family:inherit;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;animation:fadeDown .3s ease;pointer-events:auto}
+.toast.success{background:var(--primary)}.toast.error{background:var(--error)}.toast.warning{background:var(--accent)}.toast.info{background:var(--info)}
+
+.app-content{padding:20px 16px;padding-bottom:calc(var(--nav-height) + 24px)}
+@media(min-width:768px){.app-content{max-width:640px;margin:0 auto}}
+@media(max-width:380px){.quick-actions{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="bg-map"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="screen active" id="dashboardScreen">
+  <header class="app-header">
+    <button class="header-back" onclick="window.location.href='/'"><span class="material-icons-round">arrow_back</span></button>
+    <h1 data-i18n="appTitle">স্মার্ট ফার্মিং AI</h1>
+    <div class="lang-toggle" style="margin-right:4px">
+      <button class="lang-btn active" onclick="setLang('bn')" id="langBtnBnApp">বাং</button>
+      <button class="lang-btn" onclick="setLang('en')" id="langBtnEnApp">EN</button>
+    </div>
+    <button class="header-action" onclick="navigateTo('notifications')"><span class="material-icons-round">notifications_none</span><span class="badge"></span></button>
+    <button class="header-action" onclick="navigateTo('profile')"><span class="material-icons-round">account_circle</span></button>
+  </header>
+
+  <div class="app-content" id="mainContent">
+    <div style="margin-bottom:24px">
+      <h2 style="font-size:22px;font-weight:800"><span data-i18n="welcome">স্বাগতম</span>, <span id="userName">কৃষক</span>! &#128075;</h2>
+      <p style="font-size:14px;color:var(--text-secondary);margin-top:6px" data-i18n="todayWeather">আজকের আবহাওয়া: 28°C, আর্দ্রতা: ৭৫%</p>
+    </div>
+
+    <!-- AI SEARCH BAR — Google style -->
+    <div class="section" style="padding:0;margin-bottom:28px">
+      <div style="position:relative">
+        <div style="display:flex;align-items:center;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-2xl);padding:6px 6px 6px 20px;box-shadow:var(--shadow-md);transition:all .3s" id="aiSearchBox">
+          <span class="material-icons-round" style="color:var(--text-hint);font-size:22px;margin-right:12px">search</span>
+          <input type="text" id="aiSearchInput" placeholder="যেকোনো কিছু জিজ্ঞাসা করুন... (ধানের রোগ, বাজারদর, সার)" style="flex:1;border:none;outline:none;font-size:16px;font-family:inherit;background:transparent;color:var(--text);padding:12px 0" onkeydown="if(event.key==='Enter')goToAISearch()">
+          <button onclick="goToAISearch()" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(22,163,74,.3);transition:all .2s;flex-shrink:0" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <span class="material-icons-round" style="color:#fff;font-size:22px">arrow_forward</span>
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center">
+          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#127806; ধানের রোগ</span>
+          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#128200; আজকের দাম</span>
+          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#129716; সার কখন দিবেন</span>
+          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#128031; ইলিশ মাছের চাষ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" style="padding:0;margin-bottom:28px">
+      <div class="section-header"><div class="section-title" data-i18n="quickActions">দ্রুত পদক্ষেপ</div></div>
+      <div class="quick-actions">
+        <button class="quick-action" onclick="navigateTo('weather')"><div class="icon-circle" style="background:#eff6ff;color:#3b82f6">&#127780;&#65039;</div><span class="label" data-i18n="weather">আবহাওয়া</span></button>
+        <button class="quick-action" onclick="navigateTo('soil')"><div class="icon-circle" style="background:var(--primary-100);color:var(--primary)">&#127793;</div><span class="label" data-i18n="soilAnalysis">মাটি বিশ্লেষণ</span></button>
+        <button class="quick-action" onclick="navigateTo('crop')"><div class="icon-circle" style="background:#fef3c7;color:var(--accent-dark)">&#127806;</div><span class="label" data-i18n="cropRec">ফসল সুপারিশ</span></button>
+        <button class="quick-action" onclick="navigateTo('disease')"><div class="icon-circle" style="background:var(--error-light);color:var(--error)">&#128300;</div><span class="label" data-i18n="diseaseDetect">রোগ সনাক্ত</span></button>
+      </div>
+    </div>
+
+    <div class="section" style="padding:0;margin-bottom:28px">
+      <div class="section-header"><div class="section-title" data-i18n="allFeatures">বৈশিষ্ট্যসমূহ</div></div>
+      <div class="feature-grid">
+        <button class="feature-card" onclick="navigateTo('disease')"><div class="feature-icon" style="background:var(--error-light);color:var(--error)">&#128300;</div><div class="feature-title" data-i18n="diseaseTitle">রোগ সনাক্তকরণ</div><div class="feature-desc" data-i18n="diseaseDesc">ছবি আপলোড করে ফসলের রোগ শনাক্ত করুন</div></button>
+        <button class="feature-card" onclick="navigateTo('market')"><div class="feature-icon" style="background:#fef3c7;color:var(--accent-dark)">&#128200;</div><div class="feature-title" data-i18n="marketTitle">বাজার বিশ্লেষণ</div><div class="feature-desc" data-i18n="marketDesc">সর্বশেষ ফসলের দাম ও ট্রেন্ড</div></button>
+        <button class="feature-card" onclick="navigateTo('chatbot')"><div class="feature-icon" style="background:#f3e8ff;color:#9333ea">&#129302;</div><div class="feature-title" data-i18n="chatbotTitle">AI চ্যাটবট</div><div class="feature-desc" data-i18n="chatbotDesc">কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন</div></button>
+        <button class="feature-card" onclick="navigateTo('maps')"><div class="feature-icon" style="background:var(--primary-100);color:var(--primary)">&#128506;</div><div class="feature-title" data-i18n="mapTitle">মানচিত্র</div><div class="feature-desc" data-i18n="mapDesc">বাংলাদেশের জেলা মানচিত্র</div></button>
+      </div>
+    </div>
+
+    <div class="section" style="padding:0;margin-bottom:28px">
+      <div class="cta-banner" onclick="navigateTo('chatbot')"><span class="cta-icon">&#128172;</span><div class="cta-text"><h3 data-i18n="ctaTitle">AI চ্যাটবটে কথা বলুন</h3><p data-i18n="ctaDesc">বাংলায় কৃষি পরামর্শ পান</p></div></div>
+    </div>
+
+    <div class="section" style="padding:0;margin-bottom:28px">
+      <div class="section-header"><div class="section-title" data-i18n="marketAnalysis">বাজার বিশ্লেষণ</div><div class="section-link" onclick="navigateTo('market')" data-i18n="viewAll">সব দেখুন</div></div>
+      <div id="homeMarketPrices"></div>
+    </div>
+
+    <div class="section" style="padding:0;margin-bottom:28px">
+      <div class="section-header"><div class="section-title" data-i18n="dailyTips">আজকের টিপস</div></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon green">&#128161;</div><div><div class="card-title" data-i18n="tipTitle">ধানের চাষের টিপস</div><div class="card-subtitle" data-i18n="tipSubtitle">আজকের কৃষি পরামর্শ</div></div></div>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.7" data-i18n="tipText">বর্তমান মৌসুমে ধানের জন্য পর্যাপ্ত পানি নিশ্চিত করুন।</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEATHER PAGE -->
+  <div class="screen app-page" id="pageWeather">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="weather">আবহাওয়া</h1><div style="width:40px"></div></header>
+    <div class="app-content">
+      <!-- Auto Detect -->
+      <div id="weatherLocCard" class="card" style="margin-bottom:16px;border-left:4px solid var(--info);cursor:pointer" onclick="detectWeatherLocation()">
+        <div class="card-header"><div class="card-icon blue"><span class="material-icons-round">my_location</span></div><div><div class="card-title" data-i18n="currentLocation">আমার অবস্থান</div><div class="card-subtitle" id="weatherLocText" data-i18n="tapToFind">ট্যাপ করে আপনার অবস্থান খুঁজুন</div></div></div>
+      </div>
+
+      <!-- Manual Location Filter - CSV-based -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><div class="card-icon green"><span class="material-icons-round">filter_list</span></div><div><div class="card-title" data-i18n="manualFilterTitle">ম্যানুয়াল অবস্থান নির্বাচন</div><div class="card-subtitle" data-i18n="manualFilterDesc">বিভাগ → জেলা → ইউনিয়ন বাছাই করুন</div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;display:block" data-i18n="labelDivision">বিভাগ</label>
+            <select id="wDivSelect" onchange="onWDivisionChange()" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+              <option value="" data-i18n="selectDivision">বিভাগ</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;display:block" data-i18n="labelDistrict">জেলা</label>
+            <select id="wDistSelect" onchange="onWDistrictChange()" disabled style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+              <option value="" data-i18n="selectDistrict">জেলা</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;display:block" data-i18n="labelUnion">ইউনিয়ন</label>
+            <select id="wUnionSelect" onchange="onWUnionChange()" disabled style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+              <option value="" data-i18n="selectUnion">ইউনিয়ন</option>
+            </select>
+          </div>
+        </div>
+        <button id="wFilterBtn" onclick="loadWeatherByFilter()" disabled style="width:100%;margin-top:12px;padding:12px;background:var(--primary);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s">
+          <span data-i18n="viewWeatherBtn">আবহাওয়া দেখুন</span>
+        </button>
+      </div>
+
+      <!-- Current Weather - Google Style -->
+      <div id="weatherCurrentCard" style="display:none;margin-bottom:20px">
+        <div style="background:linear-gradient(160deg,#1a73e8 0%,#4285f4 40%,#669df6 100%);border-radius:24px;padding:32px 24px;color:#fff;position:relative;overflow:hidden">
+          <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%);border-radius:50%"></div>
+          <div style="position:relative;z-index:1">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-size:64px;font-weight:300;line-height:1" id="wCurrentTemp"></div>
+                <div style="font-size:18px;margin-top:4px;font-weight:500" id="wCurrentCondition"></div>
+                <div style="font-size:14px;opacity:.85;margin-top:4px" id="wFeelsLike"></div>
+                <div style="font-size:13px;opacity:.7;margin-top:6px;display:flex;align-items:center;gap:4px"><span class="material-icons-round" style="font-size:14px">place</span> <span id="wLocationName"></span></div>
+              </div>
+              <div style="font-size:72px" id="wCurrentIcon"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Detail Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div class="card" style="padding:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">💧 <span data-i18n="humidity">আর্দ্রতা</span></div><div style="font-size:22px;font-weight:700" id="wHumidity"></div></div>
+          <div class="card" style="padding:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">💨 <span data-i18n="wind">বাতাস</span></div><div style="font-size:22px;font-weight:700" id="wWind"></div></div>
+          <div class="card" style="padding:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">🌡️ <span data-i18n="feelsLike">অনুভূত তাপমাত্রা</span></div><div style="font-size:22px;font-weight:700" id="wFeelsLikeCard"></div></div>
+          <div class="card" style="padding:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">☀️ UV Index</div><div style="font-size:22px;font-weight:700" id="wUV"></div></div>
+        </div>
+      </div>
+
+      <!-- Hourly Forecast - Google Style -->
+      <div id="weatherHourlyCard" style="display:none;margin-bottom:20px">
+        <div class="card" style="padding:16px;overflow:hidden">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)" data-i18n="hourlyForecast">ঘণ্টার পূর্বাভাস</div>
+          <div id="hourlyList" style="display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch"></div>
+        </div>
+      </div>
+
+      <!-- 7-Day Forecast - Google Style -->
+      <div id="weatherForecastCard" style="display:none;margin-bottom:20px">
+        <div class="card" style="padding:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)" data-i18n="forecast7">৭ দিনের পূর্বাভাস</div>
+          <div id="dailyList"></div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="weatherLoading" style="display:none;text-align:center;padding:40px;color:var(--text-secondary)">
+        <div style="width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>
+        <div data-i18n="loadingWeather">আবহাওয়া লোড হচ্ছে...</div>
+      </div>
+
+      <!-- Agriculture Advice -->
+      <div id="weatherAdviceCard" style="display:none;margin-bottom:20px">
+        <div class="card">
+          <div class="card-header"><div class="card-icon green">&#127806;</div><div><div class="card-title" data-i18n="agriAdvice">কৃষি পরামর্শ</div><div class="card-subtitle" data-i18n="todayAgriWeather">আজকের কৃষি আবহাওয়া</div></div></div>
+          <p style="font-size:14px;color:var(--text-secondary);line-height:1.7" id="wAgriAdvice"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOIL PAGE -->
+  <div class="screen app-page" id="pageSoil">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="soilAnalysis">মাটি বিশ্লেষণ</h1><div style="width:40px"></div></header>
+    <div class="app-content">
+      <div class="npk-grid">
+        <div class="npk-card"><div class="npk-value" style="color:var(--primary)">6.8</div><div class="npk-label">pH</div><div class="npk-unit" data-i18n="normal">স্বাভাবিক</div></div>
+        <div class="npk-card"><div class="npk-value" style="color:var(--accent)">45%</div><div class="npk-label" data-i18n="humidity">আর্দ্রতা</div><div class="npk-unit" data-i18n="medium">মাঝারি</div></div>
+        <div class="npk-card"><div class="npk-value" style="color:var(--info)">72</div><div class="npk-label" data-i18n="temperature">তাপমাত্রা</div><div class="npk-unit">°F</div></div>
+      </div>
+      <div class="section" style="padding:0;margin-top:24px;margin-bottom:24px">
+        <div class="section-header"><div class="section-title" data-i18n="npkStats">NPK পরিসংখ্যান</div></div>
+        <div class="npk-grid">
+          <div class="npk-card"><div class="npk-value" style="color:#4CAF50">120</div><div class="npk-label" data-i18n="nitrogen">নাইট্রোজেন (N)</div><div class="npk-unit">mg/kg</div></div>
+          <div class="npk-card"><div class="npk-value" style="color:var(--accent)">35</div><div class="npk-label" data-i18n="phosphorus">ফসফরাস (P)</div><div class="npk-unit">mg/kg</div></div>
+          <div class="npk-card"><div class="npk-value" style="color:var(--info)">180</div><div class="npk-label" data-i18n="potassium">পটাশিয়াম (K)</div><div class="npk-unit">mg/kg</div></div>
+        </div>
+      </div>
+      <div class="section" style="padding:0;margin-bottom:24px">
+        <div class="section-header"><div class="section-title" data-i18n="recFertilizer">সুপারিশকৃত সার</div></div>
+        <div class="card" style="margin-bottom:10px"><div class="card-header"><div class="card-icon green">&#129716;</div><div><div class="card-title" data-i18n="urea">ইউরিয়া</div><div class="card-subtitle" data-i18n="nitrogenRich">নাইট্রোজেন সমৃদ্ধ</div></div></div><p style="font-size:13px;color:var(--text-secondary);line-height:1.6" data-i18n="ureaAdvice">প্রতি শেকড়ে ৩-৪ গ্রাম ব্যবহার করুন</p></div>
+        <div class="card"><div class="card-header"><div class="card-icon orange">&#128293;</div><div><div class="card-title">TSP</div><div class="card-subtitle" data-i18n="phosphorusRich">ফসফরাস সমৃদ্ধ</div></div></div><p style="font-size:13px;color:var(--text-secondary);line-height:1.6" data-i18n="tspAdvice">বীজ বুনের সময় প্রতি শেকড়ে ২ গ্রাম</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CROP PAGE -->
+  <div class="screen app-page" id="pageCrop">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="cropRec">ফসল সুপারিশ</h1><div style="width:40px"></div></header>
+    <div class="app-content">
+      <div class="card" style="margin-bottom:16px;border-left:4px solid var(--accent);background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="material-icons-round" style="color:var(--accent);font-size:24px">auto_awesome</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--accent-dark)">Dynamic Crop Recommendation</div>
+            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">ইন্টারনেট থেকে রিয়েল-টাইম তথ্য সংগ্রহ করা হচ্ছে — ১০০% ফ্রি</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location Filter: Division > District > Upazila > Union -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><div class="card-icon green"><span class="material-icons-round">filter_list</span></div><div><div class="card-title">অবস্থান নির্বাচন</div><div class="card-subtitle">বিভাগ → জেলা → উপজেলা → ইউনিয়ন বাছাই করুন</div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;display:block">বিভাগ</label>
+            <select id="cropDivision" onchange="onCropDivisionChange()" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+              <option value="">বিভাগ বাছাই করুন</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;display:block">জেলা</label>
+            <select id="cropDistrict" onchange="onCropDistrictChange()" disabled style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+              <option value="">জেলা বাছাই করুন</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;display:block">উপজেলা</label>
+            <select id="cropUpazila" onchange="onCropUpazilaChange()" disabled style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+              <option value="">উপজেলা বাছাই করুন</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;display:block">ইউনিয়ন</label>
+            <select id="cropUnion" disabled style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white">
+              <option value="">ইউনিয়ন বাছাই করুন</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block" onclick="getRecommendation()" id="cropRecBtn" style="margin-top:8px" disabled><span class="material-icons-round" style="font-size:20px">search</span><span data-i18n="getAIRec">AI সুপারিশ পান</span><div class="spinner"></div></button>
+      <div id="cropResults" style="display:none;margin-top:24px"><div class="section-header"><div class="section-title">সুপারিশকৃত ফসল</div></div><div id="cropResultsList"></div></div>
+    </div>
+  </div>
+
+  <!-- DISEASE PAGE -->
+  <div class="screen app-page" id="pageDisease">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="diseaseDetect">রোগ সনাক্তকরণ</h1><div style="width:40px"></div></header>
+    <div class="app-content">
+      <div class="upload-area" onclick="document.getElementById('diseaseFileInput').click()"><span class="material-icons-round">cloud_upload</span><p data-i18n="uploadImg">ছবি আপলোড করুন</p><p class="upload-hint" data-i18n="uploadHint">JPG, PNG ফরম্যাটে সর্বোচ্চ 5MB</p><input type="file" id="diseaseFileInput" accept="image/*" style="display:none" onchange="handleDiseaseUpload(event)"></div>
+      <div id="diseasePreview"></div><div id="diseaseResultArea"></div>
+    </div>
+  </div>
+
+  <!-- MARKET PAGE -->
+  <div class="screen app-page" id="pageMarket">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="marketAnalysis">বাজার বিশ্লেষণ</h1><div style="width:40px"></div></header>
+    <div class="app-content">
+      <div class="section-tabs"><button class="section-tab active" onclick="switchMarketTab('prices',this)" data-i18n="prices">দাম</button><button class="section-tab" onclick="switchMarketTab('trends',this)" data-i18n="trends">ট্রেন্ড</button></div>
+      <div id="marketPrices"></div>
+      <div id="marketTrends" style="display:none">
+        <div class="card" style="margin-bottom:12px"><div class="card-header"><div class="card-icon green">&#128200;</div><div><div class="card-title" data-i18n="riceMarketTrend">ধানের বাজার ট্রেন্ড</div><div class="card-subtitle" data-i18n="last7Days">গত ৭ দিনের প্রবণতা</div></div></div><p style="font-size:14px;color:var(--text-secondary);line-height:1.7" data-i18n="riceTrendText">ধানের দাম গত সপ্তাহে ৫% বৃদ্ধি পেয়েছে।</p></div>
+        <div class="card"><div class="card-header"><div class="card-icon orange">&#128176;</div><div><div class="card-title" data-i18n="profitableCrops">লাভজনক ফসল</div><div class="card-subtitle" data-i18n="thisMonth">এই মাসের সেরা ফসল</div></div></div><p style="font-size:14px;color:var(--text-secondary);line-height:1.7" data-i18n="profitableText">এই মাসে পেঁয়াজ ও টমেটো চাষ সবচেয়ে লাভজনক।</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATBOT PAGE -->
+  <div class="screen app-page" id="pageChatbot">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="chatbotTitle">AI চ্যাটবট</h1><div style="width:40px"></div></header>
+    <div class="app-content" style="padding:0;padding-bottom:0;display:flex;flex-direction:column;height:calc(100vh - var(--header-height))">
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages"><div class="chat-message bot"><div class="chat-avatar">&#129302;</div><div class="chat-bubble" data-i18n="chatWelcome">আমি আপনার কৃষি AI সহকারী।</div></div></div>
+        <div class="chat-input-area"><input type="text" id="chatInput" data-i18n-placeholder="chatPlaceholder" placeholder="আপনার প্রশ্ন লিখুন..." onkeydown="if(event.key==='Enter')sendMessage()"><button class="send-btn" onclick="sendMessage()"><span class="material-icons-round">send</span></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPS PAGE -->
+  <div class="screen app-page" id="pageMaps">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="mapTitle">মানচিত্র</h1><div style="width:40px"></div></header>
+    <div class="app-content">
+      <!-- Current Location -->
+      <div id="currentLocationCard" class="card" style="margin-bottom:16px;border-left:4px solid var(--info);cursor:pointer" onclick="getCurrentLocation()">
+        <div class="card-header"><div class="card-icon blue"><span class="material-icons-round">my_location</span></div><div><div class="card-title" data-i18n="currentLocation">আমার অবস্থান</div><div class="card-subtitle" id="currentLocText" data-i18n="tapToFind">ট্যাপ করে আপনার অবস্থান খুঁজুন</div></div></div>
+      </div>
+      <!-- Interactive Leaflet Map -->
+      <div id="bdMapContainer" style="background:var(--surface);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:20px">
+        <div style="padding:12px 16px;font-weight:700;font-size:15px;color:var(--text);border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:8px">
+          <span class="material-icons-round" style="color:var(--primary);font-size:20px">map</span>
+          মানচিত্রে যেকোনো জায়গায় ট্যাপ করুন — সম্পূর্ণ তথ্য পান
+        </div>
+        <div id="leafletMap" style="width:100%;height:450px;cursor:crosshair"></div>
+        <!-- Selected Location Info Panel -->
+        <div id="mapSelectedInfo" style="display:none;padding:0;background:var(--bg)">
+          <!-- Loading -->
+          <div id="mapDataLoading" style="display:none;text-align:center;padding:24px">
+            <div style="width:36px;height:36px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px"></div>
+            <div style="font-size:13px;color:var(--text-secondary)">তথ্য সংগ্রহ করা হচ্ছে...</div>
+          </div>
+          <!-- Data Content -->
+          <div id="mapDataContent" style="display:none;padding:16px">
+            <!-- District Header -->
+            <div id="mapDistrictHeader"></div>
+            <!-- Tabs -->
+            <div style="display:flex;gap:6px;margin:12px 0;overflow-x:auto">
+              <button class="map-tab active" onclick="switchMapTab('soil',this)">মাটি</button>
+              <button class="map-tab" onclick="switchMapTab('market',this)">বাজার</button>
+              <button class="map-tab" onclick="switchMapTab('weather',this)">আবহাওয়া</button>
+              <button class="map-tab" onclick="switchMapTab('crops',this)">ফসল</button>
+            </div>
+            <!-- Soil Tab -->
+            <div id="mapTabSoil" class="map-tab-content"></div>
+            <!-- Market Tab -->
+            <div id="mapTabMarket" class="map-tab-content" style="display:none"></div>
+            <!-- Weather Tab -->
+            <div id="mapTabWeather" class="map-tab-content" style="display:none"></div>
+            <!-- Crops Tab -->
+            <div id="mapTabCrops" class="map-tab-content" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Division Selector -->
+      <div class="form-group"><label class="form-label" data-i18n="selectDivision">বিভাগ নির্বাচন করুন</label><div class="select-wrapper"><select class="form-select" id="mapDivision" onchange="onDivisionChange()"><option value="">বিভাগ বাছাই করুন</option></select><span class="material-icons-round">account_balance</span><span class="material-icons-round select-arrow">expand_more</span></div></div>
+      <!-- District Selector -->
+      <div class="form-group" id="mapDistrictGroup" style="display:none"><label class="form-label" data-i18n="selectDistrict">জেলা নির্বাচন করুন</label><div class="select-wrapper"><select class="form-select" id="mapDistrict" onchange="onDistrictChange()"><option value="">জেলা বাছাই করুন</option></select><span class="material-icons-round">location_on</span><span class="material-icons-round select-arrow">expand_more</span></div></div>
+      <!-- Upazila Selector -->
+      <div class="form-group" id="mapUpazilaGroup" style="display:none"><label class="form-label">উপজেলা নির্বাচন করুন</label><div class="select-wrapper"><select class="form-select" id="mapUpazila" onchange="onUpazilaChange()"><option value="">উপজেলা বাছাই করুন</option></select><span class="material-icons-round">place</span><span class="material-icons-round select-arrow">expand_more</span></div></div>
+      <!-- Union Selector -->
+      <div class="form-group" id="mapUnionGroup" style="display:none"><label class="form-label">ইউনিয়ন নির্বাচন করুন</label><div class="select-wrapper"><select class="form-select" id="mapUnion"><option value="">ইউনিয়ন বাছাই করুন</option></select><span class="material-icons-round">location_city</span><span class="material-icons-round select-arrow">expand_more</span></div></div>
+      <!-- District Info -->
+      <div id="districtInfo"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS PAGE -->
+  <div class="screen app-page" id="pageNotifications">
+    <header class="app-header"><button class="header-back" onclick="navigateTo('home')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="notifications">বিজ্ঞপ্তি</h1><div style="width:40px"></div></header>
+    <div class="app-content" id="notificationsList"></div>
+  </div>
+
+  <!-- PROFILE PAGE -->
+  <div class="screen app-page" id="pageProfile">
+    <header class="app-header" style="background:transparent;border:none;"><button class="header-back" onclick="navigateTo('home')" style="background:rgba(255,255,255,.9)"><span class="material-icons-round">arrow_back</span></button><h1 style="color:#fff" data-i18n="profile">প্রোফাইল</h1><div style="width:40px"></div></header>
+    <div style="margin-top:-60px"><div class="profile-header"><div class="profile-avatar">&#128100;</div><h2 id="profileName">কৃষক</h2><p id="profileEmail" data-i18n="profileDesc">Smart Farming AI ব্যবহারকারী</p></div></div>
+    <div style="padding:0 0 100px 0">
+      <button class="profile-menu-item" onclick="openEditProfile()"><div class="menu-icon"><span class="material-icons-round">edit</span></div><span class="menu-text" data-i18n="editProfile">প্রোফাইল সম্পাদনা</span><span class="material-icons-round menu-arrow">chevron_right</span></button>
+      <button class="profile-menu-item" id="authBtn" onclick="openAuthModal('login')"><div class="menu-icon"><span class="material-icons-round">login</span></div><span class="menu-text" data-i18n="login">লগইন</span><span class="material-icons-round menu-arrow">chevron_right</span></button>
+      <button class="profile-menu-item danger" id="logoutBtn" onclick="doLogout()" style="display:none"><div class="menu-icon"><span class="material-icons-round">logout</span></div><span class="menu-text" data-i18n="logout">লগআউট</span><span class="material-icons-round menu-arrow">chevron_right</span></button>
+      <button class="profile-menu-item"><div class="menu-icon"><span class="material-icons-round">help</span></div><span class="menu-text" data-i18n="helpSupport">সাহায্য ও সমর্থন</span><span class="material-icons-round menu-arrow">chevron_right</span></button>
+      <button class="profile-menu-item danger" onclick="window.location.href='/'"><div class="menu-icon"><span class="material-icons-round">logout</span></div><span class="menu-text" data-i18n="goHome">হোমে ফিরুন</span><span class="material-icons-round menu-arrow">chevron_right</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+ <div class="screen" id="authModal" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--radius-xl);width:90%;max-width:380px;max-height:85vh;overflow-y:auto;padding:24px;position:relative">
+    <button onclick="closeAuthModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;color:var(--text-hint)"><span class="material-icons-round">close</span></button>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:48px;height:48px;background:var(--primary-100);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px"><span class="material-icons-round" style="color:var(--primary);font-size:24px">agriculture</span></div>
+      <h2 style="font-size:18px;font-weight:700" data-i18n="smartFarmingAI">স্মার্ট ফার্মিং AI</h2>
+    </div>
+    <div style="display:flex;gap:4px;background:var(--bg);border-radius:var(--radius);padding:4px;margin-bottom:16px">
+      <button id="authTab-login" class="auth-tab active" onclick="switchAuthTab('login')" style="flex:1;padding:8px;border:none;background:var(--surface);border-radius:8px;font-weight:600;cursor:pointer;font-size:13px" data-i18n="login">লগইন</button>
+      <button id="authTab-register" class="auth-tab" onclick="switchAuthTab('register')" style="flex:1;padding:8px;border:none;background:transparent;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;color:var(--text-hint)" data-i18n="register">রেজিস্ট্রেশন</button>
+    </div>
+    <div id="authLoginForm">
+      <div class="form-group"><label class="form-label" data-i18n="email">ইমেইল</label><div class="input-wrapper"><input type="email" id="loginEmail" placeholder="example@email.com"><span class="material-icons-round">email</span></div></div>
+      <div class="form-group"><label class="form-label" data-i18n="password">পাসওয়ার্ড</label><div class="input-wrapper"><input type="password" id="loginPassword" placeholder="••••••••"><span class="material-icons-round">lock</span></div></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()"><span data-i18n="loginBtn">লগইন</span></button>
+      <div style="display:flex;align-items:center;gap:12px;margin:16px 0">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:12px;color:var(--text-hint);white-space:nowrap" data-i18n="or">অথবা</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+      <div id="googleSignInBtn" style="display:flex;justify-content:center"></div>
+    </div>
+    <div id="authRegisterForm" style="display:none">
+      <div class="form-group"><label class="form-label" data-i18n="nameEn">ইংরেজি নাম</label><div class="input-wrapper"><input type="text" id="regName" placeholder="Full Name"><span class="material-icons-round">person</span></div></div>
+      <div class="form-group"><label class="form-label" data-i18n="email">ইমেইল</label><div class="input-wrapper"><input type="email" id="regEmail" placeholder="example@email.com"><span class="material-icons-round">email</span></div></div>
+      <div class="form-group"><label class="form-label" data-i18n="phone">ফোন</label><div class="input-wrapper"><input type="tel" id="regPhone" placeholder="01XXXXXXXXX"><span class="material-icons-round">phone</span></div></div>
+      <div class="form-group"><label class="form-label" data-i18n="password">পাসওয়ার্ড</label><div class="input-wrapper"><input type="password" id="regPassword" placeholder="••••••••"><span class="material-icons-round">lock</span></div></div>
+      <div class="form-group"><label class="form-label" data-i18n="district">জেলা</label><div class="input-wrapper"><select id="regDistrict"><option value="">নির্বাচন করুন...</option></select><span class="material-icons-round">location_on</span></div></div>
+      <button class="btn btn-primary btn-block" onclick="doRegister()"><span data-i18n="registerBtn">রেজিস্ট্রেশন</span></button>
+    </div>
+  </div>
+ </div>
+
+ <div class="screen" id="editProfileModal">
+  <header class="app-header"><button class="header-back" onclick="navigateTo('profile')"><span class="material-icons-round">arrow_back</span></button><h1 data-i18n="editProfile">প্রোফাইল সম্পাদনা</h1><div style="width:40px"></div></header>
+  <div class="app-content">
+    <div class="form-group"><label class="form-label" data-i18n="nameEn">ইংরেজি নাম</label><div class="input-wrapper"><input type="text" id="editNameEn" placeholder="Full Name"><span class="material-icons-round">person</span></div></div>
+    <div class="form-group"><label class="form-label" data-i18n="nameBn">বাংলা নাম</label><div class="input-wrapper"><input type="text" id="editNameBn" placeholder="পুরো নাম"><span class="material-icons-round">person</span></div></div>
+    <div class="form-group"><label class="form-label" data-i18n="email">ইমেইল</label><div class="input-wrapper"><input type="email" id="editEmail" placeholder="example@email.com"><span class="material-icons-round">email</span></div></div>
+    <div class="form-group"><label class="form-label" data-i18n="phone">ফোন</label><div class="input-wrapper"><input type="tel" id="editPhone" placeholder="01XXXXXXXXX"><span class="material-icons-round">phone</span></div></div>
+    <button class="btn btn-primary btn-block" onclick="saveProfile()"><span data-i18n="save">সংরক্ষণ করুন</span></button>
+  </div>
+</div>
+
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" onclick="navigateTo('home')" data-page="home"><span class="material-icons-round">home</span><span data-i18n="navHome">হোম</span></button>
+  <button class="nav-item" onclick="navigateTo('maps')" data-page="maps"><span class="material-icons-round">map</span><span data-i18n="navMaps">মানচিত্র</span></button>
+  <button class="nav-item" onclick="navigateTo('notifications')" data-page="notifications"><span class="material-icons-round">notifications</span><span data-i18n="navNotifications">বিজ্ঞপ্তি</span></button>
+  <button class="nav-item" onclick="navigateTo('profile')" data-page="profile"><span class="material-icons-round">person</span><span data-i18n="navProfile">প্রোফাইল</span></button>
+</nav>
+
+<script>
+var API_BASE = window.location.origin + '/api';
+var currentLang = localStorage.getItem('sfLang') || 'bn';
+var currentUser = {nameEn:'Farmer',nameBn:'কৃষক',email:'',phone:''};
+var authToken = localStorage.getItem('sfAuthToken') || '';
+
+// Auth functions
+function openAuthModal(tab){
+  document.getElementById('authModal').style.display='flex';
+  if(tab==='register') switchAuthTab('register'); else switchAuthTab('login');
+}
+function closeAuthModal(){document.getElementById('authModal').style.display='none'}
+function switchAuthTab(tab){
+  document.getElementById('authLoginForm').style.display=tab==='login'?'block':'none';
+  document.getElementById('authRegisterForm').style.display=tab==='register'?'block':'none';
+  document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById('authTab-'+tab).classList.add('active');
+}
+function doLogin(){
+  var email=document.getElementById('loginEmail').value.trim();
+  var pw=document.getElementById('loginPassword').value;
+  if(!email||!pw){showToast(currentLang==='en'?'Email & password required':'ইমেইল ও পাসওয়ার্ড আবশ্যক','error');return}
+  fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw})})
+  .then(function(r){return r.json()}).then(function(d){
+    if(d.success){
+      authToken=d.token;
+      localStorage.setItem('sfAuthToken',authToken);
+      currentUser={nameEn:d.user.name_en,nameBn:d.user.name_bn||d.user.name_en,email:d.user.email,phone:d.user.phone||''};
+      updateUserProfile();
+      closeAuthModal();
+      showToast(currentLang==='en'?'Login successful!':'সফলভাবে লগইন হয়েছে!','success');
+    } else {
+      showToast(d.error||(currentLang==='en'?'Login failed':'লগইন ব্যর্থ'),'error');
+    }
+  }).catch(function(){showToast(currentLang==='en'?'Connection error':'সংযোগ ত্রুটি','error')});
+}
+function doRegister(){
+  var name=document.getElementById('regName').value.trim();
+  var email=document.getElementById('regEmail').value.trim();
+  var phone=document.getElementById('regPhone').value.trim();
+  var pw=document.getElementById('regPassword').value;
+  var dist=document.getElementById('regDistrict').value;
+  if(!name||!email||!pw){showToast(currentLang==='en'?'Name, email & password required':'নাম, ইমেইল ও পাসওয়ার্ড আবশ্যক','error');return}
+  fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name_en:name,email:email,phone:phone,password:pw,district:dist})})
+  .then(function(r){return r.json()}).then(function(d){
+    if(d.success){
+      authToken=d.token;
+      localStorage.setItem('sfAuthToken',authToken);
+      currentUser={nameEn:d.user.name_en,nameBn:d.user.name_bn||d.user.name_en,email:d.user.email,phone:''};
+      updateUserProfile();
+      closeAuthModal();
+      showToast(currentLang==='en'?'Registration successful!':'সফলভাবে রেজিস্ট্রেশন হয়েছে!','success');
+    } else {
+      showToast(d.error||(currentLang==='en'?'Registration failed':'রেজিস্ট্রেশন ব্যর্থ'),'error');
+    }
+  }).catch(function(){showToast(currentLang==='en'?'Connection error':'সংযোগ ত্রুটি','error')});
+}
+function doLogout(){
+  authToken='';
+  localStorage.removeItem('sfAuthToken');
+  currentUser={nameEn:'Farmer',nameBn:'কৃষক',email:'',phone:''};
+  updateUserProfile();
+  showToast(currentLang==='en'?'Logged out':'লগআউট হয়েছে','info');
+}
+// Load profile on startup
+if(authToken){
+  fetch('/api/auth/profile',{headers:{'Authorization':'Bearer '+authToken}})
+  .then(function(r){return r.json()}).then(function(d){
+    if(d.name_en){
+      currentUser={nameEn:d.name_en,nameBn:d.name_bn||d.name_en,email:d.email,phone:d.phone||''};
+      updateUserProfile();
+    }
+  }).catch(function(){});
+}
+
+// Google Sign-In
+function initGoogleSignIn(){
+  if(typeof google==='undefined'||!google.accounts){setTimeout(initGoogleSignIn,200);return}
+  google.accounts.id.initialize({
+    client_id:'19800172048-he9p7n73sikcjea54l1mu65651hg53sq.apps.googleusercontent.com',
+    callback:handleGoogleCredential
+  });
+  var btn=document.getElementById('googleSignInBtn');
+  if(btn){
+    google.accounts.id.renderButton(btn,{type:'standard',theme:'outline',size:'large',text:'signin_with',shape:'rectangular',width:btn.offsetWidth||300});
+  }
+}
+function handleGoogleCredential(response){
+  fetch('/api/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:response.credential})})
+  .then(function(r){return r.json()}).then(function(d){
+    if(d.success){
+      authToken=d.token;
+      localStorage.setItem('sfAuthToken',authToken);
+      currentUser={nameEn:d.user.name_en,nameBn:d.user.name_bn||d.user.name_en,email:d.user.email,phone:d.user.phone||'',district:d.user.district||''};
+      updateUserProfile();
+      closeAuthModal();
+      showToast(currentLang==='en'?'Signed in with Google!':'Google দিয়ে সাইন ইন হয়েছে!','success');
+    } else {
+      showToast(d.error||(currentLang==='en'?'Google sign-in failed':'Google সাইন ইন ব্যর্থ'),'error');
+    }
+  }).catch(function(){showToast(currentLang==='en'?'Connection error':'সংযোগ ত্রুটি','error')});
+}
+setTimeout(initGoogleSignIn,500);
+
+var T = {
+  bn:{appTitle:'স্মার্ট ফার্মিং AI',welcome:'স্বাগতম',todayWeather:'আজকের আবহাওয়া লোড হচ্ছে...',quickActions:'দ্রুত পদক্ষেপ',weather:'আবহাওয়া',soilAnalysis:'মাটি বিশ্লেষণ',cropRec:'ফসল সুপারিশ',diseaseDetect:'রোগ সনাক্ত',allFeatures:'বৈশিষ্ট্যসমূহ',diseaseTitle:'রোগ সনাক্তকরণ',diseaseDesc:'ছবি আপলোড করে ফসলের রোগ শনাক্ত করুন',marketTitle:'বাজার বিশ্লেষণ',marketDesc:'সর্বশেষ ফসলের দাম ও ট্রেন্ড',chatbotTitle:'AI চ্যাটবট',chatbotDesc:'কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন',mapTitle:'মানচিত্র',mapDesc:'বাংলাদেশের জেলা মানচিত্র',ctaTitle:'AI চ্যাটবটে কথা বলুন',ctaDesc:'বাংলায় কৃষি পরামর্শ পান',dailyTips:'আজকের টিপস',tipTitle:'ধানের চাষের টিপস',tipSubtitle:'আজকের কৃষি পরামর্শ',tipText:'বর্তমান মৌসুমে ধানের জন্য পর্যাপ্ত পানি নিশ্চিত করুন।',marketAnalysis:'বাজার বিশ্লেষণ',viewAll:'সব দেখুন',partlyCloudy:'আংশিক মেঘলা',dhakaBD:'ঢাকা, বাংলাদেশ',humidity:'আর্দ্রতা',wind:'বাতাস',rainChance:'বৃষ্টি',forecast7:'৭ দিনের পূর্বাভাস',sat:'শনি',sun:'রবি',mon:'সোম',tue:'মঙ্গল',wed:'বুধ',thu:'বৃহ',fri:'শুক্র',agriAdvice:'কৃষি পরামর্শ',todayAgriWeather:'আজকের কৃষি আবহাওয়া',weatherAdvice:'আজ আংশিক মেঘলা থাকবে। সকালে সেচ দেওয়া উচিত।',normal:'স্বাভাবিক',medium:'মাঝারি',temperature:'তাপমাত্রা',npkStats:'NPK পরিসংখ্যান',nitrogen:'নাইট্রোজেন (N)',phosphorus:'ফসফরাস (P)',potassium:'পটাশিয়াম (K)',recFertilizer:'সুপারিশকৃত সার',urea:'ইউরিয়া',nitrogenRich:'নাইট্রোজেন সমৃদ্ধ',ureaAdvice:'প্রতি শেকড়ে ৩-৪ গ্রাম ব্যবহার করুন',phosphorusRich:'ফসফরাস সমৃদ্ধ',tspAdvice:'বীজ বুনের সময় প্রতি শেকড়ে ২ গ্রাম',selectDistrict:'জেলা',selectDistrictOpt:'জেলা নির্বাচন করুন',optDhaka:'ঢাকা',optChittagong:'চট্টগ্রাম',optRajshahi:'রাজশাহী',optKhulna:'খুলনা',optSylhet:'সিলেট',optBarishal:'বরিশাল',optRangpur:'রংপুর',optMymensingh:'ময়মনসিংহ',season:'মৌসুম',selectSeason:'মৌসুম',optRice:'ধান',optVegetable:'সবজি',optFruit:'ফল',optWheat:'গম',soilType:'মাটির ধরন',selectSoil:'মাটি',optLoam:'দোআঁশ',optClay:'কাদামাটি',optSandy:'বালুকামাটি',optSilt:'পলি মাটি',getAIRec:'AI সুপারিশ পান',recCrops:'সুপারিশকৃত ফসল',hourlyForecast:'ঘণ্টার পূর্বাভাস',loadingWeather:'আবহাওয়া লোড হচ্ছে...',feelsLike:'অনুভূত তাপমাত্রা',tapToFind:'ট্যাপ করে আপনার অবস্থান খুঁজুন',currentLocation:'আমার অবস্থান',uploadImg:'ছবি আপলোড করুন',uploadHint:'JPG, PNG ফরম্যাটে সর্বোচ্চ 5MB',prices:'দাম',trends:'ট্রেন্ড',rice:'ধান',onion:'পেঁয়াজ',potato:'আলু',tomato:'টমেটো',vegetables:'শাকসবজি',riceMarketTrend:'ধানের বাজার ট্রেন্ড',last7Days:'গত ৭ দিনের প্রবণতা',riceTrendText:'ধানের দাম গত সপ্তাহে ৫% বৃদ্ধি পেয়েছে।',profitableCrops:'লাভজনক ফসল',thisMonth:'এই মাসের সেরা ফসল',profitableText:'এই মাসে পেঁয়াজ ও টমেটো চাষ সবচেয়ে লাভজনক।',chatWelcome:'আমি আপনার কৃষি AI সহকারী। আপনি কৃষি সম্পর্কে যেকোনো প্রশ্ন করতে পারেন।',chatPlaceholder:'আপনার প্রশ্ন লিখুন...',bdAgriMap:'বাংলাদেশের কৃষি মানচিত্র',notifications:'বিজ্ঞপ্তি',weatherAlert:'আবহাওয়ার সতর্কতা',weatherAlertText:'আগামীকাল ভারী বৃষ্টি হতে পারে।',marketUpdate:'বাজার আপডেট',marketUpdateText:'ধানের দাম ৫% বৃদ্ধি পেয়েছে।',diseaseAlert:'রোগ সতর্কতা',diseaseAlertText:'আপনার এলাকায় ধানের পাতা ঝলসানো রোগ দেখা দিয়েছে।',time2h:'২ ঘণ্টা আগে',time5h:'৫ ঘণ্টা আগে',time1d:'১ দিন আগে',profile:'প্রোফাইল',profileDesc:'Smart Farming AI ব্যবহারকারী',editProfile:'প্রোফাইল সম্পাদনা',helpSupport:'সাহায্য ও সমর্থন',goHome:'হোমে ফিরুন',nameEn:'ইংরেজি নাম',nameBn:'বাংলা নাম',email:'ইমেইল',phone:'ফোন',save:'সংরক্ষণ করুন',navHome:'হোম',navMaps:'মানচিত্র',navNotifications:'বিজ্ঞপ্তি',navProfile:'প্রোফাইল',cropResultConf:'% আত্মবিশ্বাস',diseaseConf:'আত্মবিশ্বাস:',treatment:'চিকিৎসা পদ্ধতি:',mainCrops:'প্রধান ফসল:',tempLabel:'তাপমাত্রা:',rainLabel:'বৃষ্টি:',langChanged:'ভাষা বাংলা নির্বাচিত হয়েছে',currentLocation:'আমার অবস্থান',tapToFind:'ট্যাপ করে আপনার অবস্থান খুঁজুন',selectDivision:'বিভাগ নির্বাচন করুন',selectUpazila:'উপজেলা',selectUnion:'ইউনিয়ন',manualFilterTitle:'ম্যানুয়াল অবস্থান নির্বাচন',manualFilterDesc:'বিভাগ → জেলা → ইউনিয়ন বাছাই করুন',labelDivision:'বিভাগ',labelDistrict:'জেলা',labelUnion:'ইউনিয়ন',viewWeatherBtn:'আবহাওয়া দেখুন'},
+  en:{appTitle:'Smart Farming AI',welcome:'Welcome',todayWeather:'Today: 28°C, Humidity: 75%',quickActions:'Quick Actions',weather:'Weather',soilAnalysis:'Soil Analysis',cropRec:'Crop Recommendation',diseaseDetect:'Disease Detection',allFeatures:'All Features',diseaseTitle:'Disease Detection',diseaseDesc:'Upload a photo to detect crop diseases',marketTitle:'Market Analysis',marketDesc:'Latest crop prices & trends',chatbotTitle:'AI Chatbot',chatbotDesc:'Ask any agriculture question',mapTitle:'Maps',mapDesc:'Bangladesh district map',ctaTitle:'Talk to AI Chatbot',ctaDesc:'Get agriculture advice in Bangla',dailyTips:"Today's Tips",tipTitle:'Rice Farming Tips',tipSubtitle:"Today's agriculture advice",tipText:'Ensure adequate water for rice in the current season.',marketAnalysis:'Market Analysis',viewAll:'View All',partlyCloudy:'Partly Cloudy',dhakaBD:'Dhaka, Bangladesh',humidity:'Humidity',wind:'Wind',rainChance:'Rain',forecast7:'7-Day Forecast',sat:'Sat',sun:'Sun',mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',agriAdvice:'Agriculture Advice',todayAgriWeather:"Today's Agri Weather",weatherAdvice:'Partly cloudy today. Morning irrigation recommended.',normal:'Normal',medium:'Medium',temperature:'Temperature',npkStats:'NPK Statistics',nitrogen:'Nitrogen (N)',phosphorus:'Phosphorus (P)',potassium:'Potassium (K)',recFertilizer:'Recommended Fertilizer',urea:'Urea',nitrogenRich:'Nitrogen Rich',ureaAdvice:'Use 3-4 grams per plant',phosphorusRich:'Phosphorus Rich',tspAdvice:'2 grams per plant during sowing',selectDistrict:'District',selectDistrictOpt:'Select district',optDhaka:'Dhaka',optChittagong:'Chittagong',optRajshahi:'Rajshahi',optKhulna:'Khulna',optSylhet:'Sylhet',optBarishal:'Barishal',optRangpur:'Rangpur',optMymensingh:'Mymensingh',season:'Season',selectSeason:'Season',optRice:'Rice',optVegetable:'Vegetable',optFruit:'Fruit',optWheat:'Wheat',soilType:'Soil Type',selectSoil:'Soil',optLoam:'Loam',optClay:'Clay',optSandy:'Sandy',optSilt:'Silt',getAIRec:'Get AI Recommendation',recCrops:'Recommended Crops',uploadImg:'Upload Image',uploadHint:'JPG, PNG format, max 5MB',prices:'Prices',trends:'Trends',rice:'Rice',onion:'Onion',potato:'Potato',tomato:'Tomato',vegetables:'Vegetables',riceMarketTrend:'Rice Market Trend',last7Days:'Last 7 days trend',riceTrendText:'Rice prices increased by 5% this week.',profitableCrops:'Profitable Crops',thisMonth:"This month's best crops",profitableText:'Onion and tomato farming most profitable this month.',chatWelcome:'I am your agriculture AI assistant. Ask me any agriculture question.',chatPlaceholder:'Type your question...',bdAgriMap:'Bangladesh Agriculture Map',notifications:'Notifications',weatherAlert:'Weather Alert',weatherAlertText:'Heavy rain expected tomorrow.',marketUpdate:'Market Update',marketUpdateText:'Rice price increased by 5%.',diseaseAlert:'Disease Alert',diseaseAlertText:'Leaf blight disease detected in your area.',time2h:'2 hours ago',time5h:'5 hours ago',time1d:'1 day ago',profile:'Profile',profileDesc:'Smart Farming AI User',editProfile:'Edit Profile',helpSupport:'Help & Support',goHome:'Go Home',nameEn:'English Name',nameBn:'Bangla Name',email:'Email',phone:'Phone',save:'Save',navHome:'Home',navMaps:'Maps',navNotifications:'Alerts',navProfile:'Profile',cropResultConf:'% confidence',diseaseConf:'Confidence:',treatment:'Treatment:',mainCrops:'Main Crops:',tempLabel:'Temp:',rainLabel:'Rain:',langChanged:'Language set to English',currentLocation:'My Location',tapToFind:'Tap to find your location',selectDivision:'Select Division',selectUpazila:'Upazila',selectUnion:'Union',manualFilterTitle:'Manual Location Selection',manualFilterDesc:'Select Division → District → Union',labelDivision:'Division',labelDistrict:'District',labelUnion:'Union',viewWeatherBtn:'View Weather',hourlyForecast:'Hourly Forecast',loadingWeather:'Loading weather...',feelsLike:'Feels like'}
+};
+// Auth translations
+T.bn.smartFarmingAI="স্মার্ট ফার্মিং AI";T.bn.login="লগইন";T.bn.register="রেজিস্ট্রেশন";T.bn.loginBtn="লগইন";T.bn.registerBtn="রেজিস্ট্রেশন";T.bn.logout="লগআউট";T.bn.password="পাসওয়ার্ড";T.bn.or="অথবা";T.bn.goHome="হোমে ফিরুন";T.bn.profileDesc="Smart Farming AI ব্যবহারকারী";T.bn.editProfile="প্রোফাইল সম্পাদনা";T.bn.nameEn="ইংরেজি নাম";T.bn.nameBn="বাংলা নাম";T.bn.email="ইমেইল";T.bn.phone="ফোন";T.bn.save="সংরক্ষণ করুন";T.bn.navHome="হোম";T.bn.navMaps="মানচিত্র";T.bn.navNotifications="বিজ্ঞপ্তি";T.bn.navProfile="প্রোফাইল";T.bn.helpSupport="সাহায্য ও সমর্থন";T.bn.notifications="বিজ্ঞপ্তি";T.bn.langChanged="ভাষা বাংলা নির্বাচিত হয়েছে";T.bn.weatherAlert="আবহাওয়ার সতর্কতা";T.bn.weatherAlertText="আগামীকাল ভারী বৃষ্টি হতে পারে।";T.bn.marketUpdate="বাজার আপডেট";T.bn.marketUpdateText="ধানের দাম ৫% বৃদ্ধি পেয়েছে।";T.bn.diseaseAlert="রোগ সতর্কতা";T.bn.diseaseAlertText="আপনার এলাকায় ধানের পাতা ঝলসানো রোগ দেখা দিয়েছে।";
+T.en.smartFarmingAI="Smart Farming AI";T.en.login="Login";T.en.register="Sign Up";T.en.loginBtn="Login";T.en.registerBtn="Register";T.en.logout="Logout";T.en.password="Password";T.en.or="OR";T.en.goHome="Go Home";T.en.profileDesc="Smart Farming AI User";T.en.editProfile="Edit Profile";T.en.nameEn="English Name";T.en.nameBn="Bangla Name";T.en.email="Email";T.en.phone="Phone";T.en.save="Save";T.en.navHome="Home";T.en.navMaps="Maps";T.en.navNotifications="Alerts";T.en.navProfile="Profile";T.en.helpSupport="Help & Support";T.en.notifications="Notifications";T.en.langChanged="Language set to English";T.en.weatherAlert="Weather Alert";T.en.weatherAlertText="Heavy rain expected tomorrow.";T.en.marketUpdate="Market Update";T.en.marketUpdateText="Rice price increased by 5%.";T.en.diseaseAlert="Disease Alert";T.en.diseaseAlertText="Leaf blight disease detected in your area.";
+
+function t(k){return(T[currentLang]&&T[currentLang][k])||k}
+function applyTranslations(){document.querySelectorAll('[data-i18n]').forEach(function(e){var k=e.getAttribute('data-i18n');if(T[currentLang]&&T[currentLang][k])e.textContent=T[currentLang][k]});document.querySelectorAll('[data-i18n-placeholder]').forEach(function(e){var k=e.getAttribute('data-i18n-placeholder');if(T[currentLang]&&T[currentLang][k])e.placeholder=T[currentLang][k]});document.documentElement.lang=currentLang;document.querySelectorAll('#langBtnBnApp,#langBtnBn').forEach(function(b){b.classList.toggle('active',currentLang==='bn')});document.querySelectorAll('#langBtnEnApp,#langBtnEn').forEach(function(b){b.classList.toggle('active',currentLang==='en')})}
+function setLang(l){currentLang=l;localStorage.setItem('sfLang',l);applyTranslations();updateUserProfile();showToast(t('langChanged'),'info')}
+function showToast(m,ty){var c=document.getElementById('toastContainer');var e=document.createElement('div');e.className='toast '+(ty||'info');e.textContent=m;c.appendChild(e);setTimeout(function(){e.style.opacity='0';e.style.transition='opacity .3s';setTimeout(function(){if(e.parentNode)c.removeChild(e)},300)},2500)}
+function setLoading(id,ld){var b=document.getElementById(id);if(b){if(ld){b.classList.add('loading');b.disabled=true}else{b.classList.remove('loading');b.disabled=false}}}
+
+function navigateTo(p){if(p==='soil'){window.location.href='/soil.html';return}if(p==='market'){window.location.href='/market.html';return}document.querySelectorAll('.app-page').forEach(function(e){e.classList.remove('active')});document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active')});var el=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));if(el)el.classList.add('active');var ni=document.querySelector('.nav-item[data-page="'+p+'"]');if(ni)ni.classList.add('active');document.getElementById('bottomNav').style.display=(p==='chatbot'||p==='profile')?'none':'flex';var mc=document.getElementById('mainContent');if(mc)mc.style.display=(p==='home')?'block':'none';window.scrollTo(0,0);if(p==='weather')initWeatherFilter();if(p==='maps'){setTimeout(function(){if(leafletMap)leafletMap.invalidateSize()},100);initMapPage()}}
+function updateUserProfile(){var n=currentLang==='en'?(currentUser.nameEn||'Farmer'):(currentUser.nameBn||'কৃষক');var e=document.getElementById('userName');if(e)e.textContent=n;var p=document.getElementById('profileName');if(p)p.textContent=n;var authBtn=document.getElementById('authBtn');var logoutBtn=document.getElementById('logoutBtn');if(authBtn&&logoutBtn){if(authToken){authBtn.style.display='none';logoutBtn.style.display='flex'}else{authBtn.style.display='flex';logoutBtn.style.display='none'}}var pe=document.getElementById('profileEmail');if(pe&&currentUser.email)pe.textContent=currentUser.email}
+
+function handleDiseaseUpload(ev){
+  var f=ev.target.files[0];
+  if(!f)return;
+  var fd=new FormData();
+  fd.append('image',f);
+  showToast(currentLang==='en'?'Analyzing...':'বিশ্লেষণ হচ্ছে...','info');
+  
+  // Show preview
+  var pv=document.getElementById('diseasePreview');
+  pv.style.display='block';
+  var reader=new FileReader();
+  reader.onload=function(e){pv.innerHTML='<div class="upload-preview"><img src="'+e.target.result+'"><button class="remove-img" onclick="removeDiseaseImage()">&#10005;</button></div>'};
+  reader.readAsDataURL(f);
+  
+  // Analyze with API
+  fetch(API_BASE+'/disease/analyze',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(d){
+    var ra=document.getElementById('diseaseResultArea');
+    var html='';
+    
+    if(d.success && d.diseases && d.diseases.length > 0){
+      // Show primary disease
+      var primary = d.diseases[0];
+      html+='<div class="disease-result">';
+      html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">';
+      html+='<span class="material-icons-round" style="color:var(--error);font-size:36px">bug_report</span>';
+      html+='<div><div class="disease-name" style="font-size:20px;font-weight:800">'+primary.bn+'</div>';
+      html+='<div style="color:var(--text-secondary);font-size:13px;margin-top:4px">'+primary.cause+'</div></div></div>';
+      
+      // Confidence badge
+      html+='<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--error-light);border-radius:20px;margin-bottom:16px">';
+      html+='<div style="width:8px;height:8px;border-radius:50%;background:var(--error)"></div>';
+      html+='<span style="font-size:13px;font-weight:700;color:var(--error)">'+t('diseaseConf')+' '+primary.confidence+'%</span></div>';
+      
+      // Treatments
+      html+='<h4 style="font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text)">'+t('treatment')+'</h4>';
+      html+='<ul class="treatment-list">';
+      primary.treatments.forEach(function(t){html+='<li>'+t+'</li>'});
+      html+='</ul>';
+      
+      // Other possible diseases
+      if(d.diseases.length > 1){
+        html+='<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">';
+        html+='<div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:10px">অন্যান্য সম্ভাব্য রোগ:</div>';
+        d.diseases.slice(1).forEach(function(dis){
+          html+='<div style="padding:10px;background:var(--surface-hover);border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">';
+          html+='<span style="font-size:14px">'+dis.bn+'</span>';
+          html+='<span style="font-size:12px;color:var(--text-secondary)">'+dis.confidence+'%</span></div>';
+        });
+        html+='</div>';
+      }
+      
+      // General tips
+      if(d.generalTips && d.generalTips.length > 0){
+        html+='<div style="margin-top:20px;padding:14px;background:var(--accent-bg);border-radius:10px;border:1px solid rgba(245,158,11,.2)">';
+        html+='<div style="font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:8px">💡 সাধারণ পরামর্শ:</div>';
+        d.generalTips.forEach(function(tip){html+='<div style="font-size:13px;color:var(--text-secondary);padding:4px 0">• '+tip+'</div>'});
+        html+='</div>';
+      }
+      
+      // Model info
+      html+='<div style="margin-top:12px;font-size:11px;color:var(--text-hint)">মডেল: '+d.model+'</div>';
+      html+='</div>';
+      
+      showToast(currentLang==='en'?'Disease detected!':'রোগ শনাক্ত হয়েছে!','warning');
+    } else {
+      html='<div style="text-align:center;padding:20px;color:var(--text-secondary)">রোগ শনাক্ত করা যায়নি। আবার চেষ্টা করুন।</div>';
+    }
+    
+    ra.innerHTML=html;
+  }).catch(function(e){
+    showToast('Error: '+e.message,'error');
+  });
+}
+function removeDiseaseImage(){document.getElementById('diseasePreview').style.display='none';document.getElementById('diseasePreview').innerHTML='';document.getElementById('diseaseResultArea').innerHTML='';document.getElementById('diseaseFileInput').value=''}
+
+function switchMarketTab(tab,el){document.querySelectorAll('.section-tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');document.getElementById('marketPrices').style.display=tab==='prices'?'block':'none';document.getElementById('marketTrends').style.display=tab==='trends'?'block':'none'}
+
+function sendMessage(){var inp=document.getElementById('chatInput');var msg=inp.value.trim();if(!msg)return;var ml=document.getElementById('chatMessages');ml.innerHTML+='<div class="chat-message user"><div class="chat-avatar">&#128100;</div><div class="chat-bubble">'+msg.replace(/</g,'&lt;')+'</div></div>';inp.value='';ml.scrollTop=ml.scrollHeight;fetch(API_BASE+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,lang:currentLang})}).then(function(r){return r.json()}).then(function(d){ml.innerHTML+='<div class="chat-message bot"><div class="chat-avatar">&#129302;</div><div class="chat-bubble">'+d.reply+'</div></div>';ml.scrollTop=ml.scrollHeight}).catch(function(){ml.innerHTML+='<div class="chat-message bot"><div class="chat-avatar">&#129302;</div><div class="chat-bubble">'+(currentLang==='en'?'Sorry, an error occurred.':'দুঃখিত, ত্রুটি ঘটেছে।')+'</div></div>';ml.scrollTop=ml.scrollHeight})}
+
+function showDistrictInfo(){var dist=document.getElementById('mapDistrict').value;if(!dist){document.getElementById('districtInfo').innerHTML='';return}fetch(API_BASE+'/district/'+dist).then(function(r){return r.json()}).then(function(d){var crops=d.crops.map(function(c){return'<span style="padding:6px 14px;background:var(--primary-100);color:var(--primary);border-radius:20px;font-size:12px;font-weight:600">'+c+'</span>'}).join('');document.getElementById('districtInfo').innerHTML='<div class="card" style="animation:fadeUp .3s ease"><div class="card-header"><div class="card-icon green">&#128205;</div><div><div class="card-title">'+d.name+'</div><div class="card-subtitle">'+t('tempLabel')+' '+d.temp+'°C | '+t('rainLabel')+' '+d.rain+'%</div></div></div><div style="margin-top:14px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-secondary)">'+t('mainCrops')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+crops+'</div></div></div>'}).catch(function(){})}
+
+function openEditProfile(){document.getElementById('editNameEn').value=currentUser.nameEn||'';document.getElementById('editNameBn').value=currentUser.nameBn||'';document.getElementById('editEmail').value=currentUser.email||'';document.getElementById('editPhone').value=currentUser.phone||'';showScreen('editProfileModal')}
+
+// ===== AI SEARCH FUNCTIONS =====
+function goToAISearch(){
+  var q=document.getElementById('aiSearchInput').value.trim();
+  if(q){window.location.href='ai-search.html?q='+encodeURIComponent(q)}
+}
+function quickAISearch(el){
+  var q=el.textContent.replace(/^[^\s]+\s/,'');
+  window.location.href='ai-search.html?q='+encodeURIComponent(q);
+}
+// Check if URL has search query
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  var q=params.get('q');
+  if(q){document.getElementById('aiSearchInput').value=q}
+})();
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});var el=document.getElementById(id);if(el)el.classList.add('active');window.scrollTo(0,0)}
+function saveProfile(){var ne=document.getElementById('editNameEn').value.trim();var nb=document.getElementById('editNameBn').value.trim();var em=document.getElementById('editEmail').value.trim();var ph=document.getElementById('editPhone').value.trim();if(!ne||!ph){showToast(currentLang==='en'?'Name & phone required':'নাম ও ফোন নম্বর আবশ্যক','error');return}currentUser.nameEn=ne;currentUser.nameBn=nb||ne;currentUser.email=em;currentUser.phone=ph;updateUserProfile();showToast(currentLang==='en'?'Profile updated!':'প্রোফাইল আপডেট হয়েছে!');showScreen('dashboardScreen');navigateTo('profile')}
+
+function loadDashboardData(){
+  // Load weather with geolocation
+  detectWeatherLocation();
+  fetch(API_BASE+'/api/market/prices').then(function(r){return r.json()}).then(function(d){
+    var hp=document.getElementById('homeMarketPrices');if(!hp)return;hp.innerHTML='';
+    var prices=d.prices||{};
+    var items=Object.keys(prices).slice(0,8);
+    items.forEach(function(key){
+      var item=prices[key];
+      var name=item.name||key;
+      var emoji=item.emoji||'🌾';
+      var minP=item.minPrice||0;
+      var maxP=item.maxPrice||0;
+      var change=(Math.random()*8-4).toFixed(1);
+      var changeClass=change>=0?'up':'down';
+      var html='<div class="market-item"><div class="crop-icon">'+emoji+'</div><div class="crop-info"><div class="crop-name">'+name+'</div><div class="crop-price">'+minP+'-'+maxP+' ৳/কেজি</div></div><span class="crop-change '+changeClass+'">'+(change>=0?'+':'')+change+'%</span></div>';
+      hp.innerHTML+=html;
+    });
+  }).catch(function(){});
+  var nl=document.getElementById('notificationsList');
+  if(nl){
+    fetch(API_BASE+'/api/db/notifications').then(function(r){return r.json()}).then(function(d){
+      nl.innerHTML='';(d.items||d.notifications||[]).forEach(function(n){
+        nl.innerHTML+='<div class="notification-item '+(n.unread?'unread':'')+'"><div class="notif-icon" style="background:var(--primary-100);color:var(--primary)">'+n.icon+'</div><div class="notif-content"><div class="notif-title">'+n.title+'</div><div class="notif-text">'+n.text+'</div><div class="notif-time">'+n.time+'</div></div></div>';
+      });
+    }).catch(function(){});
+  }
+}
+
+// ===== WEATHER FUNCTIONS =====
+var weatherLat = null, weatherLng = null;
+
+function initWeatherFilter() {
+  var sel = document.getElementById('wDivSelect');
+  if (!sel || sel.options.length > 1) return;
+  fetch(API_BASE + '/locations/divisions')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      (d.divisions || []).forEach(function(div) {
+        var opt = document.createElement('option');
+        opt.value = div; opt.textContent = div;
+        sel.appendChild(opt);
+      });
+    }).catch(function() {});
+}
+
+function onWDivisionChange() {
+  var div = document.getElementById('wDivSelect').value;
+  var distSel = document.getElementById('wDistSelect');
+  var unionSel = document.getElementById('wUnionSelect');
+  distSel.innerHTML = '<option value="">' + t('selectDistrict') + '</option>';
+  unionSel.innerHTML = '<option value="">' + t('selectUnion') + '</option>';
+  unionSel.disabled = true; distSel.disabled = true;
+  document.getElementById('wFilterBtn').disabled = true;
+  if (!div) return;
+  fetch(API_BASE + '/locations/zillas?division=' + encodeURIComponent(div))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      (d.zillas || []).forEach(function(z) {
+        var opt = document.createElement('option');
+        opt.value = z; opt.textContent = z;
+        distSel.appendChild(opt);
+      });
+      distSel.disabled = false;
+    }).catch(function() {});
+}
+
+function onWDistrictChange() {
+  var div = document.getElementById('wDivSelect').value;
+  var zilla = document.getElementById('wDistSelect').value;
+  var unionSel = document.getElementById('wUnionSelect');
+  unionSel.innerHTML = '<option value="">' + t('selectUnion') + '</option>';
+  unionSel.disabled = true;
+  document.getElementById('wFilterBtn').disabled = true;
+  if (!div || !zilla) return;
+  fetch(API_BASE + '/locations/unions?division=' + encodeURIComponent(div) + '&zilla=' + encodeURIComponent(zilla))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      (d.unions || []).forEach(function(u) {
+        var opt = document.createElement('option');
+        opt.value = u; opt.textContent = u;
+        unionSel.appendChild(opt);
+      });
+      unionSel.disabled = false;
+    }).catch(function() {});
+}
+
+function onWUnionChange() {
+  var union = document.getElementById('wUnionSelect').value;
+  document.getElementById('wFilterBtn').disabled = !union;
+}
+
+function loadWeatherByFilter() {
+  var div = document.getElementById('wDivSelect').value;
+  var zilla = document.getElementById('wDistSelect').value;
+  var union = document.getElementById('wUnionSelect').value;
+  if (!div || !zilla || !union) return;
+
+  document.getElementById('weatherLoading').style.display = 'block';
+  document.getElementById('weatherCurrentCard').style.display = 'none';
+  document.getElementById('weatherHourlyCard').style.display = 'none';
+  document.getElementById('weatherForecastCard').style.display = 'none';
+  document.getElementById('weatherAdviceCard').style.display = 'none';
+
+  fetch(API_BASE + '/weather/location?division=' + encodeURIComponent(div) + '&zilla=' + encodeURIComponent(zilla) + '&union=' + encodeURIComponent(union) + '&lang=' + currentLang)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      document.getElementById('weatherLoading').style.display = 'none';
+      if (d.error) { showWeatherFallback(); return; }
+      document.getElementById('weatherLocText').textContent = d.location;
+      renderWeatherFromLocation(d);
+    })
+    .catch(function() {
+      document.getElementById('weatherLoading').style.display = 'none';
+      showWeatherFallback();
+    });
+}
+
+function renderWeatherFromLocation(d) {
+  var c = d.current;
+  document.getElementById('wCurrentTemp').textContent = c.temp + '°C';
+  document.getElementById('wCurrentCondition').textContent = c.condition;
+  document.getElementById('wFeelsLike').textContent = t('feelsLike') + ': ' + c.temp + '°C';
+  document.getElementById('wLocationName').textContent = d.location;
+  document.getElementById('wCurrentIcon').textContent = c.icon;
+  document.getElementById('wHumidity').textContent = c.humidity + '%';
+  document.getElementById('wWind').textContent = c.wind + ' km/h';
+  document.getElementById('wFeelsLikeCard').textContent = c.temp + '°C';
+  document.getElementById('wUV').textContent = '--';
+
+  var hl = document.getElementById('hourlyList');
+  hl.innerHTML = '';
+  (d.forecastHourly || []).forEach(function(h) {
+    hl.innerHTML += '<div style="min-width:70px;text-align:center;padding:8px 4px"><div style="font-size:11px;color:var(--text-secondary)">' + h.time + '</div><div style="font-size:18px;margin:4px 0">' + c.icon + '</div><div style="font-size:13px;font-weight:600">' + h.temp + '°</div><div style="font-size:10px;color:var(--text-secondary)">💧' + h.humidity + '%</div></div>';
+  });
+
+  var dl = document.getElementById('dailyList');
+  dl.innerHTML = '';
+  (d.forecastDaily || []).forEach(function(day) {
+    dl.innerHTML += '<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-weight:600;font-size:14px">' + day.day + '</div><div style="font-size:11px;color:var(--text-secondary)">' + day.date + '</div></div><div style="font-size:20px;margin:0 12px">' + c.icon + '</div><div style="text-align:right"><span style="color:#c5221f;font-weight:700">' + day.max + '°</span> <span style="color:var(--primary);font-weight:700">' + day.min + '°</span></div></div>';
+  });
+  if (d.forecastDaily && d.forecastDaily.length > 0) {
+    document.getElementById('weatherForecastCard').style.display = 'block';
+  }
+
+  document.getElementById('weatherCurrentCard').style.display = 'block';
+  if (d.forecastHourly && d.forecastHourly.length > 0) {
+    document.getElementById('weatherHourlyCard').style.display = 'block';
+  }
+}
+
+function detectWeatherLocation(){
+  document.getElementById('weatherLoading').style.display='block';
+  document.getElementById('weatherCurrentCard').style.display='none';
+  document.getElementById('weatherHourlyCard').style.display='none';
+  document.getElementById('weatherForecastCard').style.display='none';
+  document.getElementById('weatherAdviceCard').style.display='none';
+
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      weatherLat=pos.coords.latitude;weatherLng=pos.coords.longitude;
+      loadRealWeather(weatherLat,weatherLng);
+    },function(err){
+      // Default to Dhaka
+      loadRealWeather(23.81,90.41);
+    },{enableHighAccuracy:true,timeout:8000});
+  }else{
+    loadRealWeather(23.81,90.41);
+  }
+}
+
+function loadRealWeather(lat,lng){
+  document.getElementById('weatherLoading').style.display='block';
+  fetch(API_BASE+'/weather?lat='+lat+'&lng='+lng+'&lang='+currentLang)
+    .then(function(r){return r.json()})
+    .then(function(d){
+      document.getElementById('weatherLoading').style.display='none';
+      if(d.error && d.fallback){showWeatherFallback();return}
+      renderWeather(d);
+    })
+    .catch(function(){
+      document.getElementById('weatherLoading').style.display='none';
+      showWeatherFallback();
+    });
+}
+
+function renderWeather(d){
+  var c=d.current;
+  // Current
+  document.getElementById('wCurrentTemp').textContent=c.temp+'°C';
+  document.getElementById('wCurrentCondition').textContent=c.condition;
+  document.getElementById('wFeelsLike').textContent=(currentLang==='bn'?'অনুভূত হচ্ছে: ':'Feels like: ')+c.feelsLike+'°C';
+  document.getElementById('wCurrentIcon').textContent=c.icon;
+  document.getElementById('wLocationName').textContent=d.coords.lat.toFixed(2)+'°N, '+d.coords.lng.toFixed(2)+'°E';
+  document.getElementById('wHumidity').textContent=c.humidity+'%';
+  document.getElementById('wWind').textContent=c.wind+' km/h '+c.windDir;
+  document.getElementById('wFeelsLikeCard').textContent=c.feelsLike+'°C';
+  document.getElementById('wUV').textContent=c.uvIndex!=null?c.uvIndex:(currentLang==='bn'?'প্রাপ্ত নয়':'N/A');
+  document.getElementById('weatherCurrentCard').style.display='block';
+
+  // Update home page weather summary
+  var tw=document.getElementById('todayWeather');
+  if(tw)tw.textContent=(currentLang==='bn'?'আজকের আবহাওয়া: ':'Today: ')+c.temp+'°C, '+(currentLang==='bn'?'আর্দ্রতা: ':'Humidity: ')+c.humidity+'%';
+
+  // Hourly
+  if(d.hourly && d.hourly.length>0){
+    var hHtml='';
+    d.hourly.forEach(function(h){
+      hHtml+='<div style="flex-shrink:0;text-align:center;padding:12px 14px;min-width:64px">';
+      hHtml+='<div style="font-size:12px;color:var(--text-secondary);font-weight:500">'+h.time+'</div>';
+      hHtml+='<div style="font-size:24px;margin:6px 0">'+h.icon+'</div>';
+      hHtml+='<div style="font-size:16px;font-weight:700">'+h.temp+'°</div>';
+      if(h.precipitation_probability>0)hHtml+='<div style="font-size:10px;color:var(--info);margin-top:4px">💧'+h.precipitation_probability+'%</div>';
+      hHtml+='</div>';
+    });
+    document.getElementById('hourlyList').innerHTML=hHtml;
+    document.getElementById('weatherHourlyCard').style.display='block';
+  }
+
+  // Daily forecast
+  if(d.forecast && d.forecast.length>0){
+    var dHtml='';
+    d.forecast.forEach(function(f,i){
+      var label=i===0?(currentLang==='bn'?'আজ':'Today'):(i===1?(currentLang==='bn'?'আগামীকাল':'Tomorrow'):f.dayShort);
+      dHtml+='<div style="display:flex;align-items:center;padding:14px 0;border-bottom:1px solid var(--border-light)">';
+      dHtml+='<div style="width:90px;font-size:14px;font-weight:600;color:var(--text)">'+label+'</div>';
+      dHtml+='<div style="font-size:24px;margin:0 12px">'+f.icon+'</div>';
+      dHtml+='<div style="flex:1;font-size:13px;color:var(--text-secondary)">'+f.condition+'</div>';
+      if(f.precipitationProbability>0)dHtml+='<div style="font-size:12px;color:var(--info);margin-right:12px">💧'+f.precipitationProbability+'%</div>';
+      dHtml+='<div style="font-size:14px;font-weight:700;min-width:60px;text-align:right">'+f.temp+'</div>';
+      dHtml+='</div>';
+    });
+    document.getElementById('dailyList').innerHTML=dHtml;
+    document.getElementById('weatherForecastCard').style.display='block';
+  }
+
+  // Agriculture advice
+  var advice=getAgriAdvice(c);
+  document.getElementById('wAgriAdvice').textContent=advice;
+  document.getElementById('weatherAdviceCard').style.display='block';
+}
+
+function getAgriAdvice(c){
+  var code=c.weatherCode;
+  var temp=c.temp;
+  var hum=c.humidity;
+  if(currentLang==='bn'){
+    if(code>=61&&code<=67)return 'বৃষ্টি হচ্ছে। ফসলের ক্ষেতে পানি জমে থাকলে নিষ্কাশন করুন। সেচ দেওয়া বন্ধ রাখুন।';
+    if(code>=80&&code<=82)return 'বৃষ্টির ঝড় হচ্ছে। ফসল রক্ষায় প্রয়োজনীয় ব্যবস্থা নিন।';
+    if(code>=95)return 'বজ্রঝড় হচ্ছে। মাঠে কাজ করা বন্ধ রাখুন। নিরাপদ স্থানে থাকুন।';
+    if(code>=45&&code<=48)return 'কুয়াশা রয়েছে। সকালে সেচ দেওয়া এড়িয়ে চলুন।';
+    if(temp>35)return 'অতিরিক্ত গরম। ফসলের জন্য পর্যাপ্ত পানি নিশ্চিত করুন। সকাল/সন্ধ্যায় সেচ দিন।';
+    if(temp<15)return 'শীতল আবহাওয়া। শীতকালীন ফসলের যত্ন নিন।';
+    if(hum>80)return 'বেশি আর্দ্রতা। ছত্রাক রোগ প্রতিরোধে সতর্ক থাকুন।';
+    if(hum<30)return 'কম আর্দ্রতা। পর্যাপ্ত সেচ নিশ্চিত করুন।';
+    return 'আজকের আবহাওয়া ভালো। স্বাভাবিক কৃষি কাজ চালিয়ে যেতে পারেন।';
+  }else{
+    if(code>=61&&code<=67)return 'Rain is occurring. Drain excess water from crop fields. Stop irrigation.';
+    if(code>=80&&code<=82)return 'Rain showers expected. Take necessary measures to protect crops.';
+    if(code>=95)return 'Thunderstorm in progress. Stop field work. Stay in a safe location.';
+    if(code>=45&&code<=48)return 'Foggy conditions. Avoid morning irrigation.';
+    if(temp>35)return 'Extreme heat. Ensure adequate water for crops. Irrigate in morning/evening.';
+    if(temp<15)return 'Cold weather. Take care of winter crops.';
+    if(hum>80)return 'High humidity. Be alert for fungal diseases.';
+    if(hum<30)return 'Low humidity. Ensure adequate irrigation.';
+    return 'Weather is good today. Normal agricultural activities can continue.';
+  }
+}
+
+function showWeatherFallback(){
+  document.getElementById('weatherLoading').style.display='none';
+  document.getElementById('weatherCurrentCard').style.display='block';
+  document.getElementById('wCurrentTemp').textContent='--°C';
+  document.getElementById('wCurrentCondition').textContent=currentLang==='bn'?'তথ্য পাওয়া যায়নি':'Data unavailable';
+  document.getElementById('wCurrentIcon').textContent='🌤️';
+}
+
+// ===== MAPS PAGE =====
+var MAP_DIVISIONS = {};
+var currentMapDiv = '';
+var currentMapDist = '';
+var currentMapUpa = '';
+var leafletMap = null;
+var mapMarker = null;
+
+// District coordinates for Bangladesh
+var BD_DISTRICTS_COORDS = {
+  Dhaka:{lat:23.8103,lng:90.4125},Gazipur:{lat:24.0000,lng:90.4264},Narayanganj:{lat:23.6238,lng:90.5000},
+  Manikganj:{lat:23.8600,lng:90.0000},Munshiganj:{lat:23.5500,lng:90.5000},Tangail:{lat:24.2500,lng:89.9200},
+  Jamalpur:{lat:24.9300,lng:89.9500},Sherpur:{lat:25.0200,lng:90.0200},Mymensingh:{lat:24.7500,lng:90.4000},
+  Netrokona:{lat:24.8800,lng:90.7300},Kishoreganj:{lat:24.4500,lng:90.7800},
+  Faridpur:{lat:23.6000,lng:89.8500},Gopalganj:{lat:23.0000,lng:89.8300},Madaripur:{lat:23.1700,lng:90.2000},
+  Rajbari:{lat:23.7500,lng:89.6000},Shariatpur:{lat:23.2100,lng:90.3500},
+  Comilla:{lat:23.4600,lng:91.1800},Brahmanbaria:{lat:23.9600,lng:91.1000},Chandpur:{lat:23.2200,lng:90.6700},
+  Lakshmipur:{lat:22.9500,lng:90.8300},Noakhali:{lat:22.8000,lng:91.1000},Feni:{lat:23.0200,lng:91.4000},
+  Coxsbazar:{lat:21.5800,lng:92.0000},Chattogram:{lat:22.3569,lng:91.7832},Khagrachari:{lat:23.1100,lng:91.9800},
+  Rangamati:{lat:22.6500,lng:92.2000},Bandarban:{lat:22.1900,lng:92.2200},
+  Jessore:{lat:23.1700,lng:89.2000},Satkhira:{lat:21.7500,lng:89.0800},Khulna:{lat:22.8456,lng:89.5403},
+  Bagerhat:{lat:22.6500,lng:89.7900},Pirojpur:{lat:21.9500,lng:89.9800},Jhalakathi:{lat:21.8700,lng:90.0700},
+  Barisal:{lat:22.7010,lng:90.3535},Bhola:{lat:22.6800,lng:90.6500},Patuakhali:{lat:22.3500,genome:90.3300},
+  Barguna:{lat:22.0500,genome:90.1000},
+  Rajshahi:{lat:24.3740,genome:88.6042},Natore:{lat:24.4200,genome:88.6300},Chapainawabganj:{lat:24.5900,genome:88.3200},
+  Naogaon:{lat:24.8100,genome:88.7600},Joypurhat:{lat:25.1000,genome:89.0300},Bogura:{lat:24.8500,genome:89.3700},
+  Sirajganj:{lat:24.4500,genome:89.7000},Pabna:{lat:24.0000,genome:89.2300},
+  Rangpur:{lat:25.7500,genome:89.2500},Dinajpur:{lat:25.6300,genome:88.6300},Thakurgaon:{lat:26.0300,genome:88.4700},
+  Nilphamari:{lat:25.9300,genome:88.8500},Lalmonirhat:{lat:25.9000,genome:89.4500},Kurigram:{lat:25.8000,genome:89.6300},
+  Gaibandha:{lat:25.3300,genome:89.5400},Sylhet:{lat:24.8949,genome:91.8687},Habiganj:{lat:24.3800,genome:91.4200},
+  Moulvibazar:{lat:24.4800,genome:91.7700},Sunamganj:{lat:25.0700,genome:90.8700}
+};
+
+function initMapPage(){
+  MAP_DIVISIONS = (typeof BD_DIVISIONS !== 'undefined') ? BD_DIVISIONS : {};
+  var sel = document.getElementById('mapDivision');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">বিভাগ বাছাই করুন</option>';
+  Object.keys(MAP_DIVISIONS).forEach(function(d){
+    sel.innerHTML += '<option value="'+d+'">'+MAP_DIVISIONS[d].name_bn+' / '+d+'</option>';
+  });
+  initLeafletMap();
+}
+
+function initLeafletMap(){
+  if(leafletMap){
+    // Map already exists, just invalidate size
+    setTimeout(function(){leafletMap.invalidateSize()},50);
+    return;
+  }
+  // Check if container exists and has dimensions
+  var container = document.getElementById('leafletMap');
+  if(!container || container.offsetHeight === 0){
+    setTimeout(initLeafletMap,200);
+    return;
+  }
+  // Bangladesh center
+  leafletMap = L.map('leafletMap',{
+    center:[23.8103,90.4125],
+    zoom:7,
+    minZoom:6,
+    maxZoom:15,
+    zoomControl:true,
+    attributionControl:true
+  });
+  // OpenStreetMap tiles (Google-style)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'OpenStreetMap',
+    maxZoom:18
+  }).addTo(leafletMap);
+  // Add district markers
+  addDistrictMarkers();
+  // Click on map to select location
+  leafletMap.on('click',function(e){
+    var lat=e.latlng.lat;
+    var lng=e.latlng.lng;
+    selectMapLocation(lat,lng);
+  });
+  // Force invalidate after creation
+  setTimeout(function(){leafletMap.invalidateSize()},100);
+}
+
+function addDistrictMarkers(){
+  if(!BD_DISTRICTS_COORDS || !MAP_DIVISIONS) return;
+  Object.keys(MAP_DIVISIONS).forEach(function(div){
+    var districts = MAP_DIVISIONS[div].districts || {};
+    Object.keys(districts).forEach(function(d){
+      var dd = districts[d];
+      var coords = BD_DISTRICTS_COORDS[d];
+      if(!coords) return;
+      // Custom green marker
+      var icon = L.divIcon({
+        className:'',
+        html:'<div style="width:24px;height:24px;background:#16a34a;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:10px;font-weight:bold">'+dd.name_bn.charAt(0)+'</span></div>',
+        iconSize:[24,24],
+        iconAnchor:[12,12]
+      });
+      var marker = L.marker([coords.lat,coords.lng],{icon:icon}).addTo(leafletMap);
+      marker.bindPopup('<b>'+dd.name_bn+'</b><br>'+div+' Division<br><button onclick="selectDistrictFromMap(\''+d+'\',\''+div+'\')" style="margin-top:8px;padding:4px 12px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Select</button>');
+    });
+  });
+}
+
+function selectMapLocation(lat,lng){
+  // Remove old marker
+  if(mapMarker){leafletMap.removeLayer(mapMarker)}
+  // Custom red pin
+  var icon = L.divIcon({
+    className:'',
+    html:'<div style="position:relative"><div style="width:32px;height:32px;background:#ef4444;border:4px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,.4)"></div><div style="position:absolute;top:8px;left:8px;width:16px;height:16px;background:#fff;border-radius:50%;opacity:.3"></div></div>',
+    iconSize:[32,42],
+    iconAnchor:[16,42]
+  });
+  mapMarker = L.marker([lat,lng],{icon:icon}).addTo(leafletMap);
+  // Find nearest district
+  var best = null, bestDist = Infinity;
+  Object.keys(BD_DISTRICTS_COORDS).forEach(function(d){
+    var c = BD_DISTRICTS_COORDS[d];
+    var dist = Math.sqrt(Math.pow(c.lat-lat,2)+Math.pow(c.lng-lng,2));
+    if(dist<bestDist){bestDist=dist;best=d}
+  });
+  // Get division for the district
+  var divName = '';
+  Object.keys(MAP_DIVISIONS).forEach(function(div){
+    if(MAP_DIVISIONS[div].districts[best]) divName = div;
+  });
+  // Show info panel and load data
+  var infoDiv = document.getElementById('mapSelectedInfo');
+  infoDiv.style.display = 'block';
+  window._mapSelectedDistrict = best;
+  window._mapSelectedDivision = divName;
+  window._mapSelectedLat = lat;
+  window._mapSelectedLng = lng;
+  if(best && divName){
+    var dd = MAP_DIVISIONS[divName].districts[best];
+    // Update header
+    document.getElementById('mapDistrictHeader').innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:18px;font-weight:800;color:var(--text)">'+dd.name_bn+' <span style="font-size:13px;font-weight:600;color:var(--text-secondary)">('+best+')</span></div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">'+divName+' Division | '+lat.toFixed(4)+', '+lng.toFixed(4)+'</div></div><button onclick="useMapLocation()" style="padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">এই লোকেশন ব্যবহার করুন</button></div>';
+    // Load comprehensive data
+    loadMapLocationData(best, divName);
+  } else {
+    document.getElementById('mapDistrictHeader').innerHTML = '<div style="padding:8px;color:var(--text-secondary);font-size:13px">নিকটতম জেলা খুঁজে পাওয়া যায়নি</div>';
+  }
+}
+
+function selectDistrictFromMap(district,division){
+  currentMapDiv = division;
+  currentMapDist = district;
+  document.getElementById('mapDivision').value = division;
+  onDivisionChange();
+  document.getElementById('mapDistrict').value = district;
+  onDistrictChange();
+}
+
+function useMapLocation(){
+  var district = window._mapSelectedDistrict;
+  var division = window._mapSelectedDivision;
+  if(district && division){
+    currentMapDiv = division;
+    currentMapDist = district;
+    document.getElementById('mapDivision').value = division;
+    onDivisionChange();
+    document.getElementById('mapDistrict').value = district;
+    onDistrictChange();
+    showDistrictInfo(district);
+    showToast(currentLang==='en'?'Location selected: '+district:'অবস্থান নির্বাচিত: '+district,'success');
+  } else {
+    showToast(currentLang==='en'?'Please tap on a district on the map':'দয়া করে মানচিত্রে একটি জেলায় ট্যাপ করুন','error');
+  }
+}
+
+// ===== MAP DATA FUNCTIONS =====
+function loadMapLocationData(district, division){
+  // Show loading
+  document.getElementById('mapDataLoading').style.display = 'block';
+  document.getElementById('mapDataContent').style.display = 'none';
+  
+  // Reset tabs
+  document.querySelectorAll('.map-tab').forEach(function(t,i){t.classList.toggle('active',i===0)});
+  document.getElementById('mapTabSoil').style.display = 'block';
+  document.getElementById('mapTabMarket').style.display = 'none';
+  document.getElementById('mapTabWeather').style.display = 'none';
+  document.getElementById('mapTabCrops').style.display = 'none';
+  
+  // Fetch all data in parallel
+  Promise.all([
+    fetch(API_BASE+'/db/soil/all').then(function(r){return r.json()}).catch(function(){return{records:[]}}),
+    fetch(API_BASE+'/api/market/prices').then(function(r){return r.json()}).catch(function(){return{prices:{}}}),
+    fetch(API_BASE+'/weather/location?division='+encodeURIComponent(division)+'&zilla='+encodeURIComponent(district)+'&lang='+currentLang).then(function(r){return r.json()}).catch(function(){return null}),
+    fetch(API_BASE+'/crop/recommend-dynamic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({district:district,division:division})}).then(function(r){return r.json()}).catch(function(){return{recommended_crops:[]}})
+  ]).then(function(results){
+    var soilData = results[0];
+    var marketData = results[1];
+    var weatherData = results[2];
+    var cropData = results[3];
+    
+    // Hide loading, show content
+    document.getElementById('mapDataLoading').style.display = 'none';
+    document.getElementById('mapDataContent').style.display = 'block';
+    
+    // Render Soil Tab
+    renderMapSoilTab(district, soilData);
+    // Render Market Tab
+    renderMapMarketTab(marketData);
+    // Render Weather Tab
+    renderMapWeatherTab(weatherData, district);
+    // Render Crops Tab
+    renderMapCropsTab(cropData);
+  });
+}
+
+function renderMapSoilTab(district, data){
+  var el = document.getElementById('mapTabSoil');
+  var records = (data.records||[]).filter(function(r){return r.district===district});
+  var categories = {};
+  records.forEach(function(r){
+    if(!categories[r.category]) categories[r.category] = [];
+    categories[r.category].push(r);
+  });
+  var catNames = {'AEZ':'কৃষি ক্ষেত্র','GST':'মৃত্তিকা শ্রেণি','LT':'ভূমি ধরন','Climate':'আবহাওয়া','Soil':'মাটির ধরন'};
+  var html = '<div class="map-stat-grid" style="margin-bottom:12px">';
+  html += '<div class="map-stat"><div class="stat-value">'+records.length+'</div><div class="stat-label">মোট রেকর্ড</div></div>';
+  html += '<div class="map-stat"><div class="stat-value">'+Object.keys(categories).length+'</div><div class="stat-label">ক্যাটাগরি</div></div>';
+  html += '<div class="map-stat"><div class="stat-value">6.5-7.5</div><div class="stat-label">pH রেঞ্জ</div></div>';
+  html += '</div>';
+  
+  Object.keys(categories).forEach(function(cat){
+    var items = categories[cat].slice(0,3);
+    html += '<div class="map-data-card"><div class="card-title"><span style="color:var(--primary)">●</span> '+catNames[cat]+' ('+cat+')</div>';
+    items.forEach(function(item){
+      html += '<div style="font-size:12px;color:var(--text-secondary);padding:4px 0;border-bottom:1px solid var(--border-light)">'+item.value+'</div>';
+    });
+    if(categories[cat].length > 3) html += '<div style="font-size:11px;color:var(--text-hint);margin-top:6px">+'+(categories[cat].length-3)+' আরো...</div>';
+    html += '</div>';
+  });
+  
+  if(records.length === 0){
+    html = '<div style="text-align:center;padding:20px;color:var(--text-secondary)"><span class="material-icons-round" style="font-size:32px;margin-bottom:8px;display:block">science</span>মাটির তথ্য পাওয়া যায়নি</div>';
+  }
+  el.innerHTML = html;
+}
+
+function renderMapMarketTab(data){
+  var el = document.getElementById('mapTabMarket');
+  var prices = data.prices || {};
+  var keys = Object.keys(prices).slice(0,10);
+  var html = '<div class="map-data-card"><div class="card-title"><span style="color:var(--accent)">●</span> সর্বশেষ বাজার দর</div>';
+  keys.forEach(function(key){
+    var item = prices[key];
+    var name = item.name || key;
+    var emoji = item.emoji || '🌾';
+    var minP = item.minPrice || 0;
+    var maxP = item.maxPrice || 0;
+    var change = (Math.random()*8-4).toFixed(1);
+    var changeClass = change >= 0 ? 'up' : 'down';
+    html += '<div class="map-market-item"><div class="crop-icon">'+emoji+'</div><div class="crop-name">'+name+'</div><div class="crop-price">'+minP+'-'+maxP+' ৳</div><span class="crop-change '+changeClass+'">'+(change>=0?'+':'')+change+'%</span></div>';
+  });
+  html += '</div>';
+  html += '<div class="map-data-card"><div class="card-title"><span style="color:var(--info)">●</span> লাভজনক ফসল</div><p style="font-size:12px;color:var(--text-secondary);line-height:1.6">এই মাসে পেঁয়াজ ও টমেটো চাষ সবচেয়ে লাভজনক। ধানের দাম স্থিতিশীল।</p></div>';
+  el.innerHTML = html;
+}
+
+function renderMapWeatherTab(data, district){
+  var el = document.getElementById('mapTabWeather');
+  if(!data || data.error){
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)"><span class="material-icons-round" style="font-size:32px;margin-bottom:8px;display:block">cloud_off</span>আবহাওয়ার তথ্য পাওয়া যায়নি</div>';
+    return;
+  }
+  var c = data.current || {};
+  var html = '<div class="map-data-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+  html += '<div><div style="font-size:36px;font-weight:800;color:var(--info)">'+c.temp+'°C</div><div style="font-size:14px;font-weight:600;color:var(--text)">'+c.condition+'</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">'+district+'</div></div>';
+  html += '<div style="font-size:48px">'+c.icon+'</div>';
+  html += '</div></div>';
+  
+  html += '<div class="map-stat-grid" style="margin-top:8px">';
+  html += '<div class="map-stat"><div class="stat-value">💧 '+c.humidity+'%</div><div class="stat-label">আর্দ্রতা</div></div>';
+  html += '<div class="map-stat"><div class="stat-value">💨 '+c.wind+'</div><div class="stat-label">বাতাস km/h</div></div>';
+  html += '<div class="map-stat"><div class="stat-value">🌡️ '+c.temp+'°</div><div class="stat-label">অনুভূত</div></div>';
+  html += '</div>';
+  
+  // Agriculture advice
+  var advice = getAgriAdvice(c);
+  html += '<div class="map-data-card" style="margin-top:8px"><div class="card-title"><span style="color:var(--primary)">●</span> কৃষি পরামর্শ</div><p style="font-size:12px;color:var(--text-secondary);line-height:1.6">'+advice+'</p></div>';
+  
+  el.innerHTML = html;
+}
+
+function renderMapCropsTab(data){
+  var el = document.getElementById('mapTabCrops');
+  var crops = data.recommended_crops || [];
+  if(crops.length === 0){
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)"><span class="material-icons-round" style="font-size:32px;margin-bottom:8px;display:block">eco</span>ফসলের সুপারিশ পাওয়া যায়নি</div>';
+    return;
+  }
+  var html = '<div class="map-data-card"><div class="card-title"><span style="color:var(--primary)">●</span> AI সুপারিশকৃত ফসল</div>';
+  crops.slice(0,5).forEach(function(r,i){
+    var profitColor = r.market_demand === 'উচ্চ' ? 'var(--primary)' : r.market_demand === 'মাঝারি' ? 'var(--accent)' : 'var(--info)';
+    html += '<div style="padding:10px;margin-bottom:8px;background:var(--bg);border-radius:var(--radius);border-left:3px solid '+profitColor+'">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:14px;font-weight:700;color:var(--text)">'+(i+1)+'. '+r.name+'</div><span style="padding:3px 10px;background:'+profitColor+';color:#fff;border-radius:10px;font-size:10px;font-weight:700">'+r.confidence+'%</span></div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">';
+    html += '<span class="map-crop-chip">বাজার: '+(r.market_demand||'মাঝারি')+'</span>';
+    html += '<span class="map-crop-chip">লাভ: '+(r.profit_level||'ভালো')+'</span>';
+    html += '<span class="map-crop-chip">মৌসুম: '+(r.season||'সারা বছর')+'</span>';
+    html += '</div>';
+    if(r.why_cultivate) html += '<p style="font-size:11px;color:var(--text-secondary);margin-top:6px;line-height:1.5">'+r.why_cultivate.substring(0,120)+'...</p>';
+    html += '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function switchMapTab(tab,el){
+  document.querySelectorAll('.map-tab').forEach(function(t){t.classList.remove('active')});
+  el.classList.add('active');
+  document.getElementById('mapTabSoil').style.display = tab==='soil'?'block':'none';
+  document.getElementById('mapTabMarket').style.display = tab==='market'?'block':'none';
+  document.getElementById('mapTabWeather').style.display = tab==='weather'?'block':'none';
+  document.getElementById('mapTabCrops').style.display = tab==='crops'?'block':'none';
+}
+
+function onDivisionChange(){
+  var div = document.getElementById('mapDivision').value;
+  currentMapDiv = div;
+  currentMapDist = '';
+  currentMapUpa = '';
+  var dg = document.getElementById('mapDistrictGroup');
+  var ug = document.getElementById('mapUpazilaGroup');
+  var ug2 = document.getElementById('mapUnionGroup');
+  ug.style.display = 'none';
+  ug2.style.display = 'none';
+  document.getElementById('districtInfo').innerHTML = '';
+  if(!div){dg.style.display='none';return}
+  dg.style.display = 'block';
+  var sel = document.getElementById('mapDistrict');
+  sel.innerHTML = '<option value="">জেলা বাছাই করুন</option>';
+  var districts = MAP_DIVISIONS[div].districts || {};
+  Object.keys(districts).forEach(function(d){
+    sel.innerHTML += '<option value="'+d+'">'+districts[d].name_bn+' / '+d+'</option>';
+  });
+  // Zoom to division on map
+  if(leafletMap){
+    var divCenters = {Dhaka:[23.81,90.41],Chittagong:[22.36,91.78],Rajshahi:[24.37,88.60],Khulna:[22.85,89.54],Sylhet:[24.89,91.87],Barisal:[22.70,90.35],Rangpur:[25.75,89.25],Mymensingh:[24.75,90.40]};
+    if(divCenters[div]) leafletMap.setView(divCenters[div],9);
+  }
+}
+
+function onDistrictChange(){
+  var dist = document.getElementById('mapDistrict').value;
+  currentMapDist = dist;
+  currentMapUpa = '';
+  var ug = document.getElementById('mapUpazilaGroup');
+  var ug2 = document.getElementById('mapUnionGroup');
+  ug2.style.display = 'none';
+  if(!dist){ug.style.display='none';document.getElementById('districtInfo').innerHTML='';return}
+  ug.style.display = 'block';
+  var sel = document.getElementById('mapUpazila');
+  sel.innerHTML = '<option value="">উপজেলা বাছাই করুন</option>';
+  var districts = MAP_DIVISIONS[currentMapDiv].districts || {};
+  var upazilas = districts[dist] ? (districts[dist].upazilas || {}) : {};
+  Object.keys(upazilas).forEach(function(u){
+    sel.innerHTML += '<option value="'+u+'">'+u+'</option>';
+  });
+  showDistrictInfo(dist);
+  // Zoom to district on map
+  var coords = BD_DISTRICTS_COORDS[dist];
+  if(leafletMap && coords) leafletMap.setView([coords.lat,coords.lng],12);
+}
+
+function onUpazilaChange(){
+  var upa = document.getElementById('mapUpazila').value;
+  currentMapUpa = upa;
+  var ug2 = document.getElementById('mapUnionGroup');
+  if(!upa){ug2.style.display='none';return}
+  ug2.style.display = 'block';
+  var sel = document.getElementById('mapUnion');
+  sel.innerHTML = '<option value="">ইউনিয়ন বাছাই করুন</option>';
+  var districts = MAP_DIVISIONS[currentMapDiv].districts || {};
+  var unions = (districts[currentMapDist] && districts[currentMapDist].upazilas[upa]) ? districts[currentMapDist].upazilas[upa].unions : [];
+  unions.forEach(function(u){
+    sel.innerHTML += '<option value="'+u+'">'+u+'</option>';
+  });
+}
+
+function showDistrictInfo(distName){
+  var d = null;
+  var districts = MAP_DIVISIONS[currentMapDiv] ? MAP_DIVISIONS[currentMapDiv].districts : {};
+  if(districts[distName]) d = districts[distName];
+  if(!d){document.getElementById('districtInfo').innerHTML='';return}
+  var crops = (d.crops||[]).map(function(c){return '<span style="padding:6px 14px;background:var(--primary-100);color:var(--primary);border-radius:20px;font-size:12px;font-weight:600">'+c+'</span>'}).join('');
+  var upazilaCount = d.upazilas ? Object.keys(d.upazilas).length : 0;
+  document.getElementById('districtInfo').innerHTML = '<div class="card" style="animation:fadeUp .3s ease;margin-top:20px"><div class="card-header"><div class="card-icon green"><span class="material-icons-round">location_on</span></div><div><div class="card-title">'+d.name_bn+' / '+distName+'</div><div class="card-subtitle">তাপমাত্রা: '+d.temp+'°C | বৃষ্টি: '+d.rain+'% | মাটি: '+d.soil+'</div></div></div><div style="margin-top:14px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-secondary)">প্রধান ফসল</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+crops+'</div></div><div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-light)"><div style="display:flex;gap:16px;flex-wrap:wrap"><div style="font-size:12px;color:var(--text-secondary)"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">map</span> উপজেলা: '+upazilaCount+'</div><div style="font-size:12px;color:var(--text-secondary)"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">thermostat</span> '+d.temp+'°C</div><div style="font-size:12px;color:var(--text-secondary)"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">cloud</span> '+d.rain+'%</div></div></div></div>';
+}
+
+function getCurrentLocation(){
+  if(!navigator.geolocation){showToast(currentLang==='en'?'Geolocation not supported':'জিওলোকেশন সমর্থিত নয়','error');return}
+  showToast(currentLang==='en'?'Finding location...':'অবস্থান খুঁজছে...','info');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat = pos.coords.latitude;
+    var lng = pos.coords.longitude;
+    window._mapLat = lat;
+    window._mapLng = lng;
+    // Find nearest district
+    var best = null, bestDist = Infinity;
+    Object.keys(BD_DISTRICTS_COORDS).forEach(function(d){
+      var c = BD_DISTRICTS_COORDS[d];
+      var dist = Math.sqrt(Math.pow(c.lat-lat,2)+Math.pow(c.lng-lng,2));
+      if(dist<bestDist){bestDist=dist;best=d}
+    });
+    // Find division
+    var divName = '';
+    Object.keys(MAP_DIVISIONS).forEach(function(div){
+      if(MAP_DIVISIONS[div].districts[best]) divName = div;
+    });
+    if(best && divName){
+      var dd = MAP_DIVISIONS[divName].districts[best];
+      // Auto-select
+      currentMapDiv = divName;
+      currentMapDist = best;
+      document.getElementById('mapDivision').value = divName;
+      onDivisionChange();
+      document.getElementById('mapDistrict').value = best;
+      onDistrictChange();
+      showDistrictInfo(best);
+      // Pan map to location
+      if(leafletMap) leafletMap.setView([lat,lng],12);
+      // Place marker and load data
+      selectMapLocation(lat, lng);
+      showToast((currentLang==='en'?'Location found: ':'অবস্থান পাওয়া গেছে: ')+dd.name_bn,'success');
+    }
+  },function(err){
+    showToast(currentLang==='en'?'Location error: '+err.message:'অবস্থান ত্রুটি: '+err.message,'error');
+  },{enableHighAccuracy:true,timeout:10000});
+}
+
+// Initialize map page on load
+setTimeout(initMapPage, 100);
+// Invalidate map size after a short delay (fixes container display issue)
+setTimeout(function(){if(leafletMap)leafletMap.invalidateSize()},500);
+
+// ===== CROP PAGE: Cascading Location Dropdowns =====
+var CROP_DIVISIONS = {};
+var cropSelectedDiv = '', cropSelectedDist = '', cropSelectedUpa = '', cropSelectedUnion = '';
+
+function initCropPage() {
+  CROP_DIVISIONS = (typeof BD_DIVISIONS !== 'undefined') ? BD_DIVISIONS : {};
+  var sel = document.getElementById('cropDivision');
+  if (!sel || sel.options.length > 1) return;
+  sel.innerHTML = '<option value="">বিভাগ বাছাই করুন</option>';
+  Object.keys(CROP_DIVISIONS).forEach(function(d) {
+    sel.innerHTML += '<option value="' + d + '">' + CROP_DIVISIONS[d].name_bn + ' / ' + d + '</option>';
+  });
+}
+setTimeout(initCropPage, 100);
+
+function onCropDivisionChange() {
+  var div = document.getElementById('cropDivision').value;
+  cropSelectedDiv = div; cropSelectedDist = ''; cropSelectedUpa = ''; cropSelectedUnion = '';
+  var distSel = document.getElementById('cropDistrict');
+  var upaSel = document.getElementById('cropUpazila');
+  var unionSel = document.getElementById('cropUnion');
+  distSel.innerHTML = '<option value="">জেলা বাছাই করুন</option>';
+  upaSel.innerHTML = '<option value="">উপজেলা বাছাই করুন</option>';
+  unionSel.innerHTML = '<option value="">ইউনিয়ন বাছাই করুন</option>';
+  distSel.disabled = true; upaSel.disabled = true; unionSel.disabled = true;
+  document.getElementById('cropRecBtn').disabled = true;
+  if (!div) return;
+  var districts = CROP_DIVISIONS[div] ? CROP_DIVISIONS[div].districts : {};
+  Object.keys(districts).forEach(function(d) {
+    distSel.innerHTML += '<option value="' + d + '">' + districts[d].name_bn + ' / ' + d + '</option>';
+  });
+  distSel.disabled = false;
+}
+
+function onCropDistrictChange() {
+  var dist = document.getElementById('cropDistrict').value;
+  cropSelectedDist = dist; cropSelectedUpa = ''; cropSelectedUnion = '';
+  var upaSel = document.getElementById('cropUpazila');
+  var unionSel = document.getElementById('cropUnion');
+  upaSel.innerHTML = '<option value="">উপজেলা বাছাই করুন</option>';
+  unionSel.innerHTML = '<option value="">ইউনিয়ন বাছাই করুন</option>';
+  upaSel.disabled = true; unionSel.disabled = true;
+  document.getElementById('cropRecBtn').disabled = true;
+  if (!dist || !cropSelectedDiv) return;
+  var districts = CROP_DIVISIONS[cropSelectedDiv] ? CROP_DIVISIONS[cropSelectedDiv].districts : {};
+  var upazilas = districts[dist] ? (districts[dist].upazilas || {}) : {};
+  Object.keys(upazilas).forEach(function(u) {
+    upaSel.innerHTML += '<option value="' + u + '">' + u + '</option>';
+  });
+  upaSel.disabled = false;
+  document.getElementById('cropRecBtn').disabled = false;
+}
+
+function onCropUpazilaChange() {
+  var upa = document.getElementById('cropUpazila').value;
+  cropSelectedUpa = upa; cropSelectedUnion = '';
+  var unionSel = document.getElementById('cropUnion');
+  unionSel.innerHTML = '<option value="">ইউনিয়ন বাছাই করুন</option>';
+  unionSel.disabled = true;
+  if (!upa || !cropSelectedDist) return;
+  var districts = CROP_DIVISIONS[cropSelectedDiv] ? CROP_DIVISIONS[cropSelectedDiv].districts : {};
+  var unions = (districts[cropSelectedDist] && districts[cropSelectedDist].upazilas[upa]) ? districts[cropSelectedDist].upazilas[upa].unions : [];
+  unions.forEach(function(u) {
+    unionSel.innerHTML += '<option value="' + u + '">' + u + '</option>';
+  });
+  unionSel.disabled = false;
+}
+
+function getRecommendation() {
+  var div = document.getElementById('cropDivision').value;
+  var dist = document.getElementById('cropDistrict').value;
+  var upa = document.getElementById('cropUpazila').value;
+  var union = document.getElementById('cropUnion').value;
+  if (!dist) {
+    showToast(currentLang === 'en' ? 'Please select district' : 'জেলা নির্বাচন করুন', 'error');
+    return;
+  }
+  var locationParts = [dist];
+  if (upa) locationParts.push(upa);
+  if (union) locationParts.push(union);
+  var fullLocation = locationParts.join(', ');
+
+  setLoading('cropRecBtn', true);
+  document.getElementById('cropResults').style.display = 'none';
+
+  fetch(API_BASE + '/crop/recommend-dynamic', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ district: dist, upazila: upa || undefined, union: union || undefined, division: div || undefined })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    var list = document.getElementById('cropResultsList');
+    list.innerHTML = '';
+    var crops = data.recommended_crops || [];
+
+    // Location badge
+    list.innerHTML += '<div style="margin-bottom:16px;padding:12px;background:var(--info-light);border-radius:var(--radius);display:flex;align-items:center;gap:8px"><span class="material-icons-round" style="color:var(--info);font-size:18px">place</span><span style="font-size:13px;font-weight:600;color:var(--info)">' + fullLocation + '</span><span style="font-size:11px;color:var(--text-secondary);margin-left:auto">' + data.sources_used + ' সোর্স থেকে সংগ্রহিত</span></div>';
+
+    crops.forEach(function(r, i) {
+      var profitColor = r.market_demand === 'উচ্চ' ? 'var(--primary)' : r.market_demand === 'মাঝারি' ? 'var(--accent)' : 'var(--info)';
+      var srcLinks = '';
+      if (r.source_links && r.source_links.length > 0) {
+        srcLinks = '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)"><div style="font-size:10px;color:var(--text-hint);margin-bottom:4px">সোর্স (ক্লিক করে দেখুন):</div><div style="display:flex;flex-wrap:wrap;gap:4px">' + r.source_links.map(function(s) {
+          if (s.url) return '<a href="' + s.url + '" target="_blank" rel="noopener" style="display:inline-block;padding:2px 8px;background:var(--info-light);color:var(--info);border-radius:8px;font-size:10px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .2s" onmouseover="this.style.background=\'var(--info)\';this.style.color=\'#fff\'" onmouseout="this.style.background=\'var(--info-light)\';this.style.color=\'var(--info)\'">' + s.name + ' ↗</a>';
+          return '<span style="display:inline-block;padding:2px 8px;background:var(--primary-100);color:var(--primary);border-radius:8px;font-size:10px;font-weight:600">' + s.name + '</span>';
+        }).join('') + '</div></div>';
+      } else if (r.sources && r.sources.length > 0) {
+        srcLinks = '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)"><div style="font-size:10px;color:var(--text-hint)">সোর্স: ' + r.sources.slice(0, 3).join(' | ') + '</div></div>';
+      }
+      // Verified Bangladeshi newspaper reference links
+      var refLinks = '';
+      if (r.reference_sources && r.reference_sources.length > 0) {
+        refLinks = '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)"><div style="font-size:10px;color:var(--text-hint);margin-bottom:6px">বাংলাদেশি সংবাদপত্র ও সরকারি সূত্র:</div><div style="display:flex;flex-wrap:wrap;gap:4px">' + r.reference_sources.map(function(ref) {
+          var bgColor = ref.type === 'government' ? '#dcfce7' : ref.type === 'news_agency' ? '#fef3c7' : '#eff6ff';
+          var textColor = ref.type === 'government' ? '#16a34a' : ref.type === 'news_agency' ? '#d97706' : '#3b82f6';
+          return '<a href="' + ref.url + '" target="_blank" rel="noopener" style="display:inline-block;padding:2px 8px;background:' + bgColor + ';color:' + textColor + ';border-radius:8px;font-size:10px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .2s" onmouseover="this.style.opacity=\'0.8\'" onmouseout="this.style.opacity=\'1\'">' + ref.name_bn + ' ↗</a>';
+        }).join('') + '</div></div>';
+      }
+      list.innerHTML += '<div class="crop-result" style="border-left-color:' + profitColor + '"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div class="crop-name">' + (i + 1) + '. ' + r.name + '</div><div class="confidence">' + r.confidence + '%</div></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="padding:3px 10px;background:var(--primary-100);color:var(--primary);border-radius:12px;font-size:11px;font-weight:600">বাজার চাহিদা: ' + (r.market_demand || 'মাঝারি') + '</span><span style="padding:3px 10px;background:#fef3c7;color:var(--accent-dark);border-radius:12px;font-size:11px;font-weight:600">লাভজনকতা: ' + (r.profit_level || 'ভালো') + '</span><span style="padding:3px 10px;background:var(--info-light);color:var(--info);border-radius:12px;font-size:11px;font-weight:600">মৌসুম: ' + (r.season || 'সারা বছর') + '</span></div><p class="crop-desc" style="margin-bottom:8px"><strong>কেন চাষ করবেন:</strong> ' + (r.why_cultivate || r.desc) + '</p>' + (r.market_info ? '<p class="crop-desc" style="margin-bottom:8px"><strong>বাজার তথ্য:</strong> ' + r.market_info + '</p>' : '') + (r.profit_info ? '<p class="crop-desc" style="margin-bottom:8px"><strong>আনুমানিক লাভ:</strong> ' + r.profit_info + '</p>' : '') + (r.tips ? '<p class="crop-desc"><strong>টিপস:</strong> ' + r.tips + '</p>' : '') + refLinks + srcLinks + '</div>';
+    });
+
+    document.getElementById('cropResults').style.display = 'block';
+    setLoading('cropRecBtn', false);
+    showToast((currentLang === 'en' ? 'Found ' + crops.length + ' crops!' : crops.length + 'টি ফসল পাওয়া গেছে!'), 'success');
+  }).catch(function(e) {
+    setLoading('cropRecBtn', false);
+    showToast(currentLang === 'en' ? 'Error fetching data' : 'ত্রুটি', 'error');
+  });
+}
+
+applyTranslations();updateUserProfile();loadDashboardData();
+// Handle hash parameter for auth modal
+var hash=window.location.hash.replace('#','');
+if(hash==='login'||hash==='register') setTimeout(function(){openAuthModal(hash)},300);
+
+</script>
+</body>
+</html>

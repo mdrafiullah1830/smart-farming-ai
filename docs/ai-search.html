@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI Search — Smart Farming AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+.bg-map{position:fixed;top:0;left:0;width:100%;height:100%;background:url('bangladesh-map.png') center center no-repeat;background-size:50% auto;opacity:0.15;filter:brightness(2);pointer-events:none;z-index:1}
+:root{
+  --bg:#0a0f1a;--card:#111827;--card2:#1e293b;--border:#1e293b;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --accent:#22c55e;--accent2:#16a34a;--accent-bg:rgba(34,197,94,.08);
+  --blue:#3b82f6;--blue-bg:rgba(59,130,246,.08);
+  --purple:#a855f7;--purple-bg:rgba(168,85,247,.08);
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* Landing Page */
+.landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;text-align:center}
+.landing.hidden{display:none}
+.landing-icon{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,var(--accent),#059669);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px;box-shadow:0 8px 32px rgba(34,197,94,.3);animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 8px 32px rgba(34,197,94,.3)}50%{transform:scale(1.05);box-shadow:0 12px 40px rgba(34,197,94,.4)}}
+.landing h1{font-size:32px;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,#f1f5f9,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.landing p{color:var(--text2);font-size:16px;margin-bottom:40px;max-width:500px;line-height:1.6}
+.search-box{width:100%;max-width:640px;position:relative;margin-bottom:32px}
+.search-box input{width:100%;padding:18px 60px 18px 24px;font-size:17px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);outline:none;transition:all .3s;font-family:inherit}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+.search-box input::placeholder{color:var(--text3)}
+.search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:12px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.search-btn:hover{background:var(--accent2);transform:translateY(-50%) scale(1.05)}
+.search-btn svg{width:20px;height:20px;fill:#fff}
+
+.suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:640px}
+.suggestion{padding:10px 18px;background:var(--card);border:1px solid var(--border);border-radius:24px;color:var(--text2);font-size:13px;cursor:pointer;transition:all .2s}
+.suggestion:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+
+/* Results Page */
+.results-page{display:none;max-width:800px;margin:0 auto;padding:20px}
+.results-page.active{display:block}
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 0;margin-bottom:24px;border-bottom:1px solid var(--border)}
+.top-bar .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#059669);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.top-bar .search-input{flex:1;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:15px;outline:none;font-family:inherit}
+.top-bar .search-input:focus{border-color:var(--accent)}
+
+.answer-section{margin-bottom:32px}
+.answer-header{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.answer-badge{padding:6px 14px;background:var(--accent-bg);border:1px solid rgba(34,197,94,.2);border-radius:20px;color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.answer-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.answer-time{color:var(--text3);font-size:12px;margin-left:auto}
+.answer-text{font-size:16px;line-height:1.8;color:var(--text);padding:20px 24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);position:relative}
+.answer-text::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);border-radius:3px 0 0 3px}
+
+.sources-section{margin-bottom:32px}
+.sources-header{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.sources-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.source-card{padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;text-decoration:none;color:inherit}
+.source-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 4px 16px rgba(59,130,246,.1)}
+.source-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:var(--blue-bg);color:var(--blue);font-size:11px;font-weight:700;margin-bottom:8px}
+.source-title{font-size:14px;font-weight:600;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.source-url{font-size:11px;color:var(--text3);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.source-snippet{font-size:12px;color:var(--text2);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}
+
+.related-section{margin-bottom:40px}
+.related-header{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.related-list{display:flex;flex-direction:column;gap:8px}
+.related-item{padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+.related-item:hover{border-color:var(--purple);background:var(--purple-bg)}
+.related-icon{width:32px;height:32px;border-radius:8px;background:var(--purple-bg);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.related-text{font-size:13px;color:var(--text2);line-height:1.5}
+.related-item:hover .related-text{color:var(--text)}
+
+/* Loading */
+.loading{display:none;text-align:center;padding:60px 20px}
+.loading.active{display:block}
+.loading-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text2);font-size:14px}
+
+/* Footer */
+.footer{text-align:center;padding:40px 20px;color:var(--text3);font-size:12px;border-top:1px solid var(--border)}
+.footer a{color:var(--accent);text-decoration:none}
+
+/* Mobile */
+@media(max-width:640px){
+  .landing h1{font-size:24px}
+  .search-box input{padding:16px 56px 16px 18px;font-size:15px}
+  .sources-grid{grid-template-columns:1fr}
+  .answer-text{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="bg-map"></div>
+
+<!-- Landing Page -->
+<div class="landing" id="landing">
+  <div class="landing-icon">🌾</div>
+  <h1>AI Search</h1>
+  <p>কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন — আমরা ইন্টারনেট থেকে খুঁজে সেরা উত্তর দেব। ১০০% বিনামূল্যে।</p>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="যেকোনো কিছু জিজ্ঞাসা করুন..." autofocus>
+    <button class="search-btn" onclick="doSearch()">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    </button>
+  </div>
+  <div class="suggestions">
+    <div class="suggestion" onclick="quickSearch(this)">ধানের রোগ কি কি?</div>
+    <div class="suggestion" onclick="quickSearch(this)">বাংলাদেশে ফসলের দাম</div>
+    <div class="suggestion" onclick="quickSearch(this)">সার কখন দিবেন?</div>
+    <div class="suggestion" onclick="quickSearch(this)">মাটি পরীক্ষা কিভাবে করবেন?</div>
+    <div class="suggestion" onclick="quickSearch(this)">ইলিশ মাছের চাষ</div>
+    <div class="suggestion" onclick="quickSearch(this)">স্মার্ট ফার্মিং কি?</div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">ইন্টারনেটে খুঁজে পাচ্ছি...</div>
+</div>
+
+<!-- Results Page -->
+<div class="results-page" id="resultsPage">
+  <div class="top-bar">
+    <button class="back-btn" onclick="window.location.href='dashboard.html'" title="Dashboard e ফিরে যান">←</button>
+    <div class="logo">🌾</div>
+    <input type="text" class="search-input" id="resultSearchInput" placeholder="আবার খুঁজুন...">
+    <button class="search-btn" onclick="doSearchFromResult()" style="position:static;transform:none">
+      <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    </button>
+  </div>
+
+  <div class="answer-section" id="answerSection"></div>
+  <div class="sources-section" id="sourcesSection"></div>
+  <div class="related-section" id="relatedSection"></div>
+</div>
+
+<div class="footer">
+  Powered by <a href="#">Smart Farming AI</a> — ১০০% বিনামূল্যে | Data from DuckDuckGo & Web Sources
+</div>
+
+<script>
+var API_BASE = window.location.origin;
+
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doSearch();
+});
+document.getElementById('resultSearchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doSearchFromResult();
+});
+
+function quickSearch(el) {
+  document.getElementById('searchInput').value = el.textContent;
+  doSearch();
+}
+
+function doSearchFromResult() {
+  var q = document.getElementById('resultSearchInput').value.trim();
+  if (q) {
+    document.getElementById('searchInput').value = q;
+    doSearch();
+  }
+}
+
+async function doSearch() {
+  var query = document.getElementById('searchInput').value.trim();
+  if (!query) return;
+
+  // Show loading
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('resultsPage').classList.remove('active');
+  document.getElementById('loading').classList.add('active');
+  document.getElementById('resultSearchInput').value = query;
+
+  try {
+    var resp = await fetch(API_BASE + '/api/ai-search?q=' + encodeURIComponent(query));
+    var data = await resp.json();
+
+    document.getElementById('loading').classList.remove('active');
+
+    if (data.success) {
+      renderResults(data);
+    } else {
+      document.getElementById('answerSection').innerHTML = '<div class="answer-text">দুঃখিত, কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।</div>';
+      document.getElementById('resultsPage').classList.add('active');
+    }
+  } catch (e) {
+    document.getElementById('loading').classList.remove('active');
+    document.getElementById('answerSection').innerHTML = '<div class="answer-text">নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।</div>';
+    document.getElementById('resultsPage').classList.add('active');
+  }
+}
+
+function renderResults(data) {
+  // Answer
+  var agriBadge = data.isAgriQuery ? '<span class="answer-badge" style="margin-left:8px;background:var(--purple-bg);border-color:rgba(168,85,247,.2);color:var(--purple)"><span class="dot" style="background:var(--purple)"></span>কৃষি সম্পর্কিত</span>' : '';
+  var banglishNote = data.wasBanglish ? '<span style="color:var(--text3);font-size:11px;margin-left:8px">✨ "' + escapeHtml(data.originalQuery) + '" → "' + escapeHtml(data.query) + '"</span>' : '';
+  var breakdown = data.sourceBreakdown || {};
+  var sourceCount = (breakdown.duckduckgo||0) + (breakdown.wikipedia||0) + (breakdown.googleNews||0) + (breakdown.youtube||0);
+  var sourceStats = '<span style="color:var(--text3);font-size:11px;margin-left:8px">🔍 ' + sourceCount + ' sources</span>';
+  document.getElementById('answerSection').innerHTML =
+    '<div class="answer-header">' +
+      '<div class="answer-badge"><span class="dot"></span>AI উত্তর</div>' +
+      agriBadge +
+      banglishNote +
+      sourceStats +
+      '<div class="answer-time">' + data.timeTaken + '</div>' +
+    '</div>' +
+    '<div class="answer-text">' + formatAnswer(data.answer) + '</div>';
+
+  // Sources
+  if (data.sources && data.sources.length > 0) {
+    var sourcesHtml = '<div class="sources-header">📚 সোর্স (' + data.sources.length + ')</div><div class="sources-grid">';
+    data.sources.forEach(function(s, i) {
+      var sourceIcon = getSourceIcon(s.source, s.url);
+      sourcesHtml += '<a class="source-card" href="' + (s.url || '#') + '" target="_blank" rel="noopener">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
+          '<div class="source-num">' + (i + 1) + '</div>' +
+          '<span style="font-size:16px">' + sourceIcon + '</span>' +
+          '<span style="font-size:11px;color:var(--text3);font-weight:600">' + (s.source || 'Web') + '</span>' +
+        '</div>' +
+        '<div class="source-title">' + escapeHtml(s.title) + '</div>' +
+        '<div class="source-url">' + getDomain(s.url) + '</div>' +
+        (s.snippet ? '<div class="source-snippet">' + escapeHtml(s.snippet) + '</div>' : '') +
+      '</a>';
+    });
+    sourcesHtml += '</div>';
+    document.getElementById('sourcesSection').innerHTML = sourcesHtml;
+  } else {
+    document.getElementById('sourcesSection').innerHTML = '';
+  }
+
+  // Related Topics
+  if (data.relatedTopics && data.relatedTopics.length > 0) {
+    var relatedHtml = '<div class="related-header">🔗 সম্পর্কিত বিষয়</div><div class="related-list">';
+    data.relatedTopics.forEach(function(t) {
+      relatedHtml += '<div class="related-item" onclick="searchRelated(\'' + escapeAttr(t.text.substring(0, 60)) + '\')">' +
+        '<div class="related-icon">🔍</div>' +
+        '<div class="related-text">' + escapeHtml(t.text) + '</div>' +
+      '</div>';
+    });
+    relatedHtml += '</div>';
+    document.getElementById('relatedSection').innerHTML = relatedHtml;
+  } else {
+    document.getElementById('relatedSection').innerHTML = '';
+  }
+
+  document.getElementById('resultsPage').classList.add('active');
+}
+
+function searchRelated(text) {
+  document.getElementById('searchInput').value = text;
+  doSearch();
+}
+
+function formatAnswer(text) {
+  if (!text) return '';
+  return text
+    .replace(/\n\n/g, '</p><p style="margin-top:12px">')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>')
+    .replace(/$/, '</p>')
+    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--blue);text-decoration:underline">$1</a>');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escapeAttr(str) {
+  return str.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+function getDomain(url) {
+  try { return new URL(url).hostname; } catch(e) { return url || ''; }
+}
+
+function getSourceIcon(source, url) {
+  if (!source) return '🌐';
+  var s = source.toLowerCase();
+  if (s.includes('wikipedia')) return '📖';
+  if (s.includes('youtube')) return '▶️';
+  if (s.includes('news') || s.includes('google news')) return '📰';
+  if (s.includes('duckduckgo')) return '🦆';
+  if (url && url.includes('gov.bd')) return '🏛️';
+  if (url && url.includes('youtube.com')) return '▶️';
+  return '🌐';
+}
+
+// Check URL params for query
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var q = params.get('q');
+  if (q) {
+    document.getElementById('searchInput').value = q;
+    doSearch();
+  }
+})();
+
+// Focus search input
+setTimeout(function() { document.getElementById('searchInput').focus(); }, 100);
+</script>
+</body>
+</html>
