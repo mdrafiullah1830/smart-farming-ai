@@ -13,3 +13,12 @@ soil analysis/
 *.mp4
 soil_data.json
 *.pkl
+.wrangler/
+.dev.vars
+.vercel/
+.env.local
+.pytest_cache/
+database/*.db-shm
+database/*.db-wal
+database/.fuse_hidden*
+frontend/build/

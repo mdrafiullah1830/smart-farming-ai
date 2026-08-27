@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: smart-farming-ai
+    runtime: docker
+    plan: free
+    rootDir: apps/ai-service
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: SERVICE_TOKEN
+        generateValue: true

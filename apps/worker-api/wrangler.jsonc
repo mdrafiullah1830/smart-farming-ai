@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smart-farming-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-27",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "vars": {
+    "APP_ENV": "production",
+    "ALLOWED_ORIGINS": "https://smart-farming-ai.vercel.app,http://localhost:3000,http://localhost:8080",
+    "AI_SERVICE_URL": "https://smart-farming-ai.onrender.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "smart-farming-db",
+      "database_id": "f78e4ed1-effc-4bdc-b3c9-561589131ff4",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "smart-farming-uploads"
+    }
+  ]
+}

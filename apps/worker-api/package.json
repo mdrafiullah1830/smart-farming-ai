@@ -1,0 +1,19 @@
+{
+  "name": "@smart-farming/worker-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "db:migrate:local": "wrangler d1 migrations apply smart-farming-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply smart-farming-db --remote"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260827.1",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.127.0"
+  }
+}
