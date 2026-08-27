@@ -10,3 +10,9 @@ test('migration creates the core tables and indexes', () => {
   assert.match(sql, /CREATE INDEX idx_soil_location/);
   assert.match(sql, /CREATE INDEX idx_market_crop_date/);
 });
+
+test('district seed contains all 64 districts', () => {
+  const sql = readFileSync(new URL('../migrations/0002_seed_districts.sql', import.meta.url), 'utf8');
+  assert.equal((sql.match(/^\('/gm) ?? []).length, 64);
+  assert.match(sql, /'64','Tangail','টাঙ্গাইল'/);
+});

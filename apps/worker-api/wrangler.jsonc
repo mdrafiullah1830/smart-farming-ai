@@ -7,7 +7,7 @@
   "observability": { "enabled": true },
   "vars": {
     "APP_ENV": "production",
-    "ALLOWED_ORIGINS": "https://smart-farming-ai.vercel.app,http://localhost:3000,http://localhost:8080",
+    "ALLOWED_ORIGINS": "https://smart-farming-ai-bice.vercel.app,http://localhost:3000,http://localhost:8080",
     "AI_SERVICE_URL": "https://smart-farming-ai.onrender.com"
   },
   "d1_databases": [
