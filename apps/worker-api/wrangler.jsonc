@@ -8,7 +8,7 @@
   "vars": {
     "APP_ENV": "production",
     "ALLOWED_ORIGINS": "https://smart-farming-ai-bice.vercel.app,http://localhost:3000,http://localhost:8080",
-    "AI_SERVICE_URL": "https://smart-farming-ai.onrender.com"
+    "AI_SERVICE_URL": "https://smart-farming-ai-2504.onrender.com"
   },
   "d1_databases": [
     {

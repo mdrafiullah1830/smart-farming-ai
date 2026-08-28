@@ -4,6 +4,7 @@ export interface Env {
   APP_ENV: string;
   ALLOWED_ORIGINS: string;
   AI_SERVICE_URL: string;
+  AI_SERVICE_TOKEN: string;
   JWT_SECRET: string;
 }
 

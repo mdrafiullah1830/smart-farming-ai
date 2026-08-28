@@ -82,6 +82,29 @@ async function route(request: Request, env: Env): Promise<Response> {
     const result = await query.all();
     return json(request, env, { district, upazila, features: result.results });
   }
+  if (url.pathname === '/api/v1/integrations/ai/health' && request.method === 'GET') {
+    const upstream = await fetch(`${env.AI_SERVICE_URL}/v1/disease/analyze`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.AI_SERVICE_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        job_id: `health-${crypto.randomUUID()}`,
+        image_url: 'https://example.com/health-check.jpg',
+      }),
+    });
+    if (!upstream.ok) {
+      console.error('ai_health_failed', { status: upstream.status });
+      return error(request, env, 503, 'AI service authentication failed');
+    }
+    const result = await upstream.json<{ status?: string }>();
+    return json(request, env, {
+      status: 'ok',
+      service: 'ai-service',
+      model_status: result.status ?? 'unknown',
+    });
+  }
   if (url.pathname === '/api/v1/uploads/disease' && request.method === 'POST') return upload(request, env);
   return error(request, env, 404, 'Route not found');
 }
