@@ -1,0 +1,31 @@
+{
+  "remote_zip_bytes": 3065323818,
+  "classes": {
+    "healthy": 32432,
+    "mild": 1219,
+    "moderate": 927,
+    "severe": 1370
+  },
+  "sample_paths": {
+    "healthy": [
+      "mustard_flea_beetle_dataset/classification/healthy/img_0711_crop_09985.jpg",
+      "mustard_flea_beetle_dataset/classification/healthy/img_0615_crop_06492.jpg",
+      "mustard_flea_beetle_dataset/classification/healthy/img_0541_crop_34902.jpg"
+    ],
+    "mild": [
+      "mustard_flea_beetle_dataset/classification/mild/img_0738_crop_11447.jpg",
+      "mustard_flea_beetle_dataset/classification/mild/img_0148_crop_01012.jpg",
+      "mustard_flea_beetle_dataset/classification/mild/img_0622_crop_34300.jpg"
+    ],
+    "moderate": [
+      "mustard_flea_beetle_dataset/classification/moderate/img_0097_crop_02559.jpg",
+      "mustard_flea_beetle_dataset/classification/moderate/img_0320_crop_18365.jpg",
+      "mustard_flea_beetle_dataset/classification/moderate/img_0267_crop_14225.jpg"
+    ],
+    "severe": [
+      "mustard_flea_beetle_dataset/classification/severe/img_0074_crop_11911.jpg",
+      "mustard_flea_beetle_dataset/classification/severe/img_0074_crop_11905.jpg",
+      "mustard_flea_beetle_dataset/classification/severe/img_0318_crop_03265.jpg"
+    ]
+  }
+}

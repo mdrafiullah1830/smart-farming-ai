@@ -1,0 +1,182 @@
+[
+  {
+    "local_path": "images/affected/0000.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417840.jpg"
+  },
+  {
+    "local_path": "images/affected/0001.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417851.jpg"
+  },
+  {
+    "local_path": "images/affected/0002.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417865.jpg"
+  },
+  {
+    "local_path": "images/affected/0003.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417880.jpg"
+  },
+  {
+    "local_path": "images/affected/0004.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417895.jpg"
+  },
+  {
+    "local_path": "images/affected/0005.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417915.jpg"
+  },
+  {
+    "local_path": "images/affected/0006.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417936.jpg"
+  },
+  {
+    "local_path": "images/affected/0007.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417954.jpg"
+  },
+  {
+    "local_path": "images/affected/0008.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417973.jpg"
+  },
+  {
+    "local_path": "images/affected/0009.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417996.jpg"
+  },
+  {
+    "local_path": "images/affected/0010.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418017.jpg"
+  },
+  {
+    "local_path": "images/affected/0011.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418032.jpg"
+  },
+  {
+    "local_path": "images/affected/0012.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418042.jpg"
+  },
+  {
+    "local_path": "images/affected/0013.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418055.jpg"
+  },
+  {
+    "local_path": "images/affected/0014.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418068.jpg"
+  },
+  {
+    "local_path": "images/affected/0015.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418085.jpg"
+  },
+  {
+    "local_path": "images/affected/0016.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418111.jpg"
+  },
+  {
+    "local_path": "images/affected/0017.jpg",
+    "class": "affected",
+    "source_path": "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349418136.jpg"
+  },
+  {
+    "local_path": "images/healthy/0000.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340408.jpg"
+  },
+  {
+    "local_path": "images/healthy/0001.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340420.jpg"
+  },
+  {
+    "local_path": "images/healthy/0002.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340439.jpg"
+  },
+  {
+    "local_path": "images/healthy/0003.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340448.jpg"
+  },
+  {
+    "local_path": "images/healthy/0004.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340460.jpg"
+  },
+  {
+    "local_path": "images/healthy/0005.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340473.jpg"
+  },
+  {
+    "local_path": "images/healthy/0006.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340483.jpg"
+  },
+  {
+    "local_path": "images/healthy/0007.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340491.jpg"
+  },
+  {
+    "local_path": "images/healthy/0008.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340507.jpg"
+  },
+  {
+    "local_path": "images/healthy/0009.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340517.jpg"
+  },
+  {
+    "local_path": "images/healthy/0010.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340531.jpg"
+  },
+  {
+    "local_path": "images/healthy/0011.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340559.jpg"
+  },
+  {
+    "local_path": "images/healthy/0012.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340570.jpg"
+  },
+  {
+    "local_path": "images/healthy/0013.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340584.jpg"
+  },
+  {
+    "local_path": "images/healthy/0014.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340600.jpg"
+  },
+  {
+    "local_path": "images/healthy/0015.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340612.jpg"
+  },
+  {
+    "local_path": "images/healthy/0016.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340662.jpg"
+  },
+  {
+    "local_path": "images/healthy/0017.jpg",
+    "class": "healthy",
+    "source_path": "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340673.jpg"
+  }
+]

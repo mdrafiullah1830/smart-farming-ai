@@ -1,0 +1,14 @@
+# Trained model artifacts
+
+This directory is intentionally tracked but empty. Persisted model files
+(`.pkl`, `.joblib`, `.h5`, `.onnx`, `.pt`, etc.) are excluded by `.gitignore`
+because they are large, regenerable, and often platform-specific.
+
+A future trained model is required to live in `apps/ai-service/`
+(see `apps/ai-service/app/main.py`) before the production deployment can
+return real predictions. Until then, the service responds with
+`status: "model_unavailable"` rather than fabricating output.
+
+To promote a model from `ai_models/trained_models/` into a deployable
+artifact, export to ONNX and load it at startup in
+`apps/ai-service/app/main.py::lifespan`.

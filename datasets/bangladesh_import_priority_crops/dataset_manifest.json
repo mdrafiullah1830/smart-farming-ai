@@ -1,0 +1,140 @@
+{
+  "generated_at_timezone": "Asia/Dhaka",
+  "selection_period": "2022 to latest available FAOSTAT year",
+  "selected_crops": [
+    "wheat",
+    "maize",
+    "onion",
+    "garlic",
+    "ginger",
+    "lentil",
+    "mustard_rapeseed",
+    "soybean"
+  ],
+  "source_archives": [
+    {
+      "file": "raw/faostat_production_crops_livestock_normalized.zip",
+      "url": "https://bulks-faostat.fao.org/production/Production_Crops_Livestock_E_All_Data_(Normalized).zip",
+      "sha256": "c5835418c18f9322e7decbd6800f93a216eaae3cdfa31acb08f0518c0c6d6853"
+    },
+    {
+      "file": "raw/faostat_trade_crops_livestock_normalized.zip",
+      "url": "https://bulks-faostat.fao.org/production/Trade_CropsLivestock_E_All_Data_(Normalized).zip",
+      "sha256": "effb07f6ee6c1f086e2dd4c11742d2ba9495552fb11c11ea64aa7edbd7a32380"
+    }
+  ],
+  "coverage": {
+    "wheat": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 3
+    },
+    "maize": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 3
+    },
+    "onion": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 3
+    },
+    "garlic": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 3
+    },
+    "ginger": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 3
+    },
+    "lentil": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 3
+    },
+    "mustard_rapeseed": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 6
+    },
+    "soybean": {
+      "production_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "import_years": [
+        2022,
+        2023,
+        2024
+      ],
+      "production_rows": 3,
+      "import_rows": 3
+    }
+  }
+}

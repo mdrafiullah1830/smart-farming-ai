@@ -1,0 +1,96 @@
+{
+  "root": "/Users/mdrafiullah/smart_farming_ai/datasets/crop_disease_images",
+  "files": {
+    "ginger/ginger_leaf_dataset.zip": {
+      "type": "zip",
+      "bytes": 229016577,
+      "sha256": "779fbffec77d9b6efeea0a259cc45f89a2ac5ebd1e1a46e963ad0378fdc3e6f7",
+      "image_count": 10910,
+      "classes": {
+        "Damage-Pest": 2076,
+        "Dehydrated": 3372,
+        "Healthy": 2198,
+        "Leaf-blight": 3264
+      },
+      "integrity": "ok"
+    },
+    "lentil/lentil_disease_cc-by-4.0.parquet": {
+      "type": "parquet",
+      "bytes": 73836213,
+      "sha256": "6a249475013e90ea2e4909cfd18091b892a77e53a443eb5b382d07d06028e02a",
+      "integrity": "ok"
+    },
+    "maize/corn_maize_leaf_disease.parquet": {
+      "type": "parquet",
+      "bytes": 171316661,
+      "sha256": "5f527dd4f1c735d12a458fcbb712858c795e289ffd283fa6fbd596040b0c77f0",
+      "integrity": "ok"
+    },
+    "onion/onion_leaf_disease_raw_cc-by-4.0.parquet": {
+      "type": "parquet",
+      "bytes": 16364888,
+      "sha256": "37a5646dad707ff853fc99d659764c0d4deae9d5dfd7db5cd0eebb18ef2154ed",
+      "integrity": "ok"
+    },
+    "soybean/soybean_leaf_diseases_test.parquet": {
+      "type": "parquet",
+      "bytes": 2635788,
+      "sha256": "9e5d05eb1ad91f55e48c41d740131b8973d247e13f05e448d7b0a903d8d64700",
+      "integrity": "ok"
+    },
+    "soybean/soybean_leaf_diseases_train.parquet": {
+      "type": "parquet",
+      "bytes": 11751193,
+      "sha256": "b959dccf674fda97bb1554270c575b5b72c9ba6031f714a14c289b82ee1eccef",
+      "integrity": "ok"
+    },
+    "soybean/soybean_leaf_diseases_validation.parquet": {
+      "type": "parquet",
+      "bytes": 2481318,
+      "sha256": "4d11d1bb93baaaf21df7e1ec6307dff682a5723f1e1ae3f5ed90c4512aa6b749",
+      "integrity": "ok"
+    },
+    "wheat/wheat_leaf_rust_cc-by-4.0.zip": {
+      "type": "zip",
+      "bytes": 253660637,
+      "sha256": "1ad34f9e57d3510d81646cb027aaf5e72db0978d2278b25ca91819a6df9409bb",
+      "image_count": 859,
+      "classes": {
+        "control": 491,
+        "diseased": 368
+      },
+      "integrity": "ok"
+    }
+  },
+  "image_folders": {
+    "garlic": {
+      "type": "image_folder",
+      "bytes": 79660565,
+      "image_count": 36,
+      "classes": {
+        "affected": 18,
+        "healthy": 18
+      },
+      "empty_files": [],
+      "corrupt_files": [],
+      "partial_files": [],
+      "integrity": "ok"
+    },
+    "mustard": {
+      "type": "image_folder",
+      "bytes": 10456444,
+      "image_count": 400,
+      "classes": {
+        "healthy": 100,
+        "mild": 100,
+        "moderate": 100,
+        "severe": 100
+      },
+      "empty_files": [],
+      "corrupt_files": [],
+      "partial_files": [],
+      "integrity": "ok"
+    }
+  },
+  "status": "ok"
+}

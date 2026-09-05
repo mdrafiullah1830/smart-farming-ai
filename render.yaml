@@ -9,4 +9,4 @@ services:
     autoDeployTrigger: commit
     envVars:
       - key: SERVICE_TOKEN
-        generateValue: true
+        sync: false

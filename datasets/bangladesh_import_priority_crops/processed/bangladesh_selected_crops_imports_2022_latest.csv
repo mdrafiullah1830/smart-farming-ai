@@ -1,0 +1,55 @@
+crop_key,area,item,element,year,unit,value,flag,note
+garlic,Bangladesh,Green garlic,Import quantity,2022,t,71152.330000,X,Estimated data using trading partners database
+garlic,Bangladesh,Green garlic,Import quantity,2023,t,166191.790000,X,Estimated data using trading partners database
+garlic,Bangladesh,Green garlic,Import quantity,2024,t,174305.770000,X,Estimated data using trading partners database
+garlic,Bangladesh,Green garlic,Import value,2022,1000 USD,40126.000000,X,Estimated data using trading partners database
+garlic,Bangladesh,Green garlic,Import value,2023,1000 USD,138165.000000,X,Estimated data using trading partners database
+garlic,Bangladesh,Green garlic,Import value,2024,1000 USD,212777.000000,X,Estimated data using trading partners database
+ginger,Bangladesh,"Ginger, raw",Import quantity,2022,t,99455.700000,X,Estimated data using trading partners database
+ginger,Bangladesh,"Ginger, raw",Import quantity,2023,t,70459.980000,X,Estimated data using trading partners database
+ginger,Bangladesh,"Ginger, raw",Import quantity,2024,t,141622.770000,X,Estimated data using trading partners database
+ginger,Bangladesh,"Ginger, raw",Import value,2022,1000 USD,41738.000000,X,Estimated data using trading partners database
+ginger,Bangladesh,"Ginger, raw",Import value,2023,1000 USD,57670.000000,X,Estimated data using trading partners database
+ginger,Bangladesh,"Ginger, raw",Import value,2024,1000 USD,119388.000000,X,Estimated data using trading partners database
+lentil,Bangladesh,"Lentils, dry",Import quantity,2022,t,521194.490000,X,Estimated data using trading partners database
+lentil,Bangladesh,"Lentils, dry",Import quantity,2023,t,365236.530000,X,Estimated data using trading partners database
+lentil,Bangladesh,"Lentils, dry",Import quantity,2024,t,652099.800000,X,Estimated data using trading partners database
+lentil,Bangladesh,"Lentils, dry",Import value,2022,1000 USD,441872.000000,X,Estimated data using trading partners database
+lentil,Bangladesh,"Lentils, dry",Import value,2023,1000 USD,309930.000000,X,Estimated data using trading partners database
+lentil,Bangladesh,"Lentils, dry",Import value,2024,1000 USD,478563.000000,X,Estimated data using trading partners database
+maize,Bangladesh,Maize (corn),Import quantity,2022,t,2265459.400000,X,Estimated data using trading partners database
+maize,Bangladesh,Maize (corn),Import quantity,2023,t,873727.970000,X,Estimated data using trading partners database
+maize,Bangladesh,Maize (corn),Import quantity,2024,t,1180356.010000,X,Estimated data using trading partners database
+maize,Bangladesh,Maize (corn),Import value,2022,1000 USD,799678.000000,X,Estimated data using trading partners database
+maize,Bangladesh,Maize (corn),Import value,2023,1000 USD,280365.000000,X,Estimated data using trading partners database
+maize,Bangladesh,Maize (corn),Import value,2024,1000 USD,277942.000000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Mustard seed,Import quantity,2022,t,16890.670000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Mustard seed,Import quantity,2023,t,17257.380000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Mustard seed,Import quantity,2024,t,2541.750000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Mustard seed,Import value,2022,1000 USD,15458.000000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Mustard seed,Import value,2023,1000 USD,11495.000000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Mustard seed,Import value,2024,1000 USD,1492.000000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Rape or colza seed,Import quantity,2022,t,305055.030000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Rape or colza seed,Import quantity,2023,t,338057.290000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Rape or colza seed,Import quantity,2024,t,320343.470000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Rape or colza seed,Import value,2022,1000 USD,248958.000000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Rape or colza seed,Import value,2023,1000 USD,199529.000000,X,Estimated data using trading partners database
+mustard_rapeseed,Bangladesh,Rape or colza seed,Import value,2024,1000 USD,179544.000000,X,Estimated data using trading partners database
+onion,Bangladesh,"Onions and shallots, dry (excluding dehydrated)",Import quantity,2022,t,712226.150000,X,Estimated data using trading partners database
+onion,Bangladesh,"Onions and shallots, dry (excluding dehydrated)",Import quantity,2023,t,888456.490000,X,Estimated data using trading partners database
+onion,Bangladesh,"Onions and shallots, dry (excluding dehydrated)",Import quantity,2024,t,438517.740000,X,Estimated data using trading partners database
+onion,Bangladesh,"Onions and shallots, dry (excluding dehydrated)",Import value,2022,1000 USD,162593.000000,X,Estimated data using trading partners database
+onion,Bangladesh,"Onions and shallots, dry (excluding dehydrated)",Import value,2023,1000 USD,236384.000000,X,Estimated data using trading partners database
+onion,Bangladesh,"Onions and shallots, dry (excluding dehydrated)",Import value,2024,1000 USD,215088.000000,X,Estimated data using trading partners database
+soybean,Bangladesh,Soya beans,Import quantity,2022,t,1838431.340000,X,Estimated data using trading partners database
+soybean,Bangladesh,Soya beans,Import quantity,2023,t,1773078.190000,X,Estimated data using trading partners database
+soybean,Bangladesh,Soya beans,Import quantity,2024,t,2031230.530000,X,Estimated data using trading partners database
+soybean,Bangladesh,Soya beans,Import value,2022,1000 USD,1231530.000000,X,Estimated data using trading partners database
+soybean,Bangladesh,Soya beans,Import value,2023,1000 USD,1076607.000000,X,Estimated data using trading partners database
+soybean,Bangladesh,Soya beans,Import value,2024,1000 USD,1003315.000000,X,Estimated data using trading partners database
+wheat,Bangladesh,Wheat,Import quantity,2022,t,4169796.490000,X,Estimated data using trading partners database
+wheat,Bangladesh,Wheat,Import quantity,2023,t,2969596.690000,X,Estimated data using trading partners database
+wheat,Bangladesh,Wheat,Import quantity,2024,t,2899634.770000,X,Estimated data using trading partners database
+wheat,Bangladesh,Wheat,Import value,2022,1000 USD,1592061.000000,X,Estimated data using trading partners database
+wheat,Bangladesh,Wheat,Import value,2023,1000 USD,920302.000000,X,Estimated data using trading partners database
+wheat,Bangladesh,Wheat,Import value,2024,1000 USD,759955.000000,X,Estimated data using trading partners database

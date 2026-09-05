@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+html{
+--color-primary-bg:#00A63E;
+--color-primary-light:#2DAB5B;
+--color-primary-dark:#008532;
+--color-primary-text:#ffffff;
+--color-secondary-bg:#DC2626;
+--color-secondary-light:#FEF2F2;
+--color-secondary-dark:#ED3131;
+--color-secondary-text:#ffffff;
+--color-normal-bg:#ffffff;
+--color-normal-light:#f0f0f0;
+--color-normal-dark:#e0e0e0;
+--color-normal-text:#000000;
+--color-dark-bg:#000000;
+--color-dark-light:#202020;
+--color-dark-dark:#404040;
+--color-dark-text:#ffffff;
+--color-success-bg:#28a745;
+--color-success-text:#ffffff;
+--color-danger-bg:#dc3545;
+--color-danger-text:#dc3545;
+--color-warning-bg:#FF6600;
+--color-warning-text:#FF6600;
+--color-info-bg:#17a2b8;
+--color-info-text:#ffffff;
+--color-link-normal:#1568b2;
+--color-link-dark:#1b81dd;
+--color-border-normal:#d0d0d0;
+--color-border-dark:#909090;
+--background-primary-image:url(/site-assets/images/bg.png);
+--background-primary-repeat:repeat;
+--background-primary-position:center center;
+--background-primary-color:#ffffff;
+--background-secondary-image:url(/site-assets/images/bg.png);
+--background-secondary-repeat:repeat;
+--background-secondary-position:center center;
+--background-secondary-color:#ffffff;
+--container-small:600px;
+--container-medium:900px;
+--container-large:1200px;
+--spacing-small:8px;
+--spacing-medium:16px;
+--spacing-large:24px;
+--radius-small:4px;
+--radius-medium:8px;
+--radius-large:16px;
+--shadow-small:0px 2px 4px rgba(0, 0, 0, 0.1);
+--shadow-medium:0px 4px 8px rgba(0, 0, 0, 0.1);
+--shadow-large:0px 8px 16px rgba(0, 0, 0, 0.1);
+--text-small:0.75rem;
+--text-medium:0.9rem;
+--text-large:1.25rem;
+--font-heading-en:NotoSansBengali-Regular, sans-serif;
+--font-heading-bn:NotoSansBengali-Regular, sans-serif;
+--font-primary-en:NotoSansBengali-Regular, sans-serif;
+--font-primary-bn:NotoSansBengali-Regular, sans-serif;
+--font-secondary-en:NotoSansBengali-Regular, sans-serif;
+--font-secondary-bn:NotoSansBengali-Regular, sans-serif;
+--typography-h1-font-family:var(--font-heading);
+--typography-h1-font-weight:700;
+--typography-h1-font-size:32px;
+--typography-h1-line-height:1.2;
+--typography-h2-font-family:var(--font-heading);
+--typography-h2-font-weight:700;
+--typography-h2-font-size:28px;
+--typography-h2-line-height:1.2;
+--typography-h3-font-family:var(--font-heading);
+--typography-h3-font-weight:600;
+--typography-h3-font-size:24px;
+--typography-h3-line-height:1.5;
+--typography-h4-font-family:var(--font-heading);
+--typography-h4-font-weight:500;
+--typography-h4-font-size:20px;
+--typography-h4-line-height:1.5;
+--typography-h5-font-family:var(--font-heading);
+--typography-h5-font-weight:500;
+--typography-h5-font-size:18px;
+--typography-h5-line-height:1.5;
+--typography-h6-font-family:var(--font-heading);
+--typography-h6-font-weight:400;
+--typography-h6-font-size:16px;
+--typography-h6-line-height:1.5;
+--typography-body-font-family:var(--font-primary);
+--typography-body-font-weight:400;
+--typography-body-font-size:14px;
+--typography-body-line-height:1.2;
+--typography-p-font-family:var(--font-primary);
+--typography-p-font-weight:400;
+--typography-p-font-size:14px;
+--typography-p-line-height:1.2;
+--typography-a-font-family:var(--font-secondary);
+--typography-a-font-weight:400;
+--typography-a-font-size:14px;
+--typography-a-line-height:1.2;
+}
+html,html[lang="en"]{
+--font-heading:NotoSansBengali-Regular, sans-serif;
+--font-primary:NotoSansBengali-Regular, sans-serif;
+--font-secondary:NotoSansBengali-Regular, sans-serif;
+}
+html[lang="bn"]{
+--font-heading:NotoSansBengali-Regular, sans-serif;
+--font-primary:NotoSansBengali-Regular, sans-serif;
+--font-secondary:NotoSansBengali-Regular, sans-serif;
+}
+
+/* ===== CONTAINER ===== */
+body{overflow-x:hidden;}
+.col{flex:0 0 auto;}
+.container-row,.widget-container-row{
+  --col-gutter-x: var(--spacing-medium);
+  --col-gutter-y:0;
+  /*
+  --col-gutter-y: var(--spacing-medium);
+  */
+  display:flex;
+  flex-wrap:wrap;
+  margin-top:calc(-1 * var(--col-gutter-y));
+  margin-right:calc(-.5 * var(--col-gutter-x));
+  margin-left:calc(-.5 * var(--col-gutter-x))
+  /*
+  width:calc(100% + var(--col-gutter-x));
+  margin-top:calc(-1 * var(--col-gutter-y));
+  margin-left:calc(-1 * var(--col-gutter-x));
+  */
+}
+.container-row>*,.widget-container-row>*{
+  box-sizing:border-box;
+  flex-shrink:0;
+  width:100%;
+  max-width:100%;
+  padding-right:calc(var(--col-gutter-x) * .5);
+  padding-left:calc(var(--col-gutter-x) * .5);
+  margin-top:var(--col-gutter-y)
+  /*
+  width:calc(100% - var(--col-gutter-x));
+  max-width:calc(100% - var(--col-gutter-x));
+  margin-top:var(--col-gutter-y);
+  margin-left:var(--col-gutter-x);
+  */
+}
+
+@media (min-width:600px) {
+  .container-col-1{width:8.3333%;}
+  .container-col-2{width:16.666%;}
+  .container-col-3{width:25%;}
+  .container-col-4{width:33.333%;}
+  .container-col-5{width:41.666%;}
+  .container-col-6{width:50%;}
+  .container-col-7{width:58.333%;}
+  .container-col-8{width:66.666%;}
+  .container-col-9{width:75%;}
+  .container-col-10{width:83.333%;}
+  .container-col-11{width:91.666%;}
+  .container-col-12{width:100%;}
+}
+
+  </style>
+  <!-- analytics script -->
+  <!-- Matomo Id n/a -->
+  <script defer data-domain="bbs.gov.bd" src="https://analytics-plausible.portal.gov.bd/js/script.file-downloads.hash.outbound-links.pageview-props.tagged-events.js"></script>
+  <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+  <link rel="stylesheet" href="/site-assets/css/phosphor.css">
+  <link rel="stylesheet" href="/site-assets/css/phosphor-fill.css">
+  <link rel="stylesheet" href="/site-assets/css/index.css">
+  <link rel="stylesheet" href="/widget-assets/css/HeaderWidget">
+  <link rel="stylesheet" href="/widget-assets/css/OfficeFindThreeWidget">
+  <link rel="stylesheet" href="/widget-assets/css/GlobalSearchWidget">
+  <link rel="stylesheet" href="/widget-assets/css/LanguageSwitcherWidget">
+  <link rel="stylesheet" href="/widget-assets/css/BannerSliderImageWidget">
+  <link rel="stylesheet" href="/widget-assets/css/MenusExpandableWidget">
+  <link rel="stylesheet" href="/widget-assets/css/MenusWidget">
+  <link rel="stylesheet" href="/widget-assets/css/SocialContentShareWidget">
+  <link rel="stylesheet" href="/widget-assets/css/EParticipationOpinionPopupWidget">
+  <link rel="stylesheet" href="/widget-assets/css/EParticipationOpinionFormWidget">
+  <link rel="stylesheet" href="/widget-assets/css/ContentViewerWidget">
+  <link rel="stylesheet" href="/widget-assets/css/PrintWidget">
+  <link rel="stylesheet" href="/widget-assets/css/AccessibilityWidget">
+  <link rel="stylesheet" href="/widget-assets/css/GoToTopWidget">
+  <link rel="stylesheet" href="/widget-assets/css/TitleWithImageContentWidget">
+  <link rel="stylesheet" href="/widget-assets/css/ContentDetailsWidget">
+  <link rel="stylesheet" href="/widget-assets/css/FooterWidget">
+  <style>/* END */</style>
+  <link rel="stylesheet" href="/assets/css/index.css">
+
+  <!-- RENDERING 687f4277a79706ab75fb1131 : 1787902371120 -->
+  <title>কৃষি পরিসংখ্যান বর্ষগ্রন্থ | পাতা | বাংলাদেশ পরিসংখ্যান ব্যুরো</title>
+  <meta name="description" content=""/>
+  <meta name="keywords" content="কৃষি পরিসংখ্যান বর্ষগ্রন্থ, পাতা, বাংলাদেশ পরিসংখ্যান ব্যুরো, http://bbs.gov.bd, Bangladesh, Bangladesh National Portal, Government of the People's Republic of Bangladesh, গণপ্রজাতন্ত্রী বাংলাদেশ সরকার"/>
+  <link rel="canonical" href="http://bbs.gov.bd/pages/static-pages/6922e0d6933eb65569e28cbf"/>
+  <link rel="icon" type="image/x-icon" href="/site-assets/images/favicon.ico"/>
+  <link rel="shortcut icon" type="image/x-icon" href="/site-assets/images/favicon.ico"/>
+  <link rel="shortcut icon" type="image/png" href="/site-assets/images/favicon.png"/>
+  <link rel="shortcut icon" type="image/png" href="http://bbs.gov.bd/site-assets/images/favicon.png"/>
+  <meta name="author" content="বাংলাদেশ পরিসংখ্যান ব্যুরো"/>
+  <meta property="fb:app_id" content="..............."/>
+  <meta property="og:url" content="http://bbs.gov.bd/pages/static-pages/6922e0d6933eb65569e28cbf"/>
+  <meta property="og:site_name" content="বাংলাদেশ পরিসংখ্যান ব্যুরো"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:article:section" content="কৃষি পরিসংখ্যান বর্ষগ্রন্থ | পাতা | বাংলাদেশ পরিসংখ্যান ব্যুরো"/>
+  <meta property="og:article:author" content="বাংলাদেশ পরিসংখ্যান ব্যুরো"/>
+  <meta property="og:article:tag" content="বাংলাদেশ পরিসংখ্যান ব্যুরো"/>
+  <meta property="og:article:tag" content="Bangladesh"/>
+  <meta property="og:article:tag" content="Bangladesh National Portal"/>
+  <meta property="og:article:tag" content="Government of the People's Republic of Bangladesh"/>
+  <meta property="og:article:tag" content="গণপ্রজাতন্ত্রী বাংলাদেশ সরকার"/>
+  <meta property="og:title" content="কৃষি পরিসংখ্যান বর্ষগ্রন্থ | পাতা | বাংলাদেশ পরিসংখ্যান ব্যুরো"/>
+  <meta property="og:description" content=""/>
+  <meta property="og:image:type" content="image/jpeg"/>
+  <meta property="og:image:width" content="687"/>
+  <meta property="og:image:height" content="570"/>
+  <meta property="og:image:secure_url" content="http://bbs.gov.bd/site-assets/images/portal_banner.jpg"/>
+  <meta property="og:image" content="http://bbs.gov.bd/site-assets/images/portal_banner.jpg"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+<div class="container">
+  <div class="header"><div data-section_type="header" class="droppable">
+        <section data-widget_type="widget" data-widget_name="HeaderWidget" class="widget header-widget-section"> <div class="header-left-section"> <a class="header-title" href="http://bangladesh.gov.bd" title="বাংলাদেশ জাতীয় তথ্য বাতায়ন"> বাংলাদেশ জাতীয় তথ্য বাতায়ন </a> </div> <div class="header-left-section"> <div class="widget header-dropdown custom-items-center top-menu office-findthree-widget office-findv2-widget" data-widget-id="i3824788225" data-preselect='{&#34;officeTypeId&#34;:&#34;6915c8c02d68425160fc40f1&#34;,&#34;officeLevelId&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;divisionId&#34;:&#34;6a9136a3c27b9205e7bc700b&#34;,&#34;districtId&#34;:&#34;6a9136a3c27b9205e7bc700c&#34;,&#34;upazilaId&#34;:&#34;6a9136a3c27b9205e7bc700d&#34;,&#34;unionId&#34;:&#34;6a9136a3c27b9205e7bc700e&#34;,&#34;officeId&#34;:&#34;687f4277a79706ab75fb1131&#34;}'> <div class="office-group"> <select name="officeType" id="officeType_i3824788225" data-lang="bn" title="অধিদপ্তর" onchange="this.title = this.options[this.selectedIndex].text; window.handleOfficeTypeChangeV3('i3824788225', this, 'i7866269917', 'i8176011935')" > <option value="">অফিসের ধরণ নির্বাচন করুন</option> <option value="6915c8c02d68425160fc40ec" title="স্বায়ত্তশাসিত" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > স্বায়ত্তশাসিত </option> <option value="626a41e552093d4768e64b12" title="মন্ত্রণালয়" data-allow-levels='{&#34;ministry_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b09&#34;,&#34;sort_order&#34;:1}}' data-geo-depth="0" > মন্ত্রণালয় </option> <option value="687df048256c87dc78f1a064" title="মন্ত্রণালয় বিভাগ" data-allow-levels='{&#34;ministry_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b09&#34;,&#34;sort_order&#34;:1}}' data-geo-depth="0" > মন্ত্রণালয় বিভাগ </option> <option value="6915c8c02d68425160fc40f1" title="অধিদপ্তর" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2}}' data-geo-depth="0" selected> অধিদপ্তর </option> <option value="6a55df7c7e4bf711c06b81ef" title="কর্পোরেশন" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > কর্পোরেশন </option> <option value="6a55e0197e4bf711c06b81f2" title="কমিশন" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > কমিশন </option> <option value="6a55dfbd7e4bf711c06b81f0" title="কোম্পানি" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > কোম্পানি </option> <option value="6a55dfeb7e4bf711c06b81f1" title="কর্তৃপক্ষ/অথরিটি" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > কর্তৃপক্ষ/অথরিটি </option> <option value="6a55e03e7e4bf711c06b81f3" title="এজেন্সী" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > এজেন্সী </option> <option value="68ef52c26939cf029f3bb06b" title="ব্যাংক / বীমা / আর্থিক প্রতিষ্ঠান" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > ব্যাংক / বীমা / আর্থিক প্রতিষ্ঠান </option> <option value="6915c8c02d68425160fc40ed" title="বিভাগীয় পোর্টাল" data-allow-levels='{&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4}}' data-geo-depth="1" > বিভাগীয় পোর্টাল </option> <option value="6915c8c02d68425160fc40ef" title="জেলা পোর্টাল" data-allow-levels='{&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5}}' data-geo-depth="2" > জেলা পোর্টাল </option> <option value="626a41e552093d4768e64b20" title="পৌরসভা পোর্টাল" data-allow-levels='{&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="3" > পৌরসভা পোর্টাল </option> <option value="626a41e552093d4768e64b16" title="উপজেলা পোর্টাল" data-allow-levels='{&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7}}' data-geo-depth="3" > উপজেলা পোর্টাল </option> <option value="6915c8c02d68425160fc40ee" title="ইউনিয়ন পোর্টাল" data-allow-levels='{&#34;union_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b15&#34;,&#34;sort_order&#34;:9}}' data-geo-depth="4" > ইউনিয়ন পোর্টাল </option> <option value="687df048256c87dc78f1a066" title="রেজাল্ট" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > রেজাল্ট </option> <option value="687df048256c87dc78f1a067" title="প্রকল্প" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > প্রকল্প </option> <option value="68ef63ed4aea2e96873533f9" title="বিদেশী দূতাবাস/মিশন" data-allow-levels='{&#34;embassy&#34;:{&#34;id&#34;:&#34;68ef394bec5fb394776a34fd&#34;,&#34;sort_order&#34;:16},&#34;high_commission&#34;:{&#34;id&#34;:&#34;68ef396f6c37f3c4fc8f72fd&#34;,&#34;sort_order&#34;:17},&#34;permanent_mission&#34;:{&#34;id&#34;:&#34;68ef39aa946f997b55bbdfd3&#34;,&#34;sort_order&#34;:18},&#34;consulate_general&#34;:{&#34;id&#34;:&#34;68ef39aa946f997b55bbdfd3&#34;,&#34;sort_order&#34;:19},&#34;consulate&#34;:{&#34;id&#34;:&#34;68ef3aead613d2f8d33344e7&#34;,&#34;sort_order&#34;:20},&#34;legation&#34;:{&#34;id&#34;:&#34;68ef3b2942c4aed96ee13c0f&#34;,&#34;sort_order&#34;:21},&#34;honorary_consul&#34;:{&#34;id&#34;:&#34;68ef3b2942c4aed96ee13c0f&#34;,&#34;sort_order&#34;:22}}' data-geo-depth="0" > বিদেশী দূতাবাস/মিশন </option> <option value="68ef64f9d5ac0d4ed289703f" title="জেলা পরিষদ পোর্টাল" data-allow-levels='{&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5}}' data-geo-depth="2" > জেলা পরিষদ পোর্টাল </option> <option value="6680e6f177db1f8cd71d07d2" title="সিটি কর্পোরেশন পোর্টাল" data-allow-levels='{&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6}}' data-geo-depth="3" > সিটি কর্পোরেশন পোর্টাল </option> <option value="687df048256c87dc78f1a069" title="প্রশিক্ষণ" data-allow-levels='{&#34;head_office&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b10&#34;,&#34;sort_order&#34;:2},&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8}}' data-geo-depth="0" > প্রশিক্ষণ </option> <option value="6915c8c02d68425160fc40f0" title="শিক্ষা প্রতিষ্ঠান" data-allow-levels='{&#34;school_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b17&#34;,&#34;sort_order&#34;:10},&#34;college&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b18&#34;,&#34;sort_order&#34;:11},&#34;university&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b19&#34;,&#34;sort_order&#34;:12},&#34;madrasha&#34;:{&#34;id&#34;:&#34;68ef389234cf7ce9b5508e1c&#34;,&#34;sort_order&#34;:13},&#34;nursing&#34;:{&#34;id&#34;:&#34;68ef38c7d4a2b15e5259b6a7&#34;,&#34;sort_order&#34;:14},&#34;ploytech&#34;:{&#34;id&#34;:&#34;68ef391c0e99a31ecfa0a2ed&#34;,&#34;sort_order&#34;:15}}' data-geo-depth="0" > শিক্ষা প্রতিষ্ঠান </option> <option value="687df048256c87dc78f1a068" title="সরকারি মাঠ পর্যায়ের অফিস" data-allow-levels='{&#34;regional_office&#34;:{&#34;id&#34;:&#34;68ef33e2b74cbf429ba5968c&#34;,&#34;sort_order&#34;:3},&#34;divisional_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b11&#34;,&#34;sort_order&#34;:4},&#34;district_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b13&#34;,&#34;sort_order&#34;:5},&#34;city_corporation_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b24&#34;,&#34;sort_order&#34;:6},&#34;upazila_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b14&#34;,&#34;sort_order&#34;:7},&#34;pourashava_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b34&#34;,&#34;sort_order&#34;:8},&#34;union_level&#34;:{&#34;id&#34;:&#34;626a41e552093d4768e64b15&#34;,&#34;sort_order&#34;:9}}' data-geo-depth="0" > সরকারি মাঠ পর্যায়ের অফিস </option> </select> <div id="i7866269917" class='dynamic-dropdowns'></div> <button id="i8176011935" onclick="window.handleGoClickV3('i7866269917')" disabled>দেখুন</button> </div> </div> </div> <div class="global-searchbar custom-items-center "> <div class='widget global-search-widget'> <input class="input-search" id="4421337139" name="key" placeholder="এখানে খুঁজুন..." onkeypress="window.handleSearchEnter('4421337139', arguments[0])"/> <button type="button" class="btn-search" onclick="window.handleSearchClick('4421337139')"> অনুসন্ধান </button> </div> <div class='widget language-switcher-widget'> <input type="hidden" name="lang" id="6747387970" value="bn" /> <button type="button" id="5975337180" data-type="bn" class="btn-lang-change" onclick="window.toggleLanguage('5975337180', '6747387970')"> English </button> </div> </div> </section> 
+         <div data-widget_type="widget" data-widget_name="BannerSliderImageWidget" class="widget banner-slider-image-widget"> <div class="home-carousel"> <a class="slider images" target="_blank"> <img class="slider-image" src="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/5612bf97d95f46fe8bc24662d9e78499.jpg " alt="stattistics"> </a> <a class="slider images" target="_blank"> <img class="slider-image" src="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2026/3/b5b85802-1387-4f4f-bb06-41e09267ae25.png " alt="অর্থনৈতিক শুমারীর প্রকাশনা অনুষ্ঠান।"> </a> <a class="slider images" target="_blank"> <img class="slider-image" src="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2026/3/d2b839c4-34a9-42f1-9737-192259221f5a.jpg " alt="Master Plan for the Integrated Statistical Data Warehouse (ISDW), April 2026"> </a> <div class="slider-overlay widget-container-row"> <div class="slider-left container-col-4"> <a href="/"> <img class="office-logo" src="/site-assets/images/logo.png" alt="Office Logo"> </a> <div class="office-left-section"> <h1><a style="text-decoration: none" href="/" class="office-title"> বাংলাদেশ পরিসংখ্যান ব্যুরো </a></h1> <!--<p class="office-subtitle">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>--> <p class="office-subtitle">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p> </div> </div> <!-- <div class="container-col-4">--> <!-- <p class="office-caption">--> <!-- </p>--> <!-- </div>--> <div class="slider-controls container-col-4"> <button class="nav-btn slider-previous"> <svg width="8" height="13" viewBox="0 0 8 13" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M6.70508 11.7868L1.79976 6.88151L6.70508 1.9762" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /> </svg> </button> <button class="nav-btn slider-play"> <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" clip-rule="evenodd" d="M10.6445 20.8813C13.2967 20.8813 15.8402 19.8278 17.7156 17.9524C19.591 16.0771 20.6445 13.5335 20.6445 10.8813C20.6445 8.22918 19.591 5.68564 17.7156 3.81028C15.8402 1.93492 13.2967 0.881348 10.6445 0.881348C7.99237 0.881348 5.44883 1.93492 3.57346 3.81028C1.6981 5.68564 0.644531 8.22918 0.644531 10.8813C0.644531 13.5335 1.6981 16.0771 3.57346 17.9524C5.44883 19.8278 7.99237 20.8813 10.6445 20.8813ZM10.0883 7.34135C9.90003 7.21575 9.68121 7.14361 9.45518 7.13263C9.22914 7.12165 9.00436 7.17224 8.80482 7.27901C8.60529 7.38577 8.43848 7.5447 8.32219 7.73884C8.2059 7.93298 8.1445 8.15504 8.14453 8.38135V13.3813C8.1445 13.6077 8.2059 13.8297 8.32219 14.0239C8.43848 14.218 8.60529 14.3769 8.80482 14.4837C9.00436 14.5905 9.22914 14.641 9.45518 14.6301C9.68121 14.6191 9.90003 14.5469 10.0883 14.4213L13.8383 11.9213C14.0095 11.8072 14.1498 11.6525 14.2469 11.4711C14.344 11.2897 14.3948 11.0871 14.3948 10.8813C14.3948 10.6756 14.344 10.473 14.2469 10.2916C14.1498 10.1102 14.0095 9.9555 13.8383 9.84135L10.0883 7.34135Z" fill="currentColor" /> </svg> </button> <button class="nav-btn slider-next"> <svg width="8" height="13" viewBox="0 0 8 13" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M1.58447 11.7868L6.48979 6.88151L1.58447 1.9762" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /> </svg> </button> </div> </div> </div> </div>
+        <section data-widget_type="widget" data-widget_name="MenusExpandableWidget" class="widget menus-expandable-widget max-view"> <div class="menus-widget-container" style="--home-label:'হোম';"> <section class="widget menu-widget"> <span id="menu-toggle" class="hamburger-menu-block"> <icon class="hamburger-menu ph ph-list"></icon> <span>মেনু নির্বাচন করুন</span> </span> <ul class="menu-list menu-parent-unordered-list custom-items-center"> <li class="megamenu-link "> <a class="menu-parent-list-link home-link" href="/"> </a> </li> <li class="megamenu-link menu-parent-list"> <a title=" বিবিএস সম্পর্কে" href="#" class="menu-parent-list-link"> বিবিএস সম্পর্কে <icon class="menu-parent-list-link-icon ph ph-caret-double-down"></icon> </a> <div class="mega-menu-dropdown megaMenu"> <div class="menu-child-box "> <h6 title=" পরিচিতি" class="menu-child-title"> <a title="পরিচিতি" href="#"> <div>পরিচিতি</div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" সাবেক মহাপরিচালকগণ" class="menu-sub-child-link" href="/pages/static-pages/6922dc61933eb65569e10062" > <div>সাবেক মহাপরিচালকগণ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ভিশন ও মিশন" class="menu-sub-child-link" href="/pages/static-pages/6922e13c933eb65569e2b089" > <div>ভিশন ও মিশন</div> </a> </li> <li class="menu-sub-child-list"> <a title=" সিটিজেন চার্টার" class="menu-sub-child-link" href="/pages/static-pages/6922db5c933eb65569e09a5b" > <div>সিটিজেন চার্টার</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ডিসক্লেইমার" class="menu-sub-child-link" href="/pages/static-pages/6922dec9933eb65569e1d5cd" > <div>ডিসক্লেইমার</div> </a> </li> <li class="menu-sub-child-list"> <a title=" প্রশিক্ষণ ল্যাব" class="menu-sub-child-link" href="/pages/static-pages/6922dcc3933eb65569e11e91" > <div>প্রশিক্ষণ ল্যাব</div> </a> </li> <li class="menu-sub-child-list"> <a title=" উপাত্ত প্রকাশ নীতিমালা, ২০২৬" class="menu-sub-child-link" href="/pages/static-pages/6922e124933eb65569e2a7b3" > <div>উপাত্ত প্রকাশ নীতিমালা, ২০২৬</div> </a> </li> <li class="menu-sub-child-list"> <a title=" প্রকাশনা বিক্রয়" class="menu-sub-child-link" href="/pages/static-pages/6922dc34933eb65569e0ef9f" > <div>প্রকাশনা বিক্রয়</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ওয়েব পোর্টালের ইতিহাস" class="menu-sub-child-link" href="/pages/static-pages/6922dea7933eb65569e1c5e6" > <div>ওয়েব পোর্টালের ইতিহাস</div> </a> </li> <li class="menu-sub-child-list"> <a title=" সাংগঠনিক কাঠামো " class="menu-sub-child-link" href="/pages/static-pages/6922dc0a933eb65569e0e191" > <div>সাংগঠনিক কাঠামো </div> </a> </li> </ul> </div> <div class="menu-child-box "> <h6 title=" উইং" class="menu-child-title"> <a title="উইং" href="#"> <div>উইং</div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" এগ্রিকালচার উইং" class="menu-sub-child-link" href="/pages/static-pages/6922dd5f933eb65569e14c92" > <div>এগ্রিকালচার উইং</div> </a> </li> <li class="menu-sub-child-list"> <a title=" সেন্সাস উইং" class="menu-sub-child-link" href="/pages/static-pages/6922dffb933eb65569e24ec5" > <div>সেন্সাস উইং</div> </a> </li> <li class="menu-sub-child-list"> <a title=" কম্পিউটার উইং" class="menu-sub-child-link" href="/pages/static-pages/6922dfdf933eb65569e246bb" > <div>কম্পিউটার উইং</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ডেমোগ্রাফী এন্ড হেলথ উইং" class="menu-sub-child-link" href="/pages/static-pages/6922de2d933eb65569e18c93" > <div>ডেমোগ্রাফী এন্ড হেলথ উইং</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ন্যাশনাল একাউন্টিং উইং" class="menu-sub-child-link" href="/pages/static-pages/6922e040933eb65569e2632f" > <div>ন্যাশনাল একাউন্টিং উইং</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ইন্ডাস্ট্রি এন্ড লেবার উইং" class="menu-sub-child-link" href="/pages/static-pages/6922ddeb933eb65569e17160" > <div>ইন্ডাস্ট্রি এন্ড লেবার উইং</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ফিন্যান্স, এ্যাডমিনিস্ট্রেশন এন্ড এমআইএস" class="menu-sub-child-link" href="/pages/static-pages/6922dfc3933eb65569e23dbc" > <div>ফিন্যান্স, এ্যাডমিনিস্ট্রেশন এন্ড এমআইএস</div> </a> </li> <li class="menu-sub-child-list"> <a title=" স্ট্যাটিসটিক্যাল স্টাফ ট্রেনিং ইনস্টিটিউট" class="menu-sub-child-link" href="/pages/static-pages/6922e0be933eb65569e286b2" > <div>স্ট্যাটিসটিক্যাল স্টাফ ট্রেনিং ইনস্টিটিউট</div> </a> </li> </ul> </div> </div> </li> <li class="megamenu-link menu-parent-list"> <a title=" প্রকাশনা" href="#" class="menu-parent-list-link"> প্রকাশনা <icon class="menu-parent-list-link-icon ph ph-caret-double-down"></icon> </a> <div class="mega-menu-dropdown megaMenu"> <div class="menu-child-box "> <h6 title=" বিষয় ভিত্তিক প্রকাশনা" class="menu-child-title"> <a title="বিষয় ভিত্তিক প্রকাশনা" href="#"> <div>বিষয় ভিত্তিক প্রকাশনা</div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" সর্বশেষ প্রকাশনা" class="menu-sub-child-link" href="/pages/static-pages/6922e07a933eb65569e27407" > <div>সর্বশেষ প্রকাশনা</div> </a> </li> <li class="menu-sub-child-list"> <a title=" কি ফাইন্ডিং" class="menu-sub-child-link" href="/pages/static-pages/6922dd56933eb65569e1491b" > <div>কি ফাইন্ডিং</div> </a> </li> <li class="menu-sub-child-list"> <a title=" জনশুমারি ও গৃহগণনা (২০২২ ও ২০১১)" class="menu-sub-child-link" href="/pages/static-pages/6922dc2a933eb65569e0ebd5" > <div>জনশুমারি ও গৃহগণনা (২০২২ ও ২০১১)</div> </a> </li> <li class="menu-sub-child-list"> <a title=" অর্থনৈতিক শুমারি (২০২৪ ও ২০১৩)" class="menu-sub-child-link" href="/pages/static-pages/695b97c8c4774958d7b702b7" > <div>অর্থনৈতিক শুমারি (২০২৪ ও ২০১৩)</div> </a> </li> <li class="menu-sub-child-list"> <a title=" কৃষি" class="menu-sub-child-link" href="/pages/static-pages/6922e0f6933eb65569e29564" > <div>কৃষি</div> </a> </li> <li class="menu-sub-child-list"> <a title=" কৃষি শুমারি ২০১৯" class="menu-sub-child-link" href="/pages/static-pages/6922dc81933eb65569e10b9e" > <div>কৃষি শুমারি ২০১৯</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ডেমোগ্রাফী এন্ড হেলথ" class="menu-sub-child-link" href="/pages/static-pages/6922e096933eb65569e27b7b" > <div>ডেমোগ্রাফী এন্ড হেলথ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" পরিবেশ, প্রাকৃতিক সম্পদ, জলবায়ু ও দুর্যোগ পরিসংখ্যান (ইসিডিএস)" class="menu-sub-child-link" href="/pages/static-pages/6922dcc8933eb65569e12081" > <div>পরিবেশ, প্রাকৃতিক সম্পদ, জলবায়ু ও দুর্যোগ পরিসংখ্যান (ইসিডিএস)</div> </a> </li> <li class="menu-sub-child-list"> <a title=" বৈদেশিক বাণিজ্য পরিসংখ্যান" class="menu-sub-child-link" href="/pages/static-pages/6922e14e933eb65569e2b6c9" > <div>বৈদেশিক বাণিজ্য পরিসংখ্যান</div> </a> </li> <li class="menu-sub-child-list"> <a title=" জিডিপি" class="menu-sub-child-link" href="/pages/static-pages/6922df6e933eb65569e21f3f" > <div>জিডিপি</div> </a> </li> <li class="menu-sub-child-list"> <a title=" আইসিটি পরিসংখ্যান" class="menu-sub-child-link" href="/pages/static-pages/6922e012933eb65569e25543" > <div>আইসিটি পরিসংখ্যান</div> </a> </li> </ul> </div> <div class="menu-child-box "> <h6 title=" " class="menu-child-title"> <a title="" href="#"> <div></div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" জিও-কোড" class="menu-sub-child-link" href="/pages/static-pages/6922ded1933eb65569e1d95d" > <div>জিও-কোড</div> </a> </li> <li class="menu-sub-child-list"> <a title=" আয়, ব্যয় ও দারিদ্র্য" class="menu-sub-child-link" href="/pages/static-pages/6922dc57933eb65569e0fd4c" > <div>আয়, ব্যয় ও দারিদ্র্য</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ইন্ডাস্ট্রিয়াল স্ট্যাটিসটিকস" class="menu-sub-child-link" href="/pages/static-pages/6922de09933eb65569e17bb3" > <div>ইন্ডাস্ট্রিয়াল স্ট্যাটিসটিকস</div> </a> </li> <li class="menu-sub-child-list"> <a title=" লেবার এন্ড ইমপ্লয়মেন্ট" class="menu-sub-child-link" href="/pages/static-pages/6922ddd1933eb65569e166e7" > <div>লেবার এন্ড ইমপ্লয়মেন্ট</div> </a> </li> <li class="menu-sub-child-list"> <a title=" মূল্য এবং মজুরী (সিপিআই, কিউআইআইপি)" class="menu-sub-child-link" href="/pages/static-pages/6922de7a933eb65569e1ae8f" > <div>মূল্য এবং মজুরী (সিপিআই, কিউআইআইপি)</div> </a> </li> <li class="menu-sub-child-list"> <a title=" শিক্ষা ও স্বাক্ষরতা" class="menu-sub-child-link" href="/pages/static-pages/6922ddc4933eb65569e16288" > <div>শিক্ষা ও স্বাক্ষরতা</div> </a> </li> <li class="menu-sub-child-list"> <a title=" বস্তি শুমারি ২০১৪" class="menu-sub-child-link" href="/pages/static-pages/6922df13933eb65569e1faf0" > <div>বস্তি শুমারি ২০১৪</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ভাইটাল স্ট্যাটিসটিকস" class="menu-sub-child-link" href="/pages/static-pages/6922db9a933eb65569e0b356" > <div>ভাইটাল স্ট্যাটিসটিকস</div> </a> </li> <li class="menu-sub-child-list"> <a title=" মহিলা এবং শিশু" class="menu-sub-child-link" href="/pages/static-pages/6922e143933eb65569e2b2ee" > <div>মহিলা এবং শিশু</div> </a> </li> <li class="menu-sub-child-list"> <a title=" অন্যান্য প্রকাশনা" class="menu-sub-child-link" href="/pages/static-pages/6922e064933eb65569e26d37" > <div>অন্যান্য প্রকাশনা</div> </a> </li> </ul> </div> <div class="menu-child-box "> <h6 title=" নিয়মিত প্রকাশনা" class="menu-child-title"> <a title="নিয়মিত প্রকাশনা" href="#"> <div>নিয়মিত প্রকাশনা</div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" জেলা পরিসংখ্যান ২০১১" class="menu-sub-child-link" href="/pages/static-pages/6922de73933eb65569e1ab86" > <div>জেলা পরিসংখ্যান ২০১১</div> </a> </li> <li class="menu-sub-child-list"> <a title=" স্মল এরিয়া এটলাস বাংলাদেশ" class="menu-sub-child-link" href="/pages/static-pages/6922e05a933eb65569e26a69" > <div>স্মল এরিয়া এটলাস বাংলাদেশ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ডিজাস্টার প্রন এরিয়া এটলাস বাংলাদেশ" class="menu-sub-child-link" href="/pages/static-pages/6922e02b933eb65569e25d04" > <div>ডিজাস্টার প্রন এরিয়া এটলাস বাংলাদেশ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" পরিসংখ্যান বুলেটিন" class="menu-sub-child-link" href="/pages/static-pages/6922dc4b933eb65569e0f8eb" > <div>পরিসংখ্যান বুলেটিন</div> </a> </li> <li class="menu-sub-child-list"> <a title=" পরিসংখ্যান পকেটবুক" class="menu-sub-child-link" href="/pages/static-pages/6922de53933eb65569e19e10" > <div>পরিসংখ্যান পকেটবুক</div> </a> </li> <li class="menu-sub-child-list"> <a title=" পরিসংখ্যান বর্ষগ্রন্হ" class="menu-sub-child-link" href="/pages/static-pages/6922de79933eb65569e1ae07" > <div>পরিসংখ্যান বর্ষগ্রন্হ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" বাংলাদেশ পরিসংখ্যান" class="menu-sub-child-link" href="/pages/static-pages/6922dd65933eb65569e14e10" > <div>বাংলাদেশ পরিসংখ্যান</div> </a> </li> <li class="menu-sub-child-list"> <a title=" কৃষি পরিসংখ্যান বর্ষগ্রন্থ" class="menu-sub-child-link" href="/pages/static-pages/6922e0d6933eb65569e28cbf" > <div>কৃষি পরিসংখ্যান বর্ষগ্রন্থ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" বার্ষিক প্রতিবেদন" class="menu-sub-child-link" href="/pages/static-pages/6922dbeb933eb65569e0d6a0" > <div>বার্ষিক প্রতিবেদন</div> </a> </li> <li class="menu-sub-child-list"> <a title=" বাংলাদেশ কিছু মৌলিক পরিসংখ্যান" class="menu-sub-child-link" href="/pages/static-pages/6922dea7933eb65569e1c5d6" > <div>বাংলাদেশ কিছু মৌলিক পরিসংখ্যান</div> </a> </li> </ul> </div> </div> </li> <li class="megamenu-link menu-parent-list"> <a title=" অনলাইন উপাত্ত সেবা" href="#" class="menu-parent-list-link"> অনলাইন উপাত্ত সেবা <icon class="menu-parent-list-link-icon ph ph-caret-double-down"></icon> </a> <div class="mega-menu-dropdown megaMenu"> <div class="menu-child-box "> <h6 title=" " class="menu-child-title"> <a title="" href="#"> <div></div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" বিডি ওয়েব জিআইএস ইন ইসিডিএস প্লাটফর্ম" class="menu-sub-child-link" href="https://ecds.bbs.gov.bd/" > <div>বিডি ওয়েব জিআইএস ইন ইসিডিএস প্লাটফর্ম</div> </a> </li> <li class="menu-sub-child-list"> <a title=" বিজিআইএসপি প্লাটফর্ম" class="menu-sub-child-link" href="http://gis.gov.bd/bn/" > <div>বিজিআইএসপি প্লাটফর্ম</div> </a> </li> </ul> </div> </div> </li> <li class="megamenu-link menu-parent-list"> <a title=" এসডিজি ট্র্যাকার" href="http://www.sdg.gov.bd" class="menu-parent-list-link"> এসডিজি ট্র্যাকার </a> </li> <li class="megamenu-link menu-parent-list"> <a title=" গ্যালারি" href="#" class="menu-parent-list-link"> গ্যালারি <icon class="menu-parent-list-link-icon ph ph-caret-double-down"></icon> </a> <div class="mega-menu-dropdown megaMenu"> <div class="menu-child-box "> <h6 title=" " class="menu-child-title"> <a title="" href="#"> <div></div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" ফটো গ্যালারি" class="menu-sub-child-link" href="/pages/photo-galleries" > <div>ফটো গ্যালারি</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ভিডিও গ্যালরি" class="menu-sub-child-link" href="#" > <div>ভিডিও গ্যালরি</div> </a> </li> </ul> </div> </div> </li> <li class="megamenu-link menu-parent-list"> <a title=" জনবল" href="#" class="menu-parent-list-link"> জনবল <icon class="menu-parent-list-link-icon ph ph-caret-double-down"></icon> </a> <div class="mega-menu-dropdown megaMenu"> <div class="menu-child-box "> <h6 title=" জনবল (সদর দপ্তর)" class="menu-child-title"> <a title=" জনবল (সদর দপ্তর)" href="#"> <div> জনবল (সদর দপ্তর)</div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" ৯ম ও তদুর্ধ্ব গ্রেডের কর্মকর্তাগণ (উইং ভিত্তিক)" class="menu-sub-child-link" href="/pages/officers?filters=%7B%22officer_category%22%3A%226922d2ad81fc96cef9e99d57%22%7D" > <div>৯ম ও তদুর্ধ্ব গ্রেডের কর্মকর্তাগণ (উইং ভিত্তিক)</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ১০ম গ্রেড থেকে ২০তম গ্রেডের কর্মকর্তা ও কর্মচারীবৃন্দ (উইং ভিত্তিক)" class="menu-sub-child-link" href="/pages/static-pages/6922e11b933eb65569e2a3c7" > <div>১০ম গ্রেড থেকে ২০তম গ্রেডের কর্মকর্তা ও কর্মচারীবৃন্দ (উইং ভিত্তিক)</div> </a> </li> </ul> </div> </div> </li> <li class="megamenu-link menu-parent-list"> <a title=" যোগাযোগ" href="/pages/static-pages/6922dc7d933eb65569e10a48" class="menu-parent-list-link"> যোগাযোগ <icon class="menu-parent-list-link-icon ph ph-caret-double-down"></icon> </a> <div class="mega-menu-dropdown megaMenu"> <div class="menu-child-box "> <h6 title=" " class="menu-child-title"> <a title="" href="#"> <div></div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" সদর দপ্তর" class="menu-sub-child-link" href="/pages/static-pages/6922dc7d933eb65569e10a48" > <div>সদর দপ্তর</div> </a> </li> <li class="menu-sub-child-list"> <a title=" বরিশাল বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922dcd8933eb65569e125cd" > <div>বরিশাল বিভাগ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" চট্টগ্রাম বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922dd8e933eb65569e15717" > <div>চট্টগ্রাম বিভাগ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ঢাকা বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922e01d933eb65569e258b2" > <div>ঢাকা বিভাগ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ময়মনসিংহ বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922e09c933eb65569e27d00" > <div>ময়মনসিংহ বিভাগ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" খুলনা বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922e096933eb65569e27b72" > <div>খুলনা বিভাগ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" রাজশাহী বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922ddc3933eb65569e16269" > <div>রাজশাহী বিভাগ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" রংপুর বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922e0d9933eb65569e28db2" > <div>রংপুর বিভাগ</div> </a> </li> <li class="menu-sub-child-list"> <a title=" সিলেট বিভাগ" class="menu-sub-child-link" href="/pages/static-pages/6922ddd4933eb65569e16864" > <div>সিলেট বিভাগ</div> </a> </li> </ul> </div> </div> </li> <li class="megamenu-link menu-parent-list"> <a title=" জুলাই পুনর্জাগরণ" href="#" class="menu-parent-list-link"> জুলাই পুনর্জাগরণ <icon class="menu-parent-list-link-icon ph ph-caret-double-down"></icon> </a> <div class="mega-menu-dropdown megaMenu"> <div class="menu-child-box "> <h6 title=" " class="menu-child-title"> <a title="" href="#"> <div></div> </a> </h6> <ul class="menu-sub-child-unordered-list" aria-labelledby="mega-menu-dropdown-button"> <li class="menu-sub-child-list"> <a title=" জুলাই পুনর্জাগরণ অনুষ্ঠানমালা" class="menu-sub-child-link" href="https://julyforever.gov.bd/" > <div>জুলাই পুনর্জাগরণ অনুষ্ঠানমালা</div> </a> </li> <li class="menu-sub-child-list"> <a title=" টিভিসি/ভিডিও/ডকুমেন্টরি" class="menu-sub-child-link" href="/pages/static-pages/6922dec3933eb65569e1d311" > <div>টিভিসি/ভিডিও/ডকুমেন্টরি</div> </a> </li> <li class="menu-sub-child-list"> <a title=" ছবি" class="menu-sub-child-link" href="/pages/static-pages/6922dc6d933eb65569e1051b" > <div>ছবি</div> </a> </li> </ul> </div> </div> </li> </ul> </section> </div> <div class="expand-btn"> <span><i class="ph ph-list"></i> আরও</span> <span style="display:none;"><i class="ph ph-caret-up"></i> সংক্ষিপ্ত</span> </div> </section> 
+    </div></div>
+  <div class="wrapper">
+    <div class="body"><div data-section_type="body" class="droppable">
+        <section data-widget_type="widget" data-widget_name="SocialContentShareWidget" class="widget social-content-share-widget">
+    <div>
+        <p class="social-content-share-widget-title ">এই কনটেন্টটি শেয়ার করতে ক্লিক করুন</p>
+        <div class="social-content-share-widget-social-icons">
+            <a title="Facebook" class="social-content-share-widget-social-icons-link facebook-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-facebook-logo social-content-share-widget-fb-icon"></i>
+            </a>
+            <a title="X (Formerly Twitter)" class="social-content-share-widget-social-icons-link twitter-share" target="_blank" rel="noopener">
+                <i class="ph ph-x-logo social-content-share-widget-twitter-icon"></i>
+            </a>
+            <a title="WhatsApp" class="social-content-share-widget-social-icons-link whatsapp-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-whatsapp-logo social-content-share-widget-whatsapp-icon"></i>
+            </a>
+            <a title="LinkedIn" class="social-content-share-widget-social-icons-link linkedin-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-linkedin-logo social-content-share-widget-linkedin-icon"></i>
+            </a>
+            <a title="Viber" class="social-content-share-widget-social-icons-link viber-share" target="_blank" rel="noopener">
+                <!--<i class="ph-fill ph-chat-circle-text social-content-share-widget-viber-icon"></i>-->
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">
+                 <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
+                    transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
+                     <path d="M 63.357 24.877 c -1.243 -1.147 -6.264 -4.792 -17.448 -4.841 c 0 0 -13.189 -0.796 -19.618 5.102 c -3.579 3.58 -4.838 8.818 -4.97 15.312 c -0.133 6.494 -0.305 18.664 11.426 21.964 h 0.011 l -0.007 5.035 c 0 0 -0.075 2.038 1.267 2.454 c 1.624 0.504 2.577 -1.045 4.127 -2.716 c 0.851 -0.917 2.026 -2.264 2.911 -3.293 c 8.023 0.675 14.194 -0.868 14.894 -1.096 c 1.62 -0.525 10.787 -1.7 12.277 -13.869 C 69.766 36.387 67.483 28.453 63.357 24.877 z M 56.614 52.131 c 0 0.005 -0.004 0.014 -0.004 0.019 c -0.517 0.896 -1.172 1.703 -1.943 2.392 c -0.009 0.004 -0.009 0.009 -0.017 0.013 c -0.669 0.559 -1.327 0.877 -1.973 0.954 c -0.095 0.017 -0.192 0.023 -0.288 0.018 c -0.285 0.003 -0.568 -0.041 -0.839 -0.129 l -0.021 -0.031 c -0.995 -0.281 -2.656 -0.983 -5.423 -2.509 c -1.601 -0.873 -3.125 -1.879 -4.556 -3.009 c -0.717 -0.566 -1.401 -1.173 -2.049 -1.817 l -0.069 -0.069 l -0.069 -0.069 l -0.069 -0.069 c -0.023 -0.022 -0.046 -0.046 -0.069 -0.069 c -0.644 -0.648 -1.251 -1.332 -1.817 -2.049 c -1.13 -1.431 -2.137 -2.954 -3.009 -4.555 c -1.526 -2.767 -2.228 -4.427 -2.509 -5.423 l -0.031 -0.021 c -0.088 -0.271 -0.131 -0.554 -0.128 -0.839 c -0.005 -0.096 0.001 -0.193 0.017 -0.288 c 0.081 -0.645 0.399 -1.303 0.955 -1.974 c 0.004 -0.008 0.009 -0.008 0.013 -0.017 c 0.689 -0.771 1.497 -1.426 2.392 -1.942 c 0.004 0 0.013 -0.004 0.019 -0.004 c 0.901 -0.469 1.754 -0.31 2.335 0.375 c 0.004 0.004 1.209 1.451 1.726 2.157 c 0.532 0.749 1.027 1.523 1.481 2.322 c 0.593 1.063 0.221 2.152 -0.361 2.601 l -1.174 0.933 c -0.593 0.479 -0.514 1.368 -0.514 1.368 s 1.739 6.583 8.238 8.242 c 0 0 0.889 0.075 1.368 -0.515 l 0.933 -1.174 c 0.45 -0.582 1.537 -0.954 2.601 -0.361 c 0.797 0.454 1.571 0.949 2.319 1.481 c 0.706 0.519 2.152 1.726 2.156 1.726 C 56.924 50.376 57.083 51.23 56.614 52.131 z M 51.238 35.889 c -1.316 -1.436 -3.119 -2.219 -5.511 -2.394 c -0.348 -0.026 -0.61 -0.329 -0.584 -0.677 c 0.026 -0.348 0.33 -0.611 0.677 -0.584 c 2.692 0.197 4.829 1.14 6.352 2.802 c 1.526 1.668 2.273 3.765 2.219 6.233 c -0.007 0.344 -0.289 0.619 -0.632 0.619 c -0.004 0 -0.009 0 -0.014 0 c -0.349 -0.008 -0.626 -0.297 -0.619 -0.646 C 53.173 39.078 52.556 37.328 51.238 35.889 z M 51.145 40.135 c 0.017 0.349 -0.252 0.646 -0.601 0.663 c -0.011 0.001 -0.021 0.001 -0.032 0.001 c -0.335 0 -0.614 -0.263 -0.631 -0.601 c -0.107 -2.149 -1.117 -3.201 -3.181 -3.308 c -0.349 -0.018 -0.617 -0.316 -0.599 -0.664 c 0.018 -0.349 0.314 -0.618 0.664 -0.599 C 49.491 35.769 51.006 37.327 51.145 40.135 z M 57.086 43.186 c -0.002 0 -0.003 0 -0.005 0 c -0.347 0 -0.63 -0.28 -0.632 -0.628 c -0.029 -3.816 -1.174 -6.853 -3.404 -9.027 c -2.234 -2.178 -5.057 -3.294 -8.39 -3.317 c -0.349 -0.002 -0.631 -0.288 -0.628 -0.637 c 0.002 -0.348 0.285 -0.628 0.632 -0.628 c 0.002 0 0.003 0 0.004 0 c 3.672 0.026 6.789 1.262 9.264 3.676 c 2.481 2.418 3.754 5.757 3.786 9.923 C 57.715 42.898 57.434 43.183 57.086 43.186 z"
+                           style="stroke: none;stroke-width: 1;stroke-dasharray: none;stroke-linecap: butt;stroke-linejoin: miter;stroke-miterlimit: 10;fill:#665cac;fill-rule: nonzero;opacity:1;"
+                           transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+                 </g>
+             </svg>
+            </a>
+            <a title="Copy Link" class="social-content-share-widget-social-icons-link link-share" target="_blank" rel="noopener" onclick="window.copyToClipboard(location.href);">
+                <i class="ph ph-link social-content-share-widget-link-icon"></i>
+            </a>
+            <a title="Messenger" class="social-content-share-widget-social-icons-link messenger-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-messenger-logo social-content-share-widget-messenger-icon"></i>
+            </a>
+        </div>
+    </div>
+    <div>
+        <div
+  class="widget eps-opinion-popup-widget"
+  data-widget="EParticipationOpinionPopupWidget"
+>
+  <!-- Trigger Button -->
+  <div class="eps-opinion-trigger-wrapper">
+    <p class="social-content-share-widget-title ">&nbsp;</p>
+    <!-- Removed ID to support multiple instances -->
+    <button type="button" class="eps-opinion-btn">
+      <span></span>
+      <span>আপনার মতামত প্রদান করুন</span>
+      <i class="ph ph-chat-circle-text"></i>
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <!-- Removed ID to support multiple instances -->
+  <div class="eps-opinion-modal" aria-hidden="true">
+    <div class="eps-opinion-modal-overlay"></div>
+    <div class="eps-opinion-modal-container">
+      <div class="eps-opinion-modal-header">
+        <h3>আপনার মতামত প্রদান করুন</h3>
+        <button type="button" class="eps-opinion-close" aria-label="Close">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="eps-opinion-modal-body">
+        <div
+  class="widget eps-opinion-form-widget"
+  data-widget="EParticipationOpinionFormWidget"
+>
+  <div class="unique-category-container">
+    <form id="opinionForm" class="opinion-form" enctype="multipart/form-data">
+      <!-- We allow an external hidden input or radio group to set this, but default here -->
+      <input type="hidden" name="opinionType" value="suggestion" />
+
+      <div>
+        <label class="form-label">আপনার নাম</label>
+        <input
+          name="name"
+          type="text"
+          placeholder="আপনার নাম লিখুন"
+        />
+        <small class="error-message" hidden>
+          নাম অবশ্যই দিতে হবে
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label">আপনার ইমেইল</label>
+        <input
+          name="email"
+          type="email"
+          placeholder="আপনার ইমেইল লিখুন"
+        />
+        <small class="error-message" hidden>
+          সঠিক ইমেইল দিন
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label">আপনার যোগাযোগ নম্বর</label>
+        <input
+          name="phone"
+          type="tel"
+          placeholder="আপনার যোগাযোগ নম্বর লিখুন"
+        />
+        <small class="error-message" hidden>
+          সঠিক ফোন নম্বর দিন (যেমন 017XXXXXXXX)
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label">আপনার মতামত</label>
+        <textarea name="body" id="popupEditor"></textarea>
+        <small class="error-message" hidden>
+          মতামত কমপক্ষে ২০ অক্ষরের হতে হবে
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label"
+          >Attachment (jpg, jpeg, png, pdf • max 2 MB)</label
+        >
+        <input name="attachment" type="file" accept=".jpg,.jpeg,.png,.pdf" />
+        <small class="error-message" hidden>
+          Invalid file. Allowed: JPG, JPEG, PNG, PDF up to 2MB
+        </small>
+      </div>
+
+      <div>
+        <button type="submit" id="popupSubmitBtn">জমা দিন</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Ensure CKEditor is available if not loaded globally -->
+  <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div>
+</section>
+
+        <div data-widget_type="widget" data-widget_name="ContentViewerWidget" class="widget content-viewer-widget" data-sub-widget="TitleWithImageContentWidget"> <div class="content-update-block"> <p> কনটেন্টটি শেষ হাল-নাগাদ করা হয়েছে: বৃহস্পতিবার, ৬ আগস্ট, ২০২৬ এ ১১:৫২ AM </p> </div> <div class="widget print-widget"> <div></div> <div onclick="window._print_content(this);" title="প্রিন্ট"><i class="ph ph-printer"></i></div> </div> <div class="widget title-with-image-content-widget"> <h2> কৃষি পরিসংখ্যান বর্ষগ্রন্থ </h2> <p class="chips"> <span class="basic-chip">কন্টেন্ট: পাতা</span> </p> <div class="image-list"> </div> <rt-renderer encoded-content="PHVsPjxsaT48YSBocmVmPSJodHRwczovL29iamVjdHN0b3JhZ2UuYXAtZGNjLWdhemlwdXItMS5vcmFjbGVjbG91ZDE1LmNvbS9uL2F4dmpibnFwcnlsZy9iL1YyTWluaXN0cnkvby9vZmZpY2UtYmJzLzIwMjYvNS9jZmI4MGVjOC0xYzdmLTQ2MzItOGE1OS03NjQ5YjZhYzdmZmUucGRmIj5ZZWFyIEJvb2sgb2YgQWdyaWN1bHR1cmFsIFN0YXRpc3RpY3Mgb2YgQmFuZ2xhZGVzaCAyMDI1PC9hPiA8c3BhbiBzdHlsZT0iY29sb3I6cmdiKDI1NSwwLDApIj4oVXBsb2FkLTMwLzA2LzIwMjYpPC9zcGFuPjwvbGk+PGxpPjxhIGhyZWY9Imh0dHBzOi8vb2JqZWN0c3RvcmFnZS5hcC1kY2MtZ2F6aXB1ci0xLm9yYWNsZWNsb3VkMTUuY29tL24vYXh2amJucXByeWxnL2IvVjJNaW5pc3RyeS9vL29mZmljZS1iYnMvMjAyNC8xMi81OGYzMjU1NzZmOWE0N2NjOTFlN2QyMjdlMzM2ZTQwZi5wZGYiPlllYXIgQm9vayBvZiBBZ3JpY3VsdHVyYWwgU3RhdGlzdGljcyBvZiBCYW5nbGFkZXNoIDIwMjQ8L2E+PC9saT48bGk+PGEgaHJlZj0iaHR0cHM6Ly9vYmplY3RzdG9yYWdlLmFwLWRjYy1nYXppcHVyLTEub3JhY2xlY2xvdWQxNS5jb20vbi9heHZqYm5xcHJ5bGcvYi9WMk1pbmlzdHJ5L28vb2ZmaWNlLWJicy8yMDI0LzEyL2QwOWYzM2E2MTY3YTQ2ZmQ5ODBlNTc5Nzc0OWRlNjNkLnBkZiI+WWVhciBCb29rIG9mIEFncmljdWx0dXJhbCBTdGF0aXN0aWNzIG9mIEJhbmdsYWRlc2ggMjAyMzwvYT48L2xpPjxsaT48YSBocmVmPSJodHRwczovL29iamVjdHN0b3JhZ2UuYXAtZGNjLWdhemlwdXItMS5vcmFjbGVjbG91ZDE1LmNvbS9uL2F4dmpibnFwcnlsZy9iL1YyTWluaXN0cnkvby9vZmZpY2UtYmJzLzIwMjQvMTIvODUyMTZiYzM3OWZhNDQzZTgzN2ZmYWMzMDUyYTQ1ZGMucGRmIj5ZZWFyIEJvb2sgb2YgQWdyaWN1bHR1cmFsIFN0YXRpc3RpY3Mgb2YgQmFuZ2xhZGVzaCAyMDIyPC9hPjwvbGk+PGxpPjxhIGhyZWY9Imh0dHBzOi8vYmJzLmdvdi5iZC9wYWdlcy9maWxlcy82YTc0MjBmODExMmQwYjdmZmRkNGY5ODciPlllYXIgQm9vayBvZiBBZ3JpY3VsdHVyYWwgU3RhdGlzdGljcyBvZiBCYW5nbGFkZXNoIDIwMjE8L2E+PC9saT48bGk+PGEgaHJlZj0iaHR0cHM6Ly9vYmplY3RzdG9yYWdlLmFwLWRjYy1nYXppcHVyLTEub3JhY2xlY2xvdWQxNS5jb20vbi9heHZqYm5xcHJ5bGcvYi9WMk1pbmlzdHJ5L28vb2ZmaWNlLWJicy8yMDI0LzEyLzRiMGE0ODc0ZGJiZjQ2MWViN2FlYmIwYTY0MzQ4YzFmLnBkZiI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxNHB4Ij5ZZWFyQm9vayBvZiBBZ3JpY3VsdHVyYWwgU3RhdGlzdGljcyBvZiBCYW5nbGFkZXNoIDIwMjA8L3NwYW4+PC9hPjwvbGk+PGxpPjxhIGhyZWY9Imh0dHBzOi8vb2JqZWN0c3RvcmFnZS5hcC1kY2MtZ2F6aXB1ci0xLm9yYWNsZWNsb3VkMTUuY29tL24vYXh2amJucXByeWxnL2IvVjJNaW5pc3RyeS9vL29mZmljZS1iYnMvMjAyNC8xMi8yZGQ0MjBjNDJlMjU0NGVhOGI1NTZiNjgzZDczZmFiMy5wZGYiPjxzcGFuIHN0eWxlPSJmb250LXNpemU6MTRweCI+WWVhckJvb2sgb2YgQWdyaWN1bHR1cmFsIFN0YXRpc3RpY3Mgb2YgQmFuZ2xhZGVzaCAyMDE5PC9zcGFuPjwvYT48L2xpPjxsaT48YSBocmVmPSJodHRwczovL29iamVjdHN0b3JhZ2UuYXAtZGNjLWdhemlwdXItMS5vcmFjbGVjbG91ZDE1LmNvbS9uL2F4dmpibnFwcnlsZy9iL1YyTWluaXN0cnkvby9vZmZpY2UtYmJzLzIwMjQvMTIvMTQwOTE0OTY0NjVjNGZjNDlkNWFkYzU2YzQ1OWYwNTcucGRmIj48c3BhbiBzdHlsZT0iZm9udC1zaXplOjE0cHgiPlllYXJib29rIG9mIEFncmljdWx0dXJhbCBTdGF0aXN0aWNzIG9mIEJhbmdsYWRlc2ggMjAxODwvc3Bhbj48L2E+PC9saT48bGk+PGEgaHJlZj0iaHR0cHM6Ly9vYmplY3RzdG9yYWdlLmFwLWRjYy1nYXppcHVyLTEub3JhY2xlY2xvdWQxNS5jb20vbi9heHZqYm5xcHJ5bGcvYi9WMk1pbmlzdHJ5L28vb2ZmaWNlLWJicy8yMDI0LzEyLzQ0ZGYwMWUxZmE3ZTQ0MjQ5NmNkYzM1Y2M5ZGFlMGFiLnBkZiI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxNHB4Ij5ZZWFyYm9vayBvZiBBZ3JpY3VsdHVyYWwgU3RhdGlzdGljcyBvZiBCYW5nbGFkZXNoIDIwMTc8L3NwYW4+PC9hPjwvbGk+PGxpPjxhIGhyZWY9Imh0dHBzOi8vb2JqZWN0c3RvcmFnZS5hcC1kY2MtZ2F6aXB1ci0xLm9yYWNsZWNsb3VkMTUuY29tL24vYXh2amJucXByeWxnL2IvVjJNaW5pc3RyeS9vL29mZmljZS1iYnMvMjAyNC8xMi8yMzkyNDQzY2MwNjI0N2EwYTAxMDk0YzU3Y2MwYjQ2Zi5wZGYiPjxzcGFuIHN0eWxlPSJmb250LXNpemU6MTRweCI+WWVhcmJvb2sgb2YgQWdyaWN1bHR1cmFsIFN0YXRpc3RpY3Mgb2YgQmFuZ2xhZGVzaCAyMDE2PC9zcGFuPjwvYT48L2xpPjxsaT48YSBocmVmPSJodHRwczovL29iamVjdHN0b3JhZ2UuYXAtZGNjLWdhemlwdXItMS5vcmFjbGVjbG91ZDE1LmNvbS9uL2F4dmpibnFwcnlsZy9iL1YyTWluaXN0cnkvby9vZmZpY2UtYmJzLzIwMjQvMTIvZjM5M2VkOWQyMmU5NDMwM2FlMjdmNDFmZjVlZjA1YWQucGRmIj48c3BhbiBzdHlsZT0iZm9udC1zaXplOjE0cHgiPlllYXJib29rIG9mIEFncmljdWx0dXJhbCBTdGF0aXN0aWNzIG9mIEJhbmdsYWRlc2ggMjAxNTwvc3Bhbj48L2E+PC9saT48bGk+PGEgaHJlZj0iaHR0cHM6Ly9vYmplY3RzdG9yYWdlLmFwLWRjYy1nYXppcHVyLTEub3JhY2xlY2xvdWQxNS5jb20vbi9heHZqYm5xcHJ5bGcvYi9WMk1pbmlzdHJ5L28vb2ZmaWNlLWJicy8yMDI0LzEyLzFhYTQ1MmQ2ZGE3NjQ2NWNiMTRmMzZhYjQ5NGM0OGExLnBkZiI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxNHB4Ij5ZZWFyYm9vayBvZiBBZ3JpY3VsdHVyYWwgU3RhdGlzdGljcyBvZiBCYW5nbGFkZXNoIDIwMTQ8L3NwYW4+PC9hPjwvbGk+PGxpPjxhIGhyZWY9Imh0dHBzOi8vb2JqZWN0c3RvcmFnZS5hcC1kY2MtZ2F6aXB1ci0xLm9yYWNsZWNsb3VkMTUuY29tL24vYXh2amJucXByeWxnL2IvVjJNaW5pc3RyeS9vL29mZmljZS1iYnMvMjAyNC8xMi9lYzNmMzZkZmVlOWM0YWRmOTljYzgyZjI0OGRhMmE0YS5wZGYiPjxzcGFuIHN0eWxlPSJmb250LXNpemU6MTRweCI+WWVhcmJvb2sgb2YgQWdyaWN1bHR1cmFsIFN0YXRpc3RpY3Mgb2YgQmFuZ2xhZGVzaCAyMDEzPC9zcGFuPjwvYT48L2xpPjxsaT48YSBocmVmPSJodHRwczovL29iamVjdHN0b3JhZ2UuYXAtZGNjLWdhemlwdXItMS5vcmFjbGVjbG91ZDE1LmNvbS9uL2F4dmpibnFwcnlsZy9iL1YyTWluaXN0cnkvby9vZmZpY2UtYmJzLzIwMjQvMTIvMTFhMGQ2MjE1NzFhNDFiZjg1ZjVkYmY2NmIyY2ZmNmYucGRmIj48c3BhbiBzdHlsZT0iZm9udC1zaXplOjE0cHgiPlllYXJib29rIG9mIEFncmljdWx0dXJhbCBTdGF0aXN0aWNzIG9mIEJhbmdsYWRlc2ggMjAxMjwvc3Bhbj48L2E+PC9saT48L3VsPg=="><ul><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2026/5/cfb80ec8-1c7f-4632-8a59-7649b6ac7ffe.pdf">Year Book of Agricultural Statistics of Bangladesh 2025</a> <span style="color:rgb(255,0,0)">(Upload-30/06/2026)</span></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/58f325576f9a47cc91e7d227e336e40f.pdf">Year Book of Agricultural Statistics of Bangladesh 2024</a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/d09f33a6167a46fd980e5797749de63d.pdf">Year Book of Agricultural Statistics of Bangladesh 2023</a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/85216bc379fa443e837ffac3052a45dc.pdf">Year Book of Agricultural Statistics of Bangladesh 2022</a></li><li><a href="https://bbs.gov.bd/pages/files/6a7420f8112d0b7ffdd4f987">Year Book of Agricultural Statistics of Bangladesh 2021</a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/4b0a4874dbbf461eb7aebb0a64348c1f.pdf"><span style="font-size:14px">YearBook of Agricultural Statistics of Bangladesh 2020</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/2dd420c42e2544ea8b556b683d73fab3.pdf"><span style="font-size:14px">YearBook of Agricultural Statistics of Bangladesh 2019</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/14091496465c4fc49d5adc56c459f057.pdf"><span style="font-size:14px">Yearbook of Agricultural Statistics of Bangladesh 2018</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/44df01e1fa7e442496cdc35cc9dae0ab.pdf"><span style="font-size:14px">Yearbook of Agricultural Statistics of Bangladesh 2017</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/2392443cc06247a0a01094c57cc0b46f.pdf"><span style="font-size:14px">Yearbook of Agricultural Statistics of Bangladesh 2016</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/f393ed9d22e94303ae27f41ff5ef05ad.pdf"><span style="font-size:14px">Yearbook of Agricultural Statistics of Bangladesh 2015</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/1aa452d6da76465cb14f36ab494c48a1.pdf"><span style="font-size:14px">Yearbook of Agricultural Statistics of Bangladesh 2014</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/ec3f36dfee9c4adf99cc82f248da2a4a.pdf"><span style="font-size:14px">Yearbook of Agricultural Statistics of Bangladesh 2013</span></a></li><li><a href="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/11a0d621571a41bf85f5dbf66b2cff6f.pdf"><span style="font-size:14px">Yearbook of Agricultural Statistics of Bangladesh 2012</span></a></li></ul></rt-renderer> </div> </div> 
+        <section data-widget_type="widget" data-widget_name="SocialContentShareWidget" class="widget social-content-share-widget">
+    <div>
+        <p class="social-content-share-widget-title ">এই কনটেন্টটি শেয়ার করতে ক্লিক করুন</p>
+        <div class="social-content-share-widget-social-icons">
+            <a title="Facebook" class="social-content-share-widget-social-icons-link facebook-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-facebook-logo social-content-share-widget-fb-icon"></i>
+            </a>
+            <a title="X (Formerly Twitter)" class="social-content-share-widget-social-icons-link twitter-share" target="_blank" rel="noopener">
+                <i class="ph ph-x-logo social-content-share-widget-twitter-icon"></i>
+            </a>
+            <a title="WhatsApp" class="social-content-share-widget-social-icons-link whatsapp-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-whatsapp-logo social-content-share-widget-whatsapp-icon"></i>
+            </a>
+            <a title="LinkedIn" class="social-content-share-widget-social-icons-link linkedin-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-linkedin-logo social-content-share-widget-linkedin-icon"></i>
+            </a>
+            <a title="Viber" class="social-content-share-widget-social-icons-link viber-share" target="_blank" rel="noopener">
+                <!--<i class="ph-fill ph-chat-circle-text social-content-share-widget-viber-icon"></i>-->
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">
+                 <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
+                    transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
+                     <path d="M 63.357 24.877 c -1.243 -1.147 -6.264 -4.792 -17.448 -4.841 c 0 0 -13.189 -0.796 -19.618 5.102 c -3.579 3.58 -4.838 8.818 -4.97 15.312 c -0.133 6.494 -0.305 18.664 11.426 21.964 h 0.011 l -0.007 5.035 c 0 0 -0.075 2.038 1.267 2.454 c 1.624 0.504 2.577 -1.045 4.127 -2.716 c 0.851 -0.917 2.026 -2.264 2.911 -3.293 c 8.023 0.675 14.194 -0.868 14.894 -1.096 c 1.62 -0.525 10.787 -1.7 12.277 -13.869 C 69.766 36.387 67.483 28.453 63.357 24.877 z M 56.614 52.131 c 0 0.005 -0.004 0.014 -0.004 0.019 c -0.517 0.896 -1.172 1.703 -1.943 2.392 c -0.009 0.004 -0.009 0.009 -0.017 0.013 c -0.669 0.559 -1.327 0.877 -1.973 0.954 c -0.095 0.017 -0.192 0.023 -0.288 0.018 c -0.285 0.003 -0.568 -0.041 -0.839 -0.129 l -0.021 -0.031 c -0.995 -0.281 -2.656 -0.983 -5.423 -2.509 c -1.601 -0.873 -3.125 -1.879 -4.556 -3.009 c -0.717 -0.566 -1.401 -1.173 -2.049 -1.817 l -0.069 -0.069 l -0.069 -0.069 l -0.069 -0.069 c -0.023 -0.022 -0.046 -0.046 -0.069 -0.069 c -0.644 -0.648 -1.251 -1.332 -1.817 -2.049 c -1.13 -1.431 -2.137 -2.954 -3.009 -4.555 c -1.526 -2.767 -2.228 -4.427 -2.509 -5.423 l -0.031 -0.021 c -0.088 -0.271 -0.131 -0.554 -0.128 -0.839 c -0.005 -0.096 0.001 -0.193 0.017 -0.288 c 0.081 -0.645 0.399 -1.303 0.955 -1.974 c 0.004 -0.008 0.009 -0.008 0.013 -0.017 c 0.689 -0.771 1.497 -1.426 2.392 -1.942 c 0.004 0 0.013 -0.004 0.019 -0.004 c 0.901 -0.469 1.754 -0.31 2.335 0.375 c 0.004 0.004 1.209 1.451 1.726 2.157 c 0.532 0.749 1.027 1.523 1.481 2.322 c 0.593 1.063 0.221 2.152 -0.361 2.601 l -1.174 0.933 c -0.593 0.479 -0.514 1.368 -0.514 1.368 s 1.739 6.583 8.238 8.242 c 0 0 0.889 0.075 1.368 -0.515 l 0.933 -1.174 c 0.45 -0.582 1.537 -0.954 2.601 -0.361 c 0.797 0.454 1.571 0.949 2.319 1.481 c 0.706 0.519 2.152 1.726 2.156 1.726 C 56.924 50.376 57.083 51.23 56.614 52.131 z M 51.238 35.889 c -1.316 -1.436 -3.119 -2.219 -5.511 -2.394 c -0.348 -0.026 -0.61 -0.329 -0.584 -0.677 c 0.026 -0.348 0.33 -0.611 0.677 -0.584 c 2.692 0.197 4.829 1.14 6.352 2.802 c 1.526 1.668 2.273 3.765 2.219 6.233 c -0.007 0.344 -0.289 0.619 -0.632 0.619 c -0.004 0 -0.009 0 -0.014 0 c -0.349 -0.008 -0.626 -0.297 -0.619 -0.646 C 53.173 39.078 52.556 37.328 51.238 35.889 z M 51.145 40.135 c 0.017 0.349 -0.252 0.646 -0.601 0.663 c -0.011 0.001 -0.021 0.001 -0.032 0.001 c -0.335 0 -0.614 -0.263 -0.631 -0.601 c -0.107 -2.149 -1.117 -3.201 -3.181 -3.308 c -0.349 -0.018 -0.617 -0.316 -0.599 -0.664 c 0.018 -0.349 0.314 -0.618 0.664 -0.599 C 49.491 35.769 51.006 37.327 51.145 40.135 z M 57.086 43.186 c -0.002 0 -0.003 0 -0.005 0 c -0.347 0 -0.63 -0.28 -0.632 -0.628 c -0.029 -3.816 -1.174 -6.853 -3.404 -9.027 c -2.234 -2.178 -5.057 -3.294 -8.39 -3.317 c -0.349 -0.002 -0.631 -0.288 -0.628 -0.637 c 0.002 -0.348 0.285 -0.628 0.632 -0.628 c 0.002 0 0.003 0 0.004 0 c 3.672 0.026 6.789 1.262 9.264 3.676 c 2.481 2.418 3.754 5.757 3.786 9.923 C 57.715 42.898 57.434 43.183 57.086 43.186 z"
+                           style="stroke: none;stroke-width: 1;stroke-dasharray: none;stroke-linecap: butt;stroke-linejoin: miter;stroke-miterlimit: 10;fill:#665cac;fill-rule: nonzero;opacity:1;"
+                           transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+                 </g>
+             </svg>
+            </a>
+            <a title="Copy Link" class="social-content-share-widget-social-icons-link link-share" target="_blank" rel="noopener" onclick="window.copyToClipboard(location.href);">
+                <i class="ph ph-link social-content-share-widget-link-icon"></i>
+            </a>
+            <a title="Messenger" class="social-content-share-widget-social-icons-link messenger-share" target="_blank" rel="noopener">
+                <i class="ph-fill ph-messenger-logo social-content-share-widget-messenger-icon"></i>
+            </a>
+        </div>
+    </div>
+    <div>
+        <div
+  class="widget eps-opinion-popup-widget"
+  data-widget="EParticipationOpinionPopupWidget"
+>
+  <!-- Trigger Button -->
+  <div class="eps-opinion-trigger-wrapper">
+    <p class="social-content-share-widget-title ">&nbsp;</p>
+    <!-- Removed ID to support multiple instances -->
+    <button type="button" class="eps-opinion-btn">
+      <span></span>
+      <span>আপনার মতামত প্রদান করুন</span>
+      <i class="ph ph-chat-circle-text"></i>
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <!-- Removed ID to support multiple instances -->
+  <div class="eps-opinion-modal" aria-hidden="true">
+    <div class="eps-opinion-modal-overlay"></div>
+    <div class="eps-opinion-modal-container">
+      <div class="eps-opinion-modal-header">
+        <h3>আপনার মতামত প্রদান করুন</h3>
+        <button type="button" class="eps-opinion-close" aria-label="Close">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="eps-opinion-modal-body">
+        <div
+  class="widget eps-opinion-form-widget"
+  data-widget="EParticipationOpinionFormWidget"
+>
+  <div class="unique-category-container">
+    <form id="opinionForm" class="opinion-form" enctype="multipart/form-data">
+      <!-- We allow an external hidden input or radio group to set this, but default here -->
+      <input type="hidden" name="opinionType" value="suggestion" />
+
+      <div>
+        <label class="form-label">আপনার নাম</label>
+        <input
+          name="name"
+          type="text"
+          placeholder="আপনার নাম লিখুন"
+        />
+        <small class="error-message" hidden>
+          নাম অবশ্যই দিতে হবে
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label">আপনার ইমেইল</label>
+        <input
+          name="email"
+          type="email"
+          placeholder="আপনার ইমেইল লিখুন"
+        />
+        <small class="error-message" hidden>
+          সঠিক ইমেইল দিন
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label">আপনার যোগাযোগ নম্বর</label>
+        <input
+          name="phone"
+          type="tel"
+          placeholder="আপনার যোগাযোগ নম্বর লিখুন"
+        />
+        <small class="error-message" hidden>
+          সঠিক ফোন নম্বর দিন (যেমন 017XXXXXXXX)
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label">আপনার মতামত</label>
+        <textarea name="body" id="popupEditor"></textarea>
+        <small class="error-message" hidden>
+          মতামত কমপক্ষে ২০ অক্ষরের হতে হবে
+        </small>
+      </div>
+
+      <div>
+        <label class="form-label"
+          >Attachment (jpg, jpeg, png, pdf • max 2 MB)</label
+        >
+        <input name="attachment" type="file" accept=".jpg,.jpeg,.png,.pdf" />
+        <small class="error-message" hidden>
+          Invalid file. Allowed: JPG, JPEG, PNG, PDF up to 2MB
+        </small>
+      </div>
+
+      <div>
+        <button type="submit" id="popupSubmitBtn">জমা দিন</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Ensure CKEditor is available if not loaded globally -->
+  <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div>
+</section>
+
+    <div data-widget_type="widget" data-widget_name="AccessibilityWidget" class="widget accessibility-widget"> <div class="accessibility-float fab-icon" id="accessibility-btn" title="এক্সেসিবিলিটি"> <i class="ph ph-wheelchair-motion"></i> </div> <div class="accessibility-card" id="accessibility-card"> <h3 id="accessibility-card-title" tabindex="0">এক্সেসিবিলিটি</h3> <div id="accessibility-close" tabindex="0" title="Close"> <icon class="ph ph-x-circle"></icon> </div> <div class="item"> <button id="font-increase">ফন্ট বৃদ্ধি</button> <button id="font-decrease">ফন্ট হ্রাস</button> </div> <div class="item"> <input type="checkbox" id="monochrome" title="মনোক্রোম" /> <label for="monochrome">মনোক্রোম</label> </div> <div class="item"> <input type="checkbox" id="inverted" title="ইনভার্ট" /> <label for="inverted">ইনভার্ট</label> </div> <div class="item"> <input type="checkbox" id="bigCursor" title="বড় কার্সর" /> <label for="bigCursor">বড় কার্সর</label> </div> <div class="item"> <input type="checkbox" id="highlightLinks" title="লিঙ্ক হাইলাইট" /> <label for="highlightLinks">লিঙ্ক হাইলাইট</label> </div> <div class="item"> <input type="checkbox" id="highlightHeadings" title="শিরোনাম হাইলাইট" /> <label for="highlightHeadings">শিরোনাম হাইলাইট</label> </div> <div class="item"> <input type="checkbox" id="readingGuideCheckbox" title="পড়ার গাইড" /> <label for="readingGuideCheckbox">পড়ার গাইড</label> </div> <div class="item"> <button class="accessibility-reset">রিসেট</button> </div> <a class='screen-reader' target="_blank" rel="noreferrer" href="https://www.nvaccess.org/files/nvda/releases/2020.4/nvda_2020.4.exe">স্ক্রিন রিডার ডাউনলোড করুন</a> </div> <!-- TODO: [naeemur] add some more tab navigate options --> <div class="tab-menu"> <a href="#main-content" class="skip-link">কন্টেন্টে চলে যান</a> <a href="#accessibility-card-title" class="skip-link menu-href">এক্সেসিবিলিটি মেনুতে যান</a> </div> </div> 
+<div data-widget_type="widget" data-widget_name="GoToTopWidget" class="widget go-to-top-widget"> <div class="go-to-top-float x-fab-icon" id="go-to-top-btn" title="উপরে যান"> <i class="ph ph-caret-up"></i> </div> </div> 
+</div></div>
+  </div>
+  <div class="footer"><div data-section_type="footer" class="droppable">
+         <footer data-widget_type="widget" data-widget_name="FooterWidget" class="widget footer-widget"> <div class="footer-widget-image"></div> <div class="footer-disclaimer"> এই ওয়েবসাইটে প্রকাশিত সকল তথ্য সংশ্লিষ্ট দপ্তর কর্তৃক নিয়মিত হালনাগাদ করা হয়। তথ্যের যথার্থতা, নির্ভুলতা ও নির্ভরযোগ্যতা নিশ্চিত করতে সংশ্লিষ্ট দপ্তর সর্বদা সচেষ্ট। </div> <div class="footer-body "> <div> <ul class="left-ul"> <li class="left-ul-list"> <a class="footer-link" href="/views/sitemap">সাইট ম্যাপ</a> </li> <li class="left-ul-list"> <a class="footer-link" href="http://pmis.mopa.gov.bd/">পিএমআইএস</a> </li> <li class="left-ul-list"> <a class="footer-link" href="/pages/static-pages/6922de99933eb65569e1bdef">ডাউনলোড</a> </li> <li class="left-ul-list"> <a class="footer-link" href="http://203.112.218.65:8008">পুরাতন ওয়েবসাইট</a> </li> <li class="left-ul-list"> <a class="footer-link" href="/pages/static-pages/6922dce2933eb65569e128ee">কোড ও শ্রেণীবিভাগ</a> </li> </ul> <div class="site-update-block"> <p> সাইটটি শেষ হাল-নাগাদ করা হয়েছে: বৃহস্পতিবার, ২৭ আগস্ট, ২০২৬ এ ১৬:১২:৫৩ </p> </div> </div> <div class="text-xs"> <p> পরিকল্পনা এবং বাস্তবায়ন: মন্ত্রিপরিষদ বিভাগ, এটুআই, বিসিসি, ডিওআইসিটি ও বেসিস। </p> <div class="technical-support-block "> <p class="technical-support-text">কারিগরি সহায়তা</p> <img class="technical-support-image" data-src="https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/undefined" src="/site-assets/images/technical-support.svg" alt="np-logo-set" onerror="this.onerror=null; this.src='/site-assets/images/technical-support.svg';" /> </div> </div> </div> </footer> 
+    </div></div>
+</div>
+<script>const _window=window; const _document=document;</script>
+<script src="/site-assets/js/index.js"></script>
+<script src="/widget-assets/js/HeaderWidget"></script>
+<script src="/widget-assets/js/OfficeFindThreeWidget"></script>
+<script src="/widget-assets/js/GlobalSearchWidget"></script>
+<script src="/widget-assets/js/LanguageSwitcherWidget"></script>
+<script src="/widget-assets/js/BannerSliderImageWidget"></script>
+<script src="/widget-assets/js/MenusExpandableWidget"></script>
+<script src="/widget-assets/js/MenusWidget"></script>
+<script src="/widget-assets/js/SocialContentShareWidget"></script>
+<script src="/widget-assets/js/EParticipationOpinionPopupWidget"></script>
+<script src="/widget-assets/js/EParticipationOpinionFormWidget"></script>
+<script src="/widget-assets/js/ContentViewerWidget"></script>
+<script src="/widget-assets/js/PrintWidget"></script>
+<script src="/widget-assets/js/AccessibilityWidget"></script>
+<script src="/widget-assets/js/GoToTopWidget"></script>
+<script src="/widget-assets/js/TitleWithImageContentWidget"></script>
+<script src="/widget-assets/js/ContentDetailsWidget"></script>
+<script src="/widget-assets/js/FooterWidget"></script>
+
+<script src="/assets/js/index.js"></script>
+</body>
+</html>

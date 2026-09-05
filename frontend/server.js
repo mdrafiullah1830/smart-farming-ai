@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,7 +16,8 @@ app.use(express.static(path.join(__dirname, 'web')));
 
 // ==================== API ROUTES ====================
 const https = require('https');
-const OW_API_KEY = '0ab5b387c3901557da6d935dbfeb30b1'; // OpenWeatherMap key (activate at openweathermap.org)
+// Keep provider credentials server-side. Open-Meteo remains the no-key fallback.
+const OW_API_KEY = process.env.OPENWEATHER_API_KEY || '';
 
 function fetchJSON(url) {
   return new Promise((resolve, reject) => {
@@ -68,6 +70,7 @@ function getWeatherInfo(code, isDay) {
 
 // Try OpenWeatherMap first, fallback to Open-Meteo
 async function tryOWM(lat, lng, lang) {
+  if (!OW_API_KEY) return null;
   try {
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${OW_API_KEY}&units=metric`;
     const data = await fetchJSON(url);
@@ -1582,9 +1585,19 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Database = require('better-sqlite3');
 const { OAuth2Client } = require('google-auth-library');
-const JWT_SECRET = 'smart_farming_ai_secret_2026';
-const GOOGLE_CLIENT_ID = '19800172048-he9p7n73sikcjea54l1mu65651hg53sq.apps.googleusercontent.com';
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be configured in production');
+  }
+  console.warn('⚠️  JWT_SECRET not set — using a random ephemeral secret (dev only).');
+}
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || require('crypto').randomBytes(48).toString('hex');
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+if (!GOOGLE_CLIENT_ID) {
+  console.warn('⚠️  GOOGLE_CLIENT_ID not set — Google sign-in disabled.');
+}
+const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 let db;
 try {
@@ -1602,7 +1615,7 @@ function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.status(401).json({ error: 'No token provided' });
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET);
     req.user = decoded;
     next();
   } catch (e) {
@@ -1624,12 +1637,13 @@ app.post('/api/auth/register', (req, res) => {
     'INSERT INTO users (name_en, name_bn, email, phone, password_hash, district, upazila, division) VALUES (?,?,?,?,?,?,?,?)'
   ).run(name_en, name_bn || name_en, email, phone || '', hash, district || '', upazila || '', division || '');
 
-  const token = jwt.sign({ id: result.lastInsertRowid, email, name: name_en }, JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ id: result.lastInsertRowid, email, name: name_en }, EFFECTIVE_JWT_SECRET, { expiresIn: '7d' });
   res.json({ success: true, token, user: { id: result.lastInsertRowid, name_en, name_bn: name_bn || name_en, email } });
 });
 
 // Google Sign-In
 app.post('/api/auth/google', async (req, res) => {
+  if (!googleClient) return res.status(503).json({ error: 'Google sign-in is not configured on this server' });
   const { credential } = req.body;
   if (!credential) return res.status(400).json({ error: 'Google credential required' });
 
@@ -1655,7 +1669,7 @@ app.post('/api/auth/google', async (req, res) => {
       user = { id: result.lastInsertRowid, name_en: nameEn, name_bn: nameBn, email, phone: '', district: '', upazila: '', division: '' };
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email, name: user.name_en }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name_en }, EFFECTIVE_JWT_SECRET, { expiresIn: '7d' });
     res.json({
       success: true, token,
       user: { id: user.id, name_en: user.name_en, name_bn: user.name_bn, email: user.email, phone: user.phone, district: user.district }
@@ -1678,7 +1692,7 @@ app.post('/api/auth/login', (req, res) => {
     return res.status(401).json({ error: 'Invalid password' });
   }
 
-  const token = jwt.sign({ id: user.id, email: user.email, name: user.name_en }, JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ id: user.id, email: user.email, name: user.name_en }, EFFECTIVE_JWT_SECRET, { expiresIn: '7d' });
   res.json({ success: true, token, user: { id: user.id, name_en: user.name_en, name_bn: user.name_bn, email: user.email, phone: user.phone, district: user.district } });
 });
 
@@ -2309,7 +2323,7 @@ function banglishToBangla(text) {
 
   const dict = {
     // Common agricultural terms
-    'dhan': 'ধান', 'dhaan': 'ধান', 'dhone': 'ধান', 'dhaner': 'ধানের', 'dhaner': 'ধানের',
+    'dhan': 'ধান', 'dhaan': 'ধান', 'dhone': 'ধান', 'dhaner': 'ধানের',
     ' rog': ' রোগ', 'rog': 'রোগ', 'rogs': 'রোগ', 'rogEr': 'রোগের',
     'shosho': 'ফসল', 'fosh': 'ফসল', 'fshol': 'ফসল', 'fashol': 'ফসল', 'fossal': 'ফসল',
     'shaar': 'সার', 'sar': 'সার', 'sarr': 'সার', 'saar': 'সার',
@@ -2492,9 +2506,14 @@ app.get('/dashboard', (req, res) => {
 app.get('/soil', (req, res) => {
   res.sendFile(path.join(__dirname, 'web', 'soil.html'));
 });
+app.get('/market', (req, res) => {
+  res.sendFile(path.join(__dirname, 'web', 'market.html'));
+});
+app.get('/ai-search', (req, res) => {
+  res.sendFile(path.join(__dirname, 'web', 'ai-search.html'));
+});
 
 app.listen(PORT, '0.0.0.0', () => {
-  const os = require('os');
   const nets = os.networkInterfaces();
   let localIP = 'localhost';
   for (const name of Object.keys(nets)) {

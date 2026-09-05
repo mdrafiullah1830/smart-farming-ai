@@ -27,6 +27,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    profiles: ["full"]   # not used by the deployed surface; only for the deprecated backend/app/
     restart: unless-stopped
 
   redis:
@@ -45,11 +46,9 @@ services:
     container_name: smart_farming_backend
     environment:
       - DATABASE_URL=postgresql+asyncpg://smartfarming:password@postgres:5432/smart_farming_db
-      - MONGODB_URL=mongodb://mongodb:27017
       - REDIS_URL=redis://redis:6379/0
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - APP_ENV=production
       - DEBUG=false
     ports:

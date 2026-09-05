@@ -9,8 +9,8 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     APP_ENV: str = "production"
     DEBUG: bool = False
-    SECRET_KEY: str = "change-me-in-production"
-    ALLOWED_HOSTS: List[str] = ["*"]
+    SECRET_KEY: str = ""
+    ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://smartfarming:password@localhost:5432/smart_farming_db"

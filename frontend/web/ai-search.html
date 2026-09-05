@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>AI Search — Smart Farming AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,6 +18,8 @@
   --radius:16px;--radius-sm:10px;
 }
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.ai-lang{position:fixed;top:18px;right:18px;z-index:50;display:flex;padding:3px;border-radius:20px;background:var(--card);border:1px solid var(--border)}
+.ai-lang button{border:0;background:transparent;color:var(--text2);padding:7px 11px;border-radius:16px;font-weight:700;cursor:pointer}.ai-lang button.active{background:var(--accent);color:#fff}
 
 /* Landing Page */
 .landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;text-align:center}
@@ -93,17 +95,19 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
   .answer-text{padding:16px}
 }
 </style>
+<link rel="stylesheet" href="design-system.css">
 </head>
 <body>
 <div class="bg-map"></div>
+<div class="ai-lang"><button id="aiLangBn" onclick="setAiLang('bn')">বাং</button><button id="aiLangEn" onclick="setAiLang('en')">EN</button></div>
 
 <!-- Landing Page -->
 <div class="landing" id="landing">
   <div class="landing-icon">🌾</div>
   <h1>AI Search</h1>
-  <p>কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন — আমরা ইন্টারনেট থেকে খুঁজে সেরা উত্তর দেব। ১০০% বিনামূল্যে।</p>
+  <p data-bn="কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন — নির্ভরযোগ্য উৎসসহ উত্তর পান।" data-en="Ask any agriculture question and get an answer with reliable sources.">কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন — নির্ভরযোগ্য উৎসসহ উত্তর পান।</p>
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="যেকোনো কিছু জিজ্ঞাসা করুন..." autofocus>
+    <input type="text" id="searchInput" data-placeholder-bn="যেকোনো কিছু জিজ্ঞাসা করুন..." data-placeholder-en="Ask anything about agriculture..." placeholder="যেকোনো কিছু জিজ্ঞাসা করুন..." autofocus>
     <button class="search-btn" onclick="doSearch()">
       <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
     </button>
@@ -121,7 +125,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 <!-- Loading -->
 <div class="loading" id="loading">
   <div class="loading-spinner"></div>
-  <div class="loading-text">ইন্টারনেটে খুঁজে পাচ্ছি...</div>
+  <div class="loading-text" data-bn="উত্তর প্রস্তুত হচ্ছে..." data-en="Preparing your answer...">উত্তর প্রস্তুত হচ্ছে...</div>
 </div>
 
 <!-- Results Page -->
@@ -129,7 +133,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
   <div class="top-bar">
     <button class="back-btn" onclick="window.location.href='dashboard.html'" title="Dashboard e ফিরে যান">←</button>
     <div class="logo">🌾</div>
-    <input type="text" class="search-input" id="resultSearchInput" placeholder="আবার খুঁজুন...">
+    <input type="text" class="search-input" id="resultSearchInput" data-placeholder-bn="আবার খুঁজুন..." data-placeholder-en="Search again..." placeholder="আবার খুঁজুন...">
     <button class="search-btn" onclick="doSearchFromResult()" style="position:static;transform:none">
       <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
     </button>
@@ -146,6 +150,16 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 
 <script>
 var API_BASE = window.location.origin;
+var currentLang = localStorage.getItem('sfLang') || 'bn';
+function applyAiLang(){
+  document.documentElement.lang=currentLang;
+  document.querySelectorAll('[data-bn][data-en]').forEach(function(el){el.textContent=el.getAttribute(currentLang==='en'?'data-en':'data-bn')});
+  document.querySelectorAll('[data-placeholder-bn][data-placeholder-en]').forEach(function(el){el.placeholder=el.getAttribute(currentLang==='en'?'data-placeholder-en':'data-placeholder-bn')});
+  document.getElementById('aiLangBn').classList.toggle('active',currentLang==='bn');
+  document.getElementById('aiLangEn').classList.toggle('active',currentLang==='en');
+}
+function setAiLang(lang){currentLang=lang;localStorage.setItem('sfLang',lang);applyAiLang()}
+applyAiLang();
 
 document.getElementById('searchInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') doSearch();
@@ -186,26 +200,26 @@ async function doSearch() {
     if (data.success) {
       renderResults(data);
     } else {
-      document.getElementById('answerSection').innerHTML = '<div class="answer-text">দুঃখিত, কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।</div>';
+      document.getElementById('answerSection').innerHTML = '<div class="answer-text">'+(currentLang==='en'?'Sorry, something went wrong. Please try again.':'দুঃখিত, কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।')+'</div>';
       document.getElementById('resultsPage').classList.add('active');
     }
   } catch (e) {
     document.getElementById('loading').classList.remove('active');
-    document.getElementById('answerSection').innerHTML = '<div class="answer-text">নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।</div>';
+    document.getElementById('answerSection').innerHTML = '<div class="answer-text">'+(currentLang==='en'?'Network error. Please try again.':'নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।')+'</div>';
     document.getElementById('resultsPage').classList.add('active');
   }
 }
 
 function renderResults(data) {
   // Answer
-  var agriBadge = data.isAgriQuery ? '<span class="answer-badge" style="margin-left:8px;background:var(--purple-bg);border-color:rgba(168,85,247,.2);color:var(--purple)"><span class="dot" style="background:var(--purple)"></span>কৃষি সম্পর্কিত</span>' : '';
+  var agriBadge = data.isAgriQuery ? '<span class="answer-badge" style="margin-left:8px;background:var(--purple-bg);border-color:rgba(168,85,247,.2);color:var(--purple)"><span class="dot" style="background:var(--purple)"></span>'+(currentLang==='en'?'Agriculture':'কৃষি সম্পর্কিত')+'</span>' : '';
   var banglishNote = data.wasBanglish ? '<span style="color:var(--text3);font-size:11px;margin-left:8px">✨ "' + escapeHtml(data.originalQuery) + '" → "' + escapeHtml(data.query) + '"</span>' : '';
   var breakdown = data.sourceBreakdown || {};
   var sourceCount = (breakdown.duckduckgo||0) + (breakdown.wikipedia||0) + (breakdown.googleNews||0) + (breakdown.youtube||0);
   var sourceStats = '<span style="color:var(--text3);font-size:11px;margin-left:8px">🔍 ' + sourceCount + ' sources</span>';
   document.getElementById('answerSection').innerHTML =
     '<div class="answer-header">' +
-      '<div class="answer-badge"><span class="dot"></span>AI উত্তর</div>' +
+      '<div class="answer-badge"><span class="dot"></span>'+(currentLang==='en'?'AI answer':'AI উত্তর')+'</div>' +
       agriBadge +
       banglishNote +
       sourceStats +
@@ -215,7 +229,7 @@ function renderResults(data) {
 
   // Sources
   if (data.sources && data.sources.length > 0) {
-    var sourcesHtml = '<div class="sources-header">📚 সোর্স (' + data.sources.length + ')</div><div class="sources-grid">';
+    var sourcesHtml = '<div class="sources-header">📚 '+(currentLang==='en'?'Sources':'সোর্স')+' (' + data.sources.length + ')</div><div class="sources-grid">';
     data.sources.forEach(function(s, i) {
       var sourceIcon = getSourceIcon(s.source, s.url);
       sourcesHtml += '<a class="source-card" href="' + (s.url || '#') + '" target="_blank" rel="noopener">' +
@@ -237,7 +251,7 @@ function renderResults(data) {
 
   // Related Topics
   if (data.relatedTopics && data.relatedTopics.length > 0) {
-    var relatedHtml = '<div class="related-header">🔗 সম্পর্কিত বিষয়</div><div class="related-list">';
+    var relatedHtml = '<div class="related-header">🔗 '+(currentLang==='en'?'Related topics':'সম্পর্কিত বিষয়')+'</div><div class="related-list">';
     data.relatedTopics.forEach(function(t) {
       relatedHtml += '<div class="related-item" onclick="searchRelated(\'' + escapeAttr(t.text.substring(0, 60)) + '\')">' +
         '<div class="related-icon">🔍</div>' +

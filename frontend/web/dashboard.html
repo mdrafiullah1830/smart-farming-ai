@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>স্মার্ট ফার্মিং AI - ড্যাশবোর্ড</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -202,10 +202,40 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 .toast{padding:14px 20px;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:600;font-family:inherit;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;animation:fadeDown .3s ease;pointer-events:auto}
 .toast.success{background:var(--primary)}.toast.error{background:var(--error)}.toast.warning{background:var(--accent)}.toast.info{background:var(--info)}
 
-.app-content{padding:20px 16px;padding-bottom:calc(var(--nav-height) + 24px)}
-@media(min-width:768px){.app-content{max-width:640px;margin:0 auto}}
-@media(max-width:380px){.quick-actions{grid-template-columns:repeat(2,1fr)}}
+.app-content{padding:28px 20px;padding-bottom:calc(var(--nav-height) + 28px);max-width:1180px;margin:0 auto}
+@media(min-width:768px){
+  .app-header{padding:0 max(28px,calc((100vw - 1180px)/2));height:68px}
+  .app-header h1{font-size:20px}
+  .app-content{padding-top:34px}
+  .quick-actions{grid-template-columns:repeat(4,1fr);gap:16px}
+  .feature-grid{grid-template-columns:repeat(4,1fr);gap:16px}
+  .section{margin-bottom:34px}
+  .weather-current{padding:34px}
+}
+@media(min-width:1100px){
+  body{background-color:#f6f8f7}
+  .bg-map{background-size:34% auto;opacity:.06}
+  .bottom-nav{top:68px;bottom:0;left:0;right:auto;width:224px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;padding:28px 14px 24px;border-top:0;border-right:1px solid rgba(15,23,42,.07);box-shadow:8px 0 30px rgba(15,23,42,.05);gap:8px}
+  .nav-item{flex-direction:row;justify-content:flex-start;gap:14px;padding:13px 16px;min-width:0;border-radius:12px;text-align:left}
+  .nav-item span{font-size:13px;font-weight:700}
+  .nav-item .material-icons-round{font-size:22px}
+  .nav-item.active{background:linear-gradient(90deg,var(--primary-100),rgba(220,252,231,.35));color:var(--primary-dark)}
+  .nav-item.active .material-icons-round{width:34px;height:30px;border-radius:9px;font-size:19px}
+  .app-header{margin-left:224px}
+  .screen>.app-content{margin-left:224px;max-width:none}
+  #mainContent.app-content>div:first-child{padding:26px 30px;border-radius:22px;background:linear-gradient(120deg,#073b2a 0%,#0d6b45 52%,#18a66a 100%);color:#fff;box-shadow:0 16px 34px rgba(13,107,69,.18);position:relative;overflow:hidden}
+  #mainContent.app-content>div:first-child:after{content:'🌾';position:absolute;right:34px;bottom:-16px;font-size:104px;opacity:.16;transform:rotate(-12deg)}
+  #mainContent.app-content>div:first-child p{color:rgba(255,255,255,.78)!important}
+  #mainContent.app-content{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;align-items:start}
+  #mainContent.app-content>.section{grid-column:span 6;padding:0;margin:0}
+  #mainContent.app-content>.section:first-child,#mainContent.app-content>.section:nth-child(2){grid-column:span 12}
+  #mainContent.app-content>.section:nth-last-child(-n+2){grid-column:span 6}
+}
+@media(max-width:767px){.app-header{padding:0 12px}.app-header h1{font-size:15px}.app-content{padding:20px 14px 96px}.section{padding:0}.quick-actions{gap:8px}.quick-action{padding:13px 6px}.feature-card{padding:16px}.weather-temp{font-size:52px}}
+@media(max-width:380px){.quick-actions{grid-template-columns:repeat(2,1fr)}.lang-toggle .lang-btn{padding:5px 8px}.app-header .header-action{width:36px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
+<link rel="stylesheet" href="design-system.css">
 </head>
 <body>
 <div class="bg-map"></div>
@@ -843,7 +873,7 @@ function saveProfile(){var ne=document.getElementById('editNameEn').value.trim()
 function loadDashboardData(){
   // Load weather with geolocation
   detectWeatherLocation();
-  fetch(API_BASE+'/api/market/prices').then(function(r){return r.json()}).then(function(d){
+  fetch(API_BASE+'/market/prices').then(function(r){return r.json()}).then(function(d){
     var hp=document.getElementById('homeMarketPrices');if(!hp)return;hp.innerHTML='';
     var prices=d.prices||{};
     var items=Object.keys(prices).slice(0,8);
@@ -861,7 +891,7 @@ function loadDashboardData(){
   }).catch(function(){});
   var nl=document.getElementById('notificationsList');
   if(nl){
-    fetch(API_BASE+'/api/db/notifications').then(function(r){return r.json()}).then(function(d){
+    fetch(API_BASE+'/db/notifications').then(function(r){return r.json()}).then(function(d){
       nl.innerHTML='';(d.items||d.notifications||[]).forEach(function(n){
         nl.innerHTML+='<div class="notification-item '+(n.unread?'unread':'')+'"><div class="notif-icon" style="background:var(--primary-100);color:var(--primary)">'+n.icon+'</div><div class="notif-content"><div class="notif-title">'+n.title+'</div><div class="notif-text">'+n.text+'</div><div class="notif-time">'+n.time+'</div></div></div>';
       });
@@ -871,6 +901,7 @@ function loadDashboardData(){
 
 // ===== WEATHER FUNCTIONS =====
 var weatherLat = null, weatherLng = null;
+var LOCATION_CACHE_MS = 2 * 60 * 60 * 1000;
 
 function initWeatherFilter() {
   var sel = document.getElementById('wDivSelect');
@@ -998,14 +1029,25 @@ function detectWeatherLocation(){
   document.getElementById('weatherForecastCard').style.display='none';
   document.getElementById('weatherAdviceCard').style.display='none';
 
+  // Reuse the last approved location so opening the dashboard does not ask again.
+  try {
+    var cached = JSON.parse(localStorage.getItem('smartfarm.location.v1') || 'null');
+    if (cached && Number.isFinite(cached.lat) && Number.isFinite(cached.lng) &&
+        Number.isFinite(cached.savedAt) && Date.now() - cached.savedAt < LOCATION_CACHE_MS) {
+      weatherLat=cached.lat; weatherLng=cached.lng;
+      loadRealWeather(weatherLat,weatherLng);
+      return;
+    }
+  } catch (_) {}
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(pos){
       weatherLat=pos.coords.latitude;weatherLng=pos.coords.longitude;
+      try { localStorage.setItem('smartfarm.location.v1', JSON.stringify({lat:weatherLat,lng:weatherLng, savedAt:Date.now()})); } catch (_) {}
       loadRealWeather(weatherLat,weatherLng);
     },function(err){
       // Default to Dhaka
       loadRealWeather(23.81,90.41);
-    },{enableHighAccuracy:true,timeout:8000});
+    },{enableHighAccuracy:false,timeout:8000,maximumAge:LOCATION_CACHE_MS});
   }else{
     loadRealWeather(23.81,90.41);
   }
@@ -1135,19 +1177,19 @@ var BD_DISTRICTS_COORDS = {
   Rajbari:{lat:23.7500,lng:89.6000},Shariatpur:{lat:23.2100,lng:90.3500},
   Comilla:{lat:23.4600,lng:91.1800},Brahmanbaria:{lat:23.9600,lng:91.1000},Chandpur:{lat:23.2200,lng:90.6700},
   Lakshmipur:{lat:22.9500,lng:90.8300},Noakhali:{lat:22.8000,lng:91.1000},Feni:{lat:23.0200,lng:91.4000},
-  Coxsbazar:{lat:21.5800,lng:92.0000},Chattogram:{lat:22.3569,lng:91.7832},Khagrachari:{lat:23.1100,lng:91.9800},
+  "Cox's Bazar":{lat:21.5800,lng:92.0000},Chattogram:{lat:22.3569,lng:91.7832},Khagrachari:{lat:23.1100,lng:91.9800},
   Rangamati:{lat:22.6500,lng:92.2000},Bandarban:{lat:22.1900,lng:92.2200},
   Jessore:{lat:23.1700,lng:89.2000},Satkhira:{lat:21.7500,lng:89.0800},Khulna:{lat:22.8456,lng:89.5403},
   Bagerhat:{lat:22.6500,lng:89.7900},Pirojpur:{lat:21.9500,lng:89.9800},Jhalakathi:{lat:21.8700,lng:90.0700},
-  Barisal:{lat:22.7010,lng:90.3535},Bhola:{lat:22.6800,lng:90.6500},Patuakhali:{lat:22.3500,genome:90.3300},
-  Barguna:{lat:22.0500,genome:90.1000},
-  Rajshahi:{lat:24.3740,genome:88.6042},Natore:{lat:24.4200,genome:88.6300},Chapainawabganj:{lat:24.5900,genome:88.3200},
-  Naogaon:{lat:24.8100,genome:88.7600},Joypurhat:{lat:25.1000,genome:89.0300},Bogura:{lat:24.8500,genome:89.3700},
-  Sirajganj:{lat:24.4500,genome:89.7000},Pabna:{lat:24.0000,genome:89.2300},
-  Rangpur:{lat:25.7500,genome:89.2500},Dinajpur:{lat:25.6300,genome:88.6300},Thakurgaon:{lat:26.0300,genome:88.4700},
-  Nilphamari:{lat:25.9300,genome:88.8500},Lalmonirhat:{lat:25.9000,genome:89.4500},Kurigram:{lat:25.8000,genome:89.6300},
-  Gaibandha:{lat:25.3300,genome:89.5400},Sylhet:{lat:24.8949,genome:91.8687},Habiganj:{lat:24.3800,genome:91.4200},
-  Moulvibazar:{lat:24.4800,genome:91.7700},Sunamganj:{lat:25.0700,genome:90.8700}
+  Barisal:{lat:22.7010,lng:90.3535},Bhola:{lat:22.6800,lng:90.6500},  Patuakhali:{lat:22.3500,lng:90.3300},
+  Barguna:{lat:22.0500,lng:90.1000},
+  Rajshahi:{lat:24.3740,lng:88.6042},Natore:{lat:24.4200,lng:88.6300},Chapainawabganj:{lat:24.5900,lng:88.3200},
+  Naogaon:{lat:24.8100,lng:88.7600},Joypurhat:{lat:25.1000,lng:89.0300},Bogura:{lat:24.8500,lng:89.3700},
+  Sirajganj:{lat:24.4500,lng:89.7000},Pabna:{lat:24.0000,lng:89.2300},
+  Rangpur:{lat:25.7500,lng:89.2500},Dinajpur:{lat:25.6300,lng:88.6300},Thakurgaon:{lat:26.0300,lng:88.4700},
+  Nilphamari:{lat:25.9300,lng:88.8500},Lalmonirhat:{lat:25.9000,lng:89.4500},Kurigram:{lat:25.8000,lng:89.6300},
+  Gaibandha:{lat:25.3300,lng:89.5400},Sylhet:{lat:24.8949,lng:91.8687},Habiganj:{lat:24.3800,lng:91.4200},
+  Moulvibazar:{lat:24.4800,lng:91.7700},Sunamganj:{lat:25.0700,lng:90.8700}
 };
 
 function initMapPage(){
@@ -1303,7 +1345,7 @@ function loadMapLocationData(district, division){
   // Fetch all data in parallel
   Promise.all([
     fetch(API_BASE+'/db/soil/all').then(function(r){return r.json()}).catch(function(){return{records:[]}}),
-    fetch(API_BASE+'/api/market/prices').then(function(r){return r.json()}).catch(function(){return{prices:{}}}),
+    fetch(API_BASE+'/market/prices').then(function(r){return r.json()}).catch(function(){return{prices:{}}}),
     fetch(API_BASE+'/weather/location?division='+encodeURIComponent(division)+'&zilla='+encodeURIComponent(district)+'&lang='+currentLang).then(function(r){return r.json()}).catch(function(){return null}),
     fetch(API_BASE+'/crop/recommend-dynamic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({district:district,division:division})}).then(function(r){return r.json()}).catch(function(){return{recommended_crops:[]}})
   ]).then(function(results){

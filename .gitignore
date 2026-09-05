@@ -3,22 +3,80 @@
 **/.venv/
 **/__pycache__/
 *.pyc
-.env
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .DS_Store
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+**/.env.local
+**/.dev.vars
+**/service-account*.json
+**/gcp-credentials*.json
+
+# Cloud platform state
+.wrangler/
+.vercel/
+.netlify/
+.amplify/
+
+# Flutter
+**/.dart_tool/
+**/build/
+**/.flutter-plugins-dependencies
+**/.flutter-plugins
+**/ios/Flutter/ephemeral/
+**/ios/Pods/
+**/android/.gradle/
+**/android/local.properties
+frontend/build/
+
+# Databases & caches
+*.db
+*.db-shm
+*.db-wal
+database/*.db
+database/.fuse_hidden*
+**/.cache/
+
+# Trained model artifacts (large, regenerable)
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+*.onnx
+*.pt
+*.pth
+*.tflite
+ai_models/trained_models/*
+!ai_models/trained_models/.gitkeep
+
+# Datasets (large; tracked selectively only)
 soil report/
 soil report.zip
 soil analysis/
+soil_data.json
+datasets/soil_report_all.json
 *.zip
 *.dmg
 *.mp4
-soil_data.json
-*.pkl
-.wrangler/
-.dev.vars
-.vercel/
-.env.local
-.pytest_cache/
-database/*.db-shm
-database/*.db-wal
-database/.fuse_hidden*
-frontend/build/
+
+# Report-generation side-project (kept out of the product repo)
+report_build/
+output/
+tmp/
+Final_Project_Report_*
+*.docx
+*.pdf
+audit/_raw/
+
+# OS / editor
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

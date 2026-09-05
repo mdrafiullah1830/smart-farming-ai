@@ -1,0 +1,19 @@
+{
+  "remote_zip_bytes": 4810886212,
+  "classes": {
+    "affected": 856,
+    "healthy": 3454
+  },
+  "sample_paths": {
+    "affected": [
+      "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417840.jpg",
+      "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417851.jpg",
+      "Garlic Leaf Dataset/Affected Leaf/Original Image/1736349417865.jpg"
+    ],
+    "healthy": [
+      "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340408.jpg",
+      "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340420.jpg",
+      "Garlic Leaf Dataset/Healthy Leaf/Healthy leaf/1736323340439.jpg"
+    ]
+  }
+}

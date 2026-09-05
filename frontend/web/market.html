@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>বাজার বিশ্লেষণ - Smart Farming AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -164,6 +164,7 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
 
 @media(min-width:768px){.app-content{max-width:640px;margin:0 auto}}
 </style>
+<link rel="stylesheet" href="design-system.css">
 </head>
 <body>
 <div class="bg-map"></div>
@@ -172,7 +173,8 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
 <div class="screen active" id="marketScreen">
   <header class="app-header">
     <button class="header-back" onclick="window.location.href='dashboard.html'"><span class="material-icons-round">arrow_back</span></button>
-    <h1>বাজার বিশ্লেষণ</h1>
+    <h1 data-bn="বাজার বিশ্লেষণ" data-en="Market Intelligence">বাজার বিশ্লেষণ</h1>
+    <div class="lang-toggle"><button class="lang-btn" id="marketLangBn" onclick="setMarketLang('bn')">বাং</button><button class="lang-btn" id="marketLangEn" onclick="setMarketLang('en')">EN</button></div>
     <button class="header-action" onclick="refreshPrices()"><span class="material-icons-round">refresh</span></button>
     <button class="header-action" onclick="toggleAlertPanel()"><span class="material-icons-round">notifications_active</span></button>
   </header>
@@ -181,9 +183,9 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
     <!-- HERO CARD -->
     <div class="market-hero">
       <div class="hero-content">
-        <div class="hero-label"><span class="live-dot"></span> লাইভ বাজার দর</div>
-        <div class="hero-title">আজকের বাজার<br>সামগ্রিক প্রতিবেদন</div>
-        <div class="hero-subtitle">সরকারি কৃষি বিপণন অধিদপ্তর থেকে প্রাপ্ত তথ্য</div>
+        <div class="hero-label"><span class="live-dot"></span> <span data-bn="লাইভ বাজার দর" data-en="Live market prices">লাইভ বাজার দর</span></div>
+        <div class="hero-title" data-bn="আজকের বাজার — সামগ্রিক প্রতিবেদন" data-en="Today's market overview">আজকের বাজার<br>সামগ্রিক প্রতিবেদন</div>
+        <div class="hero-subtitle" data-bn="সরকারি কৃষি বিপণন অধিদপ্তর থেকে প্রাপ্ত তথ্য" data-en="Data sourced from Bangladesh agricultural market authorities">সরকারি কৃষি বিপণন অধিদপ্তর থেকে প্রাপ্ত তথ্য</div>
         <div class="hero-stats">
           <div class="hero-stat"><div class="stat-value" id="heroAvgPrice">--</div><div class="stat-label">গড় দাম (৳/কেজি)</div></div>
           <div class="hero-stat"><div class="stat-value" id="heroCrops">--</div><div class="stat-label">ফসল ট্র্যাকিং</div></div>
@@ -194,17 +196,17 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
 
     <!-- SEARCH -->
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="ফসল খুঁজুন... (যেমন: ধান, পেঁয়াজ)" oninput="filterPrices()">
+      <input type="text" id="searchInput" data-placeholder-bn="ফসল খুঁজুন... (যেমন: ধান, পেঁয়াজ)" data-placeholder-en="Search crops... (rice, onion)" placeholder="ফসল খুঁজুন... (যেমন: ধান, পেঁয়াজ)" oninput="filterPrices()">
       <span class="material-icons-round">search</span>
     </div>
 
     <!-- TABS -->
     <div class="market-tabs">
-      <button class="market-tab active" onclick="switchMainTab('prices',this)">দাম তালিকা</button>
-      <button class="market-tab" onclick="switchMainTab('chart',this)">মূল্য চার্ট</button>
-      <button class="market-tab" onclick="switchMainTab('compare',this)">জেলা তুলনা</button>
-      <button class="market-tab" onclick="switchMainTab('calc',this)">লাভ হিসাব</button>
-      <button class="market-tab" onclick="switchMainTab('alerts',this)">বাজার সতর্কতা</button>
+      <button class="market-tab active" onclick="switchMainTab('prices',this)" data-bn="দাম তালিকা" data-en="Price list">দাম তালিকা</button>
+      <button class="market-tab" onclick="switchMainTab('chart',this)" data-bn="মূল্য চার্ট" data-en="Price chart">মূল্য চার্ট</button>
+      <button class="market-tab" onclick="switchMainTab('compare',this)" data-bn="জেলা তুলনা" data-en="District comparison">জেলা তুলনা</button>
+      <button class="market-tab" onclick="switchMainTab('calc',this)" data-bn="লাভ হিসাব" data-en="Profit calculator">লাভ হিসাব</button>
+      <button class="market-tab" onclick="switchMainTab('alerts',this)" data-bn="বাজার সতর্কতা" data-en="Market alerts">বাজার সতর্কতা</button>
     </div>
 
     <!-- TAB: PRICES -->
@@ -408,6 +410,16 @@ var priceChart = null;
 var allPrices = [];
 var allDistricts = [];
 
+function applyMarketLang(){
+  document.documentElement.lang=currentLang;
+  document.querySelectorAll('[data-bn][data-en]').forEach(function(el){el.textContent=el.getAttribute(currentLang==='en'?'data-en':'data-bn')});
+  document.querySelectorAll('[data-placeholder-bn][data-placeholder-en]').forEach(function(el){el.placeholder=el.getAttribute(currentLang==='en'?'data-placeholder-en':'data-placeholder-bn')});
+  document.getElementById('marketLangBn').classList.toggle('active',currentLang==='bn');
+  document.getElementById('marketLangEn').classList.toggle('active',currentLang==='en');
+}
+function setMarketLang(lang){currentLang=lang;localStorage.setItem('sfLang',lang);applyMarketLang();renderPrices(allPrices)}
+window.addEventListener('DOMContentLoaded',applyMarketLang);
+
 // ==================== PRICE DATA ====================
 var CROP_DATA = {
   rice_boro: {name:'বোরো চাল (সরু)',nameEn:'Boro Rice (Fine)',emoji:'🌾',category:'rice',unit:'৳/কেজি'},
@@ -582,7 +594,7 @@ function renderPrices(prices){
     var changeText = (p.change>0?'+':'')+p.change+'%';
     html += '<div class="price-card" data-category="'+p.category+'" onclick="showPriceDetail(\''+p.id+'\')">';
     html += '<div class="price-icon" style="background:'+getCategoryColor(p.category)+'">'+p.emoji+'</div>';
-    html += '<div class="price-info"><div class="price-name">'+p.name+'</div><div class="price-category">'+p.unit+'</div></div>';
+    html += '<div class="price-info"><div class="price-name">'+(currentLang==='en'?p.nameEn:p.name)+'</div><div class="price-category">'+(currentLang==='en'?p.unit.replace('৳/কেজি','BDT/kg').replace('৳/লিটার','BDT/litre').replace('৳/পিস','BDT/item'):p.unit)+'</div></div>';
     html += '<div class="price-value-box"><div class="price-range">'+p.minPrice+'-'+p.maxPrice+'</div><div class="price-change '+changeClass+'">'+changeIcon+' '+changeText+'</div></div>';
     html += '</div>';
   });

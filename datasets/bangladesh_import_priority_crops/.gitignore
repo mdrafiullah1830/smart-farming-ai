@@ -1,0 +1,3 @@
+# Large public source files are kept locally and can be re-downloaded from sources.csv.
+raw/*.zip
+docs/*.pdf

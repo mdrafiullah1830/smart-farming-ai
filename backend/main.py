@@ -58,7 +58,10 @@ class ChatMessage(BaseModel):
     lang: str = "bn"
 
 # ==================== AUTH HELPERS ====================
-SECRET = "smart_farming_ai_fastapi_secret_2026"
+SECRET = os.getenv("SECRET_KEY", "")
+if not SECRET and os.getenv("APP_ENV", "production").lower() == "production":
+    raise RuntimeError("SECRET_KEY must be configured in production")
+SECRET = SECRET or "local-development-only-change-me"
 
 def hash_password(pw: str) -> str:
     return hashlib.sha256((pw + SECRET).encode()).hexdigest()

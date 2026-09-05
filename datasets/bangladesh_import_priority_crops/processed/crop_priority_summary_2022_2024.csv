@@ -1,0 +1,9 @@
+crop_key,first_year,latest_year,production_first_t,production_latest_t,production_change_pct,imports_latest_t,imports_latest_1000_usd,latest_import_to_production_ratio,assessment
+garlic,2022,2024,526819.0,527665.0,0.16,174305.77,212777.0,0.33,import_dependent_but_production_trend_mixed
+ginger,2022,2024,82152.0,83175.0,1.25,141622.77,119388.0,1.703,import_dependent_but_production_trend_mixed
+lentil,2022,2024,190743.0,184819.0,-3.11,652099.8,478563.0,3.528,import_dependent_but_production_trend_mixed
+maize,2022,2024,4261845.0,4592508.0,7.76,1180356.01,277942.0,0.257,meets_both
+mustard_rapeseed,2022,2024,409659.0,637745.0,55.68,322885.22,181036.0,0.506,meets_both
+onion,2022,2024,2517070.0,2917354.0,15.9,438517.74,215088.0,0.15,meets_both
+soybean,2022,2024,98646.0,106833.0,8.3,2031230.53,1003315.0,19.013,meets_both
+wheat,2022,2024,1085834.0,1172242.0,7.96,2899634.77,759955.0,2.474,meets_both

@@ -1,0 +1,9 @@
+crop,source_url,source_version_or_id,declared_license,source_image_count,local_selection,class_labels,notes
+wheat,https://data.mendeley.com/datasets/th422bg4yd/1,th422bg4yd/1,CC BY 4.0,859,859,"diseased; control","Complete Wheat Leaf Rust archive; split folders retain train/test/validation structure."
+maize,https://huggingface.co/datasets/Project-AgML/corn_maize_leaf_disease,Project-AgML/corn_maize_leaf_disease,Not specified,4188,4188,"Blight; Common_Rust; Gray_Leaf_Spot; Healthy","Complete published Parquet; source README cites PlantDoc."
+onion,https://huggingface.co/datasets/Project-AgML/COLD_onion_leaf_disease_classification,raw config,CC BY 4.0,815,815,"Iris yellow virus; Stemphylium leaf blight and collectrichum leaf blight; healthy; purple blotch","Complete non-augmented raw configuration."
+garlic,https://data.mendeley.com/datasets/wcgx6bbvw7/1,wcgx6bbvw7/1,CC BY 4.0,4310,36,"affected; healthy","Deterministic 18-per-class subset of original images; augmented paths excluded. Bangladesh Tipburn/healthy source."
+ginger,https://github.com/wongjay1941/Ginger-Leaf-Dataset,main,Not specified,10910,10910,"Damage-Pest; Dehydrated; Healthy; Leaf-blight","Complete Git LFS archive; repository contains no LICENSE file."
+lentil,https://huggingface.co/datasets/Project-AgML/lentil_disease_classification,Project-AgML/lentil_disease_classification,CC BY 4.0,5349,5349,"Ascochyta blight; Lentil Rust; Normal; Powdery Mildew","Complete published Parquet."
+mustard,https://data.mendeley.com/datasets/h64b58vtxc/1,h64b58vtxc/1,CC BY 4.0,35948,400,"healthy; mild; moderate; severe","Deterministic 100-per-class subset from a 3.07 GB remote archive; labels are flea-beetle damage severity, not pathogen classes."
+soybean,https://huggingface.co/datasets/anandvermagmailcom/soybean-leaf-diseases,anandvermagmailcom/soybean-leaf-diseases,Not specified,1800,1800,"Bacterial_blight; Frogeye; Healthy; Soyabean_rust","Complete train/validation/test Parquet splits."

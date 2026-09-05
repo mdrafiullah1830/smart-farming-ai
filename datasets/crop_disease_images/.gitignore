@@ -1,0 +1,11 @@
+# Dataset binaries stay local and must not be committed.
+*.zip
+*.parquet
+**/images/
+*.part
+
+# Keep reproducibility metadata, source notes, and scripts tracked.
+!*.json
+!*.csv
+!*.md
+!*.py

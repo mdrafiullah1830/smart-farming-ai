@@ -1,0 +1,51 @@
+/* Smart Farming AI — Field Intelligence design system */
+:root{
+  --sf-forest:#123d2d;--sf-forest-2:#1d5b43;--sf-leaf:#2f855a;
+  --sf-lime:#b7d94c;--sf-harvest:#e6a23c;--sf-water:#2f6f8f;
+  --sf-canvas:#f4f6f1;--sf-panel:#fffefa;--sf-ink:#17231d;
+  --sf-muted:#66736c;--sf-line:#dfe5dd;
+  --sf-shadow:0 14px 35px rgba(18,61,45,.08);
+}
+html{background:var(--sf-canvas)}
+body{background-color:var(--sf-canvas)!important;color:var(--sf-ink)!important;background-image:radial-gradient(circle at 92% 4%,rgba(183,217,76,.12),transparent 26%),radial-gradient(circle at 8% 96%,rgba(47,111,143,.08),transparent 30%)!important}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(18,61,45,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(18,61,45,.025) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
+.app-header{background:rgba(255,254,250,.88)!important;border-bottom:1px solid var(--sf-line)!important;box-shadow:none!important}
+.app-header h1{color:var(--sf-forest)!important;letter-spacing:-.45px!important}
+.card,.quick-action,.feature-card,.market-item,.notification-item,.npk-card,.insight-card,.calc-card,.chart-card,.market-map-card{background:var(--sf-panel)!important;border:1px solid var(--sf-line)!important;box-shadow:0 4px 16px rgba(18,61,45,.045)!important}
+.card:hover,.quick-action:hover,.feature-card:hover{box-shadow:var(--sf-shadow)!important;border-color:rgba(47,133,90,.28)!important}
+.section-title{font-size:18px!important;color:var(--sf-forest)!important;letter-spacing:-.35px}
+.section-title:after{content:"";display:block;width:30px;height:3px;margin-top:7px;border-radius:4px;background:linear-gradient(90deg,var(--sf-leaf),var(--sf-lime))}
+.btn-primary,.calc-btn,.search-btn,.send-btn{background:var(--sf-forest)!important;box-shadow:0 8px 18px rgba(18,61,45,.18)!important}
+.btn-primary:hover,.calc-btn:hover,.search-btn:hover,.send-btn:hover{background:var(--sf-forest-2)!important}
+.lang-toggle{background:#edf1ea!important;border-color:var(--sf-line)!important}
+.lang-toggle .lang-btn.active{background:var(--sf-forest)!important;box-shadow:none!important}
+.bottom-nav{background:rgba(255,254,250,.92)!important;border-color:var(--sf-line)!important}
+.nav-item.active{color:var(--sf-forest-2)!important}
+.nav-item.active .material-icons-round{background:var(--sf-forest)!important;box-shadow:none!important}
+.weather-current,.market-hero,.profile-header{background:linear-gradient(135deg,var(--sf-forest),var(--sf-forest-2))!important;box-shadow:0 18px 44px rgba(18,61,45,.2)!important}
+.cta-banner{background:linear-gradient(135deg,#254f48,#2f6f8f)!important;box-shadow:0 16px 36px rgba(37,79,72,.2)!important}
+.input-wrapper input,.form-select,.search-box input,.chat-input-area input{border:1px solid var(--sf-line)!important;background:var(--sf-panel)!important}
+.input-wrapper input:focus,.form-select:focus,.search-box input:focus,.chat-input-area input:focus{border-color:var(--sf-leaf)!important;box-shadow:0 0 0 4px rgba(47,133,90,.11)!important}
+.bg-map{opacity:.045!important;filter:grayscale(1) contrast(.8)!important}
+
+@media(min-width:1100px){
+  .bottom-nav{width:248px!important;padding:24px 16px!important;box-shadow:12px 0 32px rgba(18,61,45,.045)!important}
+  .bottom-nav:before{content:"FIELD INTELLIGENCE";display:block;padding:0 16px 22px;color:var(--sf-muted);font-size:10px;font-weight:800;letter-spacing:1.8px}
+  .nav-item{border-radius:10px!important;padding:12px 14px!important}
+  .nav-item.active{background:#e9f1e9!important}
+  .app-header{margin-left:248px!important}
+  .screen>.app-content{margin-left:248px!important}
+  #mainContent.app-content{max-width:1440px!important;padding:34px 42px 60px!important}
+  #mainContent.app-content>div:first-child{grid-column:1/-1;background:linear-gradient(115deg,var(--sf-forest),#27684d)!important;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 50px rgba(18,61,45,.18)!important}
+  .quick-action,.feature-card{min-height:142px;justify-content:center}
+}
+@media(min-width:768px) and (max-width:1099px){
+  .app-content{max-width:920px!important;padding-left:28px!important;padding-right:28px!important}
+  .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:767px){
+  .app-header{height:62px!important}
+  .app-content{padding-left:14px!important;padding-right:14px!important}
+  .card,.feature-card{border-radius:16px!important}
+  .bottom-nav{margin:0 10px 10px;left:0!important;right:0!important;width:auto!important;border:1px solid var(--sf-line)!important;border-radius:18px!important;height:68px!important;box-shadow:0 12px 32px rgba(18,61,45,.14)!important}
+}

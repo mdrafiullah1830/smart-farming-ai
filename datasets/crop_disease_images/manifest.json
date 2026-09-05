@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "purpose": "Local crop disease and plant-health image collection",
+  "binary_policy": "local-only; excluded from Git",
+  "validation_report": "validation_report.json",
+  "datasets": [
+    {
+      "crop": "wheat",
+      "artifact": "wheat/wheat_leaf_rust_cc-by-4.0.zip",
+      "format": "zip",
+      "local_images": 859,
+      "local_bytes": 253660637,
+      "classes": {"diseased": 368, "control": 491},
+      "license": "CC BY 4.0",
+      "complete_source": true
+    },
+    {
+      "crop": "maize",
+      "artifact": "maize/corn_maize_leaf_disease.parquet",
+      "format": "parquet",
+      "local_images": 4188,
+      "local_bytes": 171316661,
+      "classes": {"Blight": 1146, "Common_Rust": 1306, "Gray_Leaf_Spot": 574, "Healthy": 1162},
+      "license": "not specified by source",
+      "complete_source": true
+    },
+    {
+      "crop": "onion",
+      "artifact": "onion/onion_leaf_disease_raw_cc-by-4.0.parquet",
+      "format": "parquet",
+      "local_images": 815,
+      "local_bytes": 16364888,
+      "classes": {"Iris yellow virus": 281, "Stemphylium leaf blight and collectrichum leaf blight": 90, "healthy": 426, "purple blotch": 18},
+      "license": "CC BY 4.0",
+      "complete_source": true,
+      "configuration": "raw (non-augmented)"
+    },
+    {
+      "crop": "garlic",
+      "artifact": "garlic/images",
+      "format": "image folders",
+      "local_images": 36,
+      "local_bytes": 79660565,
+      "classes": {"affected": 18, "healthy": 18},
+      "license": "CC BY 4.0",
+      "complete_source": false,
+      "selection": "first 18 original, non-augmented archive entries per class in stable archive order",
+      "source_original_images": 4310
+    },
+    {
+      "crop": "ginger",
+      "artifact": "ginger/ginger_leaf_dataset.zip",
+      "format": "zip",
+      "local_images": 10910,
+      "local_bytes": 229016577,
+      "classes": {"Damage-Pest": 2076, "Dehydrated": 3372, "Healthy": 2198, "Leaf-blight": 3264},
+      "license": "not specified by source",
+      "complete_source": true
+    },
+    {
+      "crop": "lentil",
+      "artifact": "lentil/lentil_disease_cc-by-4.0.parquet",
+      "format": "parquet",
+      "local_images": 5349,
+      "local_bytes": 73836213,
+      "classes": {"Ascochyta blight": 1229, "Lentil Rust": 1248, "Normal": 1569, "Powdery Mildew": 1303},
+      "license": "CC BY 4.0",
+      "complete_source": true
+    },
+    {
+      "crop": "mustard",
+      "artifact": "mustard/images",
+      "format": "image folders",
+      "local_images": 400,
+      "local_bytes": 10456444,
+      "classes": {"healthy": 100, "mild": 100, "moderate": 100, "severe": 100},
+      "license": "CC BY 4.0",
+      "complete_source": false,
+      "selection": "first 100 archive entries per class in stable archive order",
+      "source_images": 35948,
+      "scope_warning": "flea-beetle damage severity, not pathogen disease"
+    },
+    {
+      "crop": "soybean",
+      "artifacts": ["soybean/soybean_leaf_diseases_train.parquet", "soybean/soybean_leaf_diseases_validation.parquet", "soybean/soybean_leaf_diseases_test.parquet"],
+      "format": "parquet",
+      "local_images": 1800,
+      "local_bytes": 16868299,
+      "splits": {"train": 1260, "validation": 268, "test": 272},
+      "classes": ["Bacterial_blight", "Frogeye", "Healthy", "Soyabean_rust"],
+      "license": "not specified by source",
+      "complete_source": true
+    }
+  ]
+}
