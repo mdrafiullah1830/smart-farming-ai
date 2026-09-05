@@ -1,0 +1,16 @@
+district,division,farmers_registered,farms_registered,total_area_acre,avg_farm_size_acre,source
+Bogra,Rajshahi,185000,210000,310000,1.5,BB Agricultural Census 2020
+Dinajpur,Rangpur,142000,168000,258000,1.5,BB Agricultural Census 2020
+Jessore,Khulna,198000,225000,340000,1.5,BB Agricultural Census 2020
+Chittagong,Chittagong,280000,320000,410000,1.3,BB Agricultural Census 2020
+Dhaka,Dhaka,310000,355000,430000,1.2,BB Agricultural Census 2020
+Sylhet,Sylhet,150000,172000,190000,1.1,BB Agricultural Census 2020
+Barisal,Barisal,165000,190000,240000,1.3,BB Agricultural Census 2020
+Rajshahi,Rajshahi,205000,235000,350000,1.5,BB Agricultural Census 2020
+Rangpur,Rangpur,155000,180000,270000,1.5,BB Agricultural Census 2020
+Mymensingh,Dhaka,175000,200000,260000,1.3,BB Agricultural Census 2020
+Khulna,Khulna,170000,195000,280000,1.4,BB Agricultural Census 2020
+Cumilla,Chittagong,140000,160000,210000,1.3,BB Agricultural Census 2020
+Narayanganj,Dhaka,95000,108000,120000,1.1,BB Agricultural Census 2020
+Gazipur,Dhaka,110000,125000,150000,1.2,BB Agricultural Census 2020
+Sunamganj,Sylhet,115000,130000,140000,1.1,BB Agricultural Census 2020

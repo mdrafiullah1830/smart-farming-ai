@@ -164,6 +164,121 @@ async function aiSearch(request: Request, env: Env): Promise<Response> {
   return json(request, env, { success: true, query, originalQuery: query, answer, isAgriQuery: true, wasBanglish: false, timeTaken: 'instant', sourceBreakdown: {}, sources: [{ title: 'কৃষি তথ্য সার্ভিস', url: 'https://ais.gov.bd/', source: 'AIS Bangladesh', snippet: 'বাংলাদেশের সরকারি কৃষি তথ্য।' }], relatedTopics: [] });
 }
 
+// ---------------------------------------------------------------------------
+// Live data endpoints (fetched client-side; cached 10 min via Cache API)
+// ---------------------------------------------------------------------------
+
+const CACHE_NAME = "smart-farming-live-v1";
+
+async function fetchJson(url: string): Promise<unknown> {
+  let cache: Cache;
+  try {
+    cache = await caches.open(CACHE_NAME);
+  } catch {
+    // No cache available (e.g. local wrangler dev) — fetch directly.
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+    if (!r.ok) throw new Error(`upstream ${r.status} for ${url}`);
+    return r.json();
+  }
+  const cached = await cache.match(url);
+  if (cached) return cached.json();
+  const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+  if (!r.ok) throw new Error(`upstream ${r.status} for ${url}`);
+  const data = await r.json();
+  await cache.put(url, new Response(JSON.stringify(data), {
+    headers: { "Content-Type": "application/json", "Cache-Control": "max-age=600" },
+  }));
+  return data;
+}
+
+async function marketLive(request: Request, env: Env): Promise<Response> {
+  // Proxy the DAM daily wholesale marquee (BDT/kg), converted to JSON.
+  try {
+    const data = await fetchJson("https://market.dam.gov.bd/?L=E");
+    return json(request, env, { success: true, source: "DAM", prices: data });
+  } catch (cause) {
+    return error(request, env, 502, `DAM price fetch failed: ${(cause as Error).message}`);
+  }
+}
+
+async function marketUpazila(request: Request, env: Env): Promise<Response> {
+  try {
+    const data = await fetchJson("https://market.dam.gov.bd/subdistrict_retail_price_report");
+    return json(request, env, { success: true, source: "DAM", rows: data });
+  } catch (cause) {
+    return error(request, env, 502, `DAM upazila price fetch failed: ${(cause as Error).message}`);
+  }
+}
+
+async function disasterAlerts(request: Request, env: Env): Promise<Response> {
+  try {
+    const data = await fetchJson("https://cap.bmd.gov.bd/api/cap/rss.xml");
+    return json(request, env, { success: true, source: "BMD CAP RSS", alerts: data });
+  } catch (cause) {
+    return error(request, env, 502, `BMD alert fetch failed: ${(cause as Error).message}`);
+  }
+}
+
+async function cropCalendar(request: Request, env: Env): Promise<Response> {
+  const crop = new URL(request.url).searchParams.get("crop");
+  const region = new URL(request.url).searchParams.get("region");
+  // Static table shipped as a JSON asset; served from the worker for low latency.
+  try {
+    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/crop_calendar/crop_calendar.json");
+    let rows: unknown[] = [];
+    if (Array.isArray(data)) rows = data;
+    else rows = (data as { rows?: unknown[] }).rows ?? [];
+    if (crop) rows = (rows as { crop: string }[]).filter((r) => r.crop === crop);
+    if (region) rows = (rows as { region: string }[]).filter((r) => r.region === region);
+    return json(request, env, { success: true, rows });
+  } catch (cause) {
+    return error(request, env, 502, `crop calendar fetch failed: ${(cause as Error).message}`);
+  }
+}
+
+async function fertilizer(request: Request, env: Env): Promise<Response> {
+  const crop = new URL(request.url).searchParams.get("crop");
+  const region = new URL(request.url).searchParams.get("region") ?? "alluvial";
+  try {
+    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/fertilizer/barc_fertilizer_recommendation.csv");
+    const text = typeof data === "string" ? data : JSON.stringify(data);
+    const lines = text.trim().split("\n");
+    const header = lines[0].split(",");
+    const idx: Record<string, number> = {};
+    header.forEach((h, i) => idx[h.trim()] = i);
+    const out = lines.slice(1)
+      .map((l) => {
+        const c = l.split(",");
+        const row: Record<string, string> = {};
+        header.forEach((h, i) => row[h.trim()] = (c[i] ?? "").trim());
+        return row;
+      })
+      .filter((r) => !crop || r.crop === crop)
+      .filter((r) => !region || r.soil_type === region || r.soil_type === "all");
+    return json(request, env, { success: true, rows: out });
+  } catch (cause) {
+    return error(request, env, 502, `fertilizer table fetch failed: ${(cause as Error).message}`);
+  }
+}
+
+async function groundwater(request: Request, env: Env): Promise<Response> {
+  const district = new URL(request.url).searchParams.get("district");
+  try {
+    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/irrigation/groundwater_depth.csv");
+    const text = typeof data === "string" ? data : JSON.stringify(data);
+    const lines = text.trim().split("\n");
+    const out = lines.slice(1)
+      .map((l) => {
+        const c = l.split(",");
+        return { district: c[0], division: c[1], depth_m: Number(c[2]), stress_level: c[3] };
+      })
+      .filter((r) => !district || r.district.toLowerCase() === district.toLowerCase());
+    return json(request, env, { success: true, rows: out });
+  } catch (cause) {
+    return error(request, env, 502, `groundwater fetch failed: ${(cause as Error).message}`);
+  }
+}
+
 async function route(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request, env) });
@@ -279,6 +394,35 @@ async function route(request: Request, env: Env): Promise<Response> {
     });
   }
   if (url.pathname === '/api/v1/uploads/disease' && request.method === 'POST') return upload(request, env);
+
+  // --- Live market prices (DAM daily wholesale) ---
+  if (url.pathname === '/api/v1/market/prices/live' && request.method === 'GET') {
+    return marketLive(request, env);
+  }
+  if (url.pathname === '/api/v1/market/prices/upazila' && request.method === 'GET') {
+    return marketUpazila(request, env);
+  }
+
+  // --- Live disaster alerts (BMD CAP RSS) ---
+  if (url.pathname === '/api/v1/disaster/alerts' && request.method === 'GET') {
+    return disasterAlerts(request, env);
+  }
+
+  // --- Crop calendar (sowing / harvest windows per region) ---
+  if (url.pathname === '/api/v1/crops/calendar' && request.method === 'GET') {
+    return cropCalendar(request, env);
+  }
+
+  // --- Fertilizer recommendation (BARC 2018 table) ---
+  if (url.pathname === '/api/v1/crops/fertilizer' && request.method === 'GET') {
+    return fertilizer(request, env);
+  }
+
+  // --- Groundwater depth / irrigation stress (BWDB) ---
+  if (url.pathname === '/api/v1/irrigation/groundwater' && request.method === 'GET') {
+    return groundwater(request, env);
+  }
+
   return error(request, env, 404, 'Route not found');
 }
 

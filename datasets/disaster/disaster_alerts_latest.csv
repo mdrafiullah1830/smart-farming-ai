@@ -1,0 +1,6 @@
+source,type,severity,title,districts,published,link
+BMD (CAP RSS),cyclone,high,"Heavy Rainfall Warning - Khulna, Barishal, Chattogram, Sylhet - 17.08.2026","Heavy Rainfall,Warning,Khulna,Barishal,Chattogram,Sylhet","Mon, 17 Aug 2026 07:46:00 +0000",https://cap.bmd.gov.bd/api/cap/8b70982d-a6b3-468e-a69a-bf7b12f9931c.xml
+BMD (CAP RSS),rain,high,"Heavy Rainfall Warning - Dhaka, Khulna, Barishal, Chattogram - 06.08.2026","Heavy Rainfall,Warning,Dhaka,Khulna,Barishal,Chattogram","Thu, 06 Aug 2026 04:06:00 +0000",https://cap.bmd.gov.bd/api/cap/6e9b00f3-2d2f-4942-a834-cddc7ee36abc.xml
+BMD (CAP RSS),cyclone,low,Warning Message - Low Pressure - Maritime Ports Signal 3 - 26.07.2026,"Warning Message,Low Pressure,Maritime Ports,Signal","Sun, 26 Jul 2026 05:25:00 +0000",https://cap.bmd.gov.bd/api/cap/bb1e937b-8874-4c12-ae7f-dab058dd7bdd.xml
+BMD (CAP RSS),rain,high,Landslide Warning - Chattogram Division - 21.07.2026,"Landslide Warning,Chattogram Division","Tue, 21 Jul 2026 15:40:00 +0000",https://cap.bmd.gov.bd/api/cap/486b9df6-4d6d-45dd-a36c-6c84da2b6562.xml
+BMD (CAP RSS),rain,high,"Heavy Rainfall Warning - Barishal, Chattogram - 21.07.2026","Heavy Rainfall,Warning,Barishal,Chattogram","Tue, 21 Jul 2026 09:40:00 +0000",https://cap.bmd.gov.bd/api/cap/a04c03d3-4a8f-42f5-ad1a-68320fe4f6d6.xml

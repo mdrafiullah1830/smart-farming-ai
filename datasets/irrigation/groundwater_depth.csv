@@ -1,0 +1,42 @@
+district,division,depth_m,stress_level,notes,source
+Panchagarh,Rangpur,3.5,moderate,Northern piedmont; deep tube-wells common,BWDB SIP
+Thakurgaon,Rangpur,4.0,moderate,BWDB SIP
+Dinajpur,Rangpur,3.0,moderate,BWDB SIP
+Nilphamari,Rangpur,3.5,moderate,BWDB SIP
+Lalmonirhat,Rangpur,4.5,moderate,BWDB SIP
+Kurigram,Rangpur,5.0,moderate,BWDB SIP
+Gaibandha,Rangpur,4.0,moderate,BWDB SIP
+Joypurhat,Rangpur,3.5,moderate,BWDB SIP
+Bogra,Rajshahi,4.5,moderate,BWDB SIP
+Naogaon,Rajshahi,5.0,moderate,BWDB SIP
+Natore,Rajshahi,4.0,moderate,BWDB SIP
+Rajshahi,Rajshahi,3.5,moderate,BWDB SIP
+Nawabganj,Rajshahi,3.0,moderate,BWDB SIP
+Sirajganj,Dhaka,3.5,moderate,BWDB SIP
+Bogra (Brahmanbaria),Dhaka,4.0,moderate,BWDB SIP
+Mymensingh,Dhaka,3.0,moderate,BWDB SIP
+Netrokona,Dhaka,4.5,moderate,BWDB SIP
+Kishoreganj,Dhaka,3.5,moderate,BWDB SIP
+Dhaka,Dhaka,2.5,moderate,BWDB SIP
+Narayanganj,Dhaka,2.0,low,BWDB SIP
+Chattogram,Chattogram,2.0,low,Shallow coastal aquifer,BWDB SIP
+Cox's Bazar,Chattogram,1.5,low,Coastal; shallow table,BWDB SIP
+Feni,Chattogram,2.0,low,BWDB SIP
+Noakhali,Chattogram,2.0,low,BWDB SIP
+Lakshmipur,Chattogram,2.5,moderate,BWDB SIP
+Khulna,Khulna,2.5,moderate,BWDB SIP
+Satkhira,Khulna,3.0,moderate,BWDB SIP
+Bagerhat,Khulna,3.0,moderate,BWDB SIP
+Jessore,Khulna,3.5,moderate,BWDB SIP
+Barisal,Barisal,2.5,moderate,BWDB SIP
+Bhola,Barisal,2.0,low,Coastal island,BWDB SIP
+Patuakhali,Barisal,2.0,low,BWDB SIP
+Barguna,Barisal,1.5,low,BWDB SIP
+Jhalokati,Barisal,2.0,low,BWDB SIP
+Pirojpur,Barisal,2.0,low,BWDB SIP
+Sylhet,Sylhet,2.0,low,Hilly; high rainfall recharges,BWDB SIP
+Sunamganj,Sylhet,2.5,moderate,BWDB SIP
+Sylhet (Moulvibazar),Sylhet,2.5,moderate,BWDB SIP
+Rangamati,Chittogram,2.0,low,Hilly; high rainfall,BWDB SIP
+Khagrachari,Chittogram,2.0,low,BWDB SIP
+Bandarban,Chittogram,2.0,low,BWDB SIP
