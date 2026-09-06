@@ -130,4 +130,25 @@ describe('Worker API', () => {
     // Rate limit headers should be present
     assert.ok(res.headers.has('X-RateLimit-Limit') || !env.RATE_LIMIT_KV);
   });
+
+  it('security headers present on responses', async () => {
+    const req = createRequest('/health');
+    const res = await worker.fetch(req, env);
+    assert.ok(res.headers.has('X-Content-Type-Options'));
+    assert.ok(res.headers.has('X-Frame-Options'));
+    assert.ok(res.headers.has('X-XSS-Protection'));
+    assert.ok(res.headers.has('Referrer-Policy'));
+    assert.ok(res.headers.has('Content-Security-Policy'));
+  });
+
+  it('CSP allows required external resources', async () => {
+    const req = createRequest('/health');
+    const res = await worker.fetch(req, env);
+    const csp = res.headers.get('Content-Security-Policy');
+    assert.ok(csp?.includes("connect-src 'self'"));
+    assert.ok(csp?.includes('api.open-meteo.com'));
+    assert.ok(csp?.includes('market.dam.gov.bd'));
+    assert.ok(csp?.includes('cap.bmd.gov.bd'));
+    assert.ok(csp?.includes('raw.githubusercontent.com'));
+  });
 });

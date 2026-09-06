@@ -1,5 +1,5 @@
 import { createToken, currentUser, hashPassword, verifyPassword } from './auth';
-import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders } from './http';
+import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders } from './http';
 import type { Env } from './types';
 
 type UserRow = { id: string; email: string; name: string; password_hash: string; phone?: string | null; language?: string | null };
@@ -435,22 +435,22 @@ export default {
     if (url.pathname !== '/health' && url.pathname.startsWith('/api/')) {
       rateLimitInfo = await checkRateLimit(request, env);
       if (rateLimitInfo && !rateLimitInfo.allowed) {
-        return addRateLimitHeaders(
+        return addSecurityHeaders(addRateLimitHeaders(
           new Response(JSON.stringify({ error: 'Too Many Requests' }), { 
             status: 429, 
             headers: corsHeaders(request, env) 
           }), 
           rateLimitInfo
-        );
+        ));
       }
     }
     
     try { 
       const response = await route(request, env);
-      return addRateLimitHeaders(response, rateLimitInfo);
+      return addSecurityHeaders(addRateLimitHeaders(response, rateLimitInfo));
     } catch (cause) {
       console.error('request_failed', cause);
-      return addRateLimitHeaders(error(request, env, 500, 'Internal server error'), rateLimitInfo);
+      return addSecurityHeaders(addRateLimitHeaders(error(request, env, 500, 'Internal server error'), rateLimitInfo));
     }
   },
 };
