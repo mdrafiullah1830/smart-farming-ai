@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """Smart Farming AI - FastAPI Backend with SQLite database."""
-import os, json, sqlite3, hashlib, secrets
+import os, json, sqlite3, secrets
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+import bcrypt
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'database', 'smart_farming.db')
+
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
 app = FastAPI(title="Smart Farming AI", version="1.0.0", description="AI-powered agriculture platform for Bangladesh")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,10 +67,10 @@ if not SECRET and os.getenv("APP_ENV", "production").lower() == "production":
 SECRET = SECRET or "local-development-only-change-me"
 
 def hash_password(pw: str) -> str:
-    return hashlib.sha256((pw + SECRET).encode()).hexdigest()
+    return bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()
 
 def verify_password(pw: str, hashed: str) -> bool:
-    return hash_password(pw) == hashed
+    return bcrypt.checkpw(pw.encode(), hashed.encode())
 
 def create_token(user_id: int, email: str) -> str:
     import jwt

@@ -54,66 +54,52 @@ Smart Farming AI is a comprehensive AI-powered agriculture platform specifically
 │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘  │
 │       └─────────────┴────────────┴────────────┴────────────┘        │
 └───────────────────────────────┬─────────────────────────────────────┘
-                                │ HTTP/REST API
+                                 │ HTTPS / REST API
 ┌───────────────────────────────┴─────────────────────────────────────┐
-│                     FRONTEND SERVER (Node.js :3000)                 │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────────────┐  │
-│  │   Weather  │ │   Crop     │ │  Disease   │ │    Chatbot       │  │
-│  │  (OWM +    │ │ Recommend  │ │  (HF API + │ │  (Training Data  │  │
-│  │ Open-Meteo)│ │ (5-source  │ │  KB Match) │ │   + Similarity)  │  │
-│  │            │ │  scoring)  │ │            │ │                  │  │
-│  └────────────┘ └────────────┘ └────────────┘ └──────────────────┘  │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────────────┐  │
-│  │   Market   │ │    Soil    │ │    Auth    │ │  Search Scraper  │  │
-│  │  Prices    │ │   Data     │ │   (JWT)    │ │ (Google/DDG/Bing)│  │
-│  │  (33+)     │ │ (86K+ DB)  │ │            │ │                  │  │
-│  └────────────┘ └────────────┘ └────────────┘ └──────────────────┘  │
+│              EDGE API GATEWAY (Cloudflare Worker)                  │
+│  apps/worker-api/  —  TypeScript, D1 SQLite, KV, R2                │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────┐   │
+│  │   Auth     │ │  Weather   │ │   Market   │ │    Chatbot     │   │
+│  │  (JWT)     │ │ (Open-Meteo)│ │  (DAM)     │ │  (Curated KB)  │   │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────────┘   │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────┐   │
+│  │   Soil     │ │   Crop     │ │  Disease   │ │   AI Search    │   │
+│  │  (BARC)    │ │  Rec (Rule)│ │  (Proxy)   │ │  (Multi-src)   │   │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────────┘   │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────┐   │
+│  │Disaster    │ │ Fertilizer │ │ Groundwater│ │  Crop Calendar │   │
+│  │ (BMD RSS)  │ │ (BARC)     │ │ (BWDB)     │ │  (Static JSON) │   │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────────┘   │
 └───────────┬────────────────────────────────────┬────────────────────┘
-            │ SQLite (86K+ records)              │
             │                                    │
 ┌───────────┴──────────────────┐  ┌──────────────┴────────────────────┐
-│    BACKEND SERVER (FastAPI   │  │       EXTERNAL SERVICES          │
-│           :8000)             │  │  ┌─────────────┐ ┌────────────┐  │
-│  ┌──────────┐ ┌──────────┐   │  │  │ OpenWeather  │ │ Hugging    │  │
-│  │ Crop     │ │ Yield    │   │  │  │    Map API   │ │  Face API  │  │
-│  │ Recommend│ │ Predict  │   │  │  └─────────────┘ └────────────┘  │
-│  │          │ │          │   │  │  ┌─────────────┐ ┌────────────┐  │
-│  │ (Random  │ │ (Gradient│   │  │  │ Open-Meteo   │ │ Google     │  │
-│  │  Forest, │ │  Boost,  │   │  │  │ (Free)       │ │ Search     │  │
-│  │  XGBoost)│ │  XGBoost)│   │  │  └─────────────┘ └────────────┘  │
-│  └──────────┘ └──────────┘   │  │  ┌─────────────┐ ┌────────────┐  │
-│  ┌──────────┐ ┌──────────┐   │  │  │ Wikipedia    │ │ Perplexity │  │
-│  │ Disease  │ │ Market   │   │  │  │ /Banglapedia │ │   AI       │  │
-│  │Detection │ │Forecast  │   │  │  └─────────────┘ └────────────┘  │
-│  │(Efficient│ │ (LSTM)   │   │  │  ┌─────────────┐ ┌────────────┐  │
-│  │   Net)   │ │          │   │  │  │ BAMIS/BARC   │ │ BD News    │  │
-│  └──────────┘ └──────────┘   │  │  │ Government   │ │ Papers     │  │
-│  ┌──────────┐ ┌──────────┐   │  │  └─────────────┘ └────────────┘  │
-│  │ Chatbot  │ │ Satellite│   │  └──────────────────────────────────┘
-│  │(Bangla   │ │(NDVI)    │   │
-│  │  BERT)   │ │          │   │
-│  └──────────┘ └──────────┘   │
-│  ┌──────────┐ ┌──────────┐   │
-│  │  Voice   │ │ Disaster │   │
-│  │ Assistant│ │ Alerts   │   │
-│  └──────────┘ └──────────┘   │
-│  ┌──────────┐ ┌──────────┐   │
-│  │Government│ │Farmer    │   │
-│  │Dashboard │ │  Mgmt    │   │
-│  └──────────┘ └──────────┘   │
-└───────────────────────────────┘
+│     AI MICROSERVICE          │  │       EXTERNAL SERVICES           │
+│  apps/ai-service/ (Render)   │  │  ┌─────────────┐ ┌────────────┐  │
+│  FastAPI + ONNX Runtime      │  │  │ Open-Meteo   │ │ Hugging    │  │
+│  ┌────────────┐              │  │  │ (Free)       │ │  Face API  │  │
+│  │  Disease   │              │  │  └─────────────┘ └────────────┘  │
+│  │ Detection  │              │  │  ┌─────────────┐ ┌────────────┐  │
+│  │  (ONNX)    │              │  │  │ Wikipedia    │ │ Google     │  │
+│  └────────────┘              │  │  │ /Banglapedia │ │ Search     │  │
+│  ┌────────────┐              │  │  └─────────────┘ └────────────┘  │
+│  │  (Future:  │              │  │  ┌─────────────┐ ┌────────────┐  │
+│  │   Yield,   │              │  │  │ BAMIS/BARC   │ │ BD News    │  │
+│  │   Market)  │              │  │  │ Government   │ │ Papers     │  │
+│  └────────────┘              │  │  └─────────────┘ └────────────┘  │
+└──────────────────────────────┘  └──────────────────────────────────┘
             │
 ┌───────────┴────────────────────────────────────────────────────────┐
 │                         DATA LAYER                                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │
-│  │   PostgreSQL  │  │   MongoDB    │  │        Redis             │  │
-│  │  (PostGIS)    │  │  (Logs/      │  │   (Caching/Sessions)     │  │
-│  │  Primary DB   │  │   Analytics) │  │                          │  │
+│  │ Cloudflare   │  │   Cloudflare │  │      Cloudflare R2       │  │
+│  │     D1       │  │     KV       │  │   (Disease Images)       │  │
+│  │  (Primary)   │  │  (Cache/     │  │                          │  │
+│  │  SQLite)     │  │   Rate Limit)│  │                          │  │
 │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │
 │  ┌──────────────┐  ┌──────────────┐                                │
-│  │   SQLite      │  │  88+ Excel   │                                │
-│  │  (Dev/Lite)   │  │  Files (BARC)│                                │
-│  │  86K+ records │  │  Soil Data   │                                │
+│  │   SQLite     │  │  88+ Excel   │                                │
+│  │  (Dev/Lite)  │  │  Files (BARC)│                                │
+│  │  86K+ records│  │  Soil Data   │                                │
 │  └──────────────┘  └──────────────┘                                │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -266,58 +252,64 @@ Smart Farming AI is a comprehensive AI-powered agriculture platform specifically
 
 ## Tech Stack
 
-### Frontend
+### Frontend (Deployed on Vercel)
 | Component | Technology |
 |-----------|------------|
 | UI Framework | HTML5, CSS3, Vanilla JavaScript |
 | UI Library | Material Icons, Chart.js |
 | Maps | Leaflet.js |
-| Scraping | Cheerio.js (server-side HTML parsing) |
-| File Upload | Multer.js |
-| Auth | JWT (jsonwebtoken), bcryptjs |
-| Server | Node.js + Express 5 |
+| Deployment | Vercel (Static SPA) |
 
-### Backend
+### Edge API Gateway (Deployed on Cloudflare Workers)
+| Component | Technology |
+|-----------|------------|
+| Runtime | Cloudflare Workers (TypeScript) |
+| Database | Cloudflare D1 (SQLite) |
+| Cache/Rate Limit | Cloudflare KV |
+| File Storage | Cloudflare R2 |
+| Auth | JWT (HS256), bcrypt (edge-compatible) |
+| External APIs | Open-Meteo (free), DAM, BMD, Wikipedia |
+
+### AI Microservice (Deployed on Render)
 | Component | Technology |
 |-----------|------------|
 | API Server | Python + FastAPI |
-| ORM | SQLAlchemy (async) |
+| Inference | ONNX Runtime (CPU) |
 | Validation | Pydantic v2 |
-| ML Models | scikit-learn, XGBoost, TensorFlow/Keras |
-| Auth | JWT, bcrypt |
-| Caching | Redis |
-| i18n | Custom middleware |
+| Auth | Service-to-service token |
+| Model Format | ONNX (disease detection) |
 
 ### AI/ML Models
-| Model | Algorithm | Purpose |
-|-------|-----------|---------|
-| Crop Recommendation | Random Forest, XGBoost, Gradient Boosting | Predict best crop for given conditions |
-| Yield Prediction | Random Forest, XGBoost, Gradient Boosting | Predict crop yield per acre |
-| Market Forecasting | LSTM / Random Forest | Time-series price prediction |
-| Disease Detection | EfficientNetB0 / RandomForest | Plant disease classification from images |
-| Chatbot | Knowledge Base + Similarity Matching | Bangla agricultural Q&A |
+| Model | Algorithm | Purpose | Status |
+|-------|-----------|---------|--------|
+| Crop Recommendation | Rule-based (district/climate) | Predict best crop for given conditions | ✅ Worker |
+| Yield Prediction | Random Forest, XGBoost | Predict crop yield per acre | 🟡 Planned (AI Service) |
+| Market Forecasting | LSTM / Random Forest | Time-series price prediction | 🟡 Planned (AI Service) |
+| Disease Detection | EfficientNetB0 (ONNX) | Plant disease classification from images | 🟡 AI Service (needs model) |
+| Chatbot | Knowledge Base + Similarity Matching | Bangla agricultural Q&A | ✅ Worker |
 
-### Database
+### Data Layer (Production)
 | Database | Purpose |
 |----------|---------|
-| PostgreSQL (PostGIS) | Primary database with geospatial support |
-| MongoDB | Logs, analytics, unstructured data |
-| Redis | Caching, session management |
-| SQLite | Development/lite version (86K+ records) |
+| Cloudflare D1 (SQLite) | Primary database — users, districts, soil, market, crops |
+| Cloudflare KV | Caching, rate limiting, session management |
+| Cloudflare R2 | Disease image uploads |
+
+### Data Layer (Development)
+| Database | Purpose |
+|----------|---------|
+| SQLite | Local development (86K+ BARC soil records) |
 
 ### External Services
-| Service | Purpose |
-|---------|---------|
-| OpenWeatherMap | Real-time weather (primary) |
-| Open-Meteo | Weather forecast (free fallback) |
-| Hugging Face Inference | Free image classification (disease detection) |
-| Google Search | Web scraping for AI search |
-| DuckDuckGo | Web scraping (fallback) |
-| Bing Search | Web scraping (fallback) |
-| Perplexity AI | Answer extraction |
-| Wikipedia/Banglapedia | District crop data |
-| BAMIS/BARC | Government crop statistics |
-| Bangladeshi Newspapers | Verified agricultural news |
+| Service | Purpose | Cost |
+|---------|---------|------|
+| Open-Meteo | Weather forecast & current conditions | Free |
+| DAM (Department of Agricultural Marketing) | Live wholesale/retail market prices | Free (gov) |
+| BMD (Bangladesh Meteorological Dept) | Disaster alerts (CAP RSS) | Free (gov) |
+| Hugging Face Inference API | Backup disease classification | Free tier |
+| Wikipedia / Banglapedia | District & crop reference data | Free |
+| BAMIS / BARC | Government crop statistics | Free (gov) |
+| Bangladeshi Newspapers | Verified agricultural news | Free |
 
 ---
 
@@ -325,9 +317,7 @@ Smart Farming AI is a comprehensive AI-powered agriculture platform specifically
 
 ```
 smart_farming_ai/
-├── frontend/                        # Node.js Express server
-│   ├── server.js                    # Main server (2500+ lines) — all API routes
-│   ├── package.json                 # Dependencies
+├── frontend/                        # Static SPA (deployed on Vercel)
 │   ├── web/                         # Static frontend files
 │   │   ├── index.html               # Landing page
 │   │   ├── dashboard.html           # Main dashboard (10 screens)
@@ -340,50 +330,33 @@ smart_farming_ai/
 │   ├── bangladesh_locations.csv     # 128 locations
 │   ├── scripts/
 │   │   └── parse_soil_data.py       # Soil data parser
+│   ├── server.js                    # Legacy Node.js server (dev only)
+│   ├── package.json                 # Dependencies
 │   └── ios/                         # Flutter mobile app (in progress)
 │
-├── backend/                         # Python FastAPI server
+├── apps/
+│   ├── worker-api/                  # Cloudflare Worker (Edge API Gateway)
+│   │   ├── src/
+│   │   │   ├── index.ts             # Main router & endpoints
+│   │   │   ├── auth.ts              # JWT auth, bcrypt
+│   │   │   ├── http.ts              # CORS, JSON, rate limiting helpers
+│   │   │   └── types.ts             # Env bindings
+│   │   ├── migrations/              # D1 SQL migrations
+│   │   ├── wrangler.jsonc           # Worker config
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   └── ai-service/                  # AI Microservice (Render)
+│       ├── app/
+│       │   └── main.py              # FastAPI + ONNX disease detection
+│       ├── Dockerfile
+│       ├── render.yaml
+│       ├── requirements.txt
+│       └── requirements-dev.txt
+│
+├── backend/                         # Legacy FastAPI (SQLite, dev only)
 │   ├── main.py                      # Simple FastAPI backend (SQLite)
-│   ├── app/                         # Full-featured FastAPI backend
-│   │   ├── main.py                  # App entry point
-│   │   ├── core/
-│   │   │   ├── config.py            # Settings (env-based)
-│   │   │   ├── database.py          # PostgreSQL async connection
-│   │   │   ├── security.py          # JWT auth, password hashing
-│   │   │   ├── cache.py             # Redis caching
-│   │   │   └── i18n.py              # Internationalization
-│   │   ├── models/                  # SQLAlchemy models
-│   │   │   ├── farmer.py            # Farmer model
-│   │   │   ├── farm.py              # Farm model
-│   │   │   ├── crop.py              # Crop model
-│   │   │   ├── district.py          # District model
-│   │   │   ├── soil_weather.py      # Soil/Weather models
-│   │   │   ├── weather.py           # Weather model
-│   │   │   └── all_models.py        # Satellite, Voice, Disaster, etc.
-│   │   ├── schemas/
-│   │   │   └── weather.py           # Pydantic schemas
-│   │   ├── api/v1/
-│   │   │   ├── router.py            # API router (14 modules)
-│   │   │   └── endpoints/
-│   │   │       ├── farmers.py       # Farmer CRUD
-│   │   │       ├── farms.py         # Farm management
-│   │   │       ├── weather.py       # Weather intelligence
-│   │   │       ├── soil.py          # Soil analysis
-│   │   │       ├── crops.py         # Crop recommendation
-│   │   │       ├── yield_prediction.py # Yield prediction
-│   │   │       ├── disease.py       # Disease detection
-│   │   │       ├── market.py        # Market intelligence
-│   │   │       ├── chatbot.py       # Bangla chatbot
-│   │   │       ├── voice.py         # Voice assistant
-│   │   │       ├── satellite.py     # Satellite NDVI monitoring
-│   │   │       ├── disaster.py      # Disaster alerts
-│   │   │       ├── notifications.py # Notifications
-│   │   │       └── government.py    # Government dashboard
-│   │   └── middleware/
-│   │       ├── rate_limiter.py      # Rate limiting
-│   │       ├── logging.py           # Request logging
-│   │       └── i18n.py              # Language middleware
-│   └── .venv/                       # Python virtual environment
+│   └── requirements.txt
 │
 ├── ai_models/                       # AI/ML training pipelines
 │   ├── inference.py                 # Unified inference pipeline
@@ -402,6 +375,9 @@ smart_farming_ai/
 │   ├── satellite/                   # Satellite analysis (planned)
 │   └── voice_assistant/             # Voice processing (planned)
 │
+├── ai_models/trained_models/        # ONNX model artifacts (gitignored)
+│   └── .gitkeep
+│
 ├── database/
 │   └── smart_farming.db             # SQLite database (86K+ records)
 │
@@ -415,6 +391,21 @@ smart_farming_ai/
 │   └── ... (multiple categories)
 │
 ├── scripts/
+│   ├── parse_xlsx.py                # Parse xlsx → JSON
+│   └── setup_db.py                  # Database setup
+│
+├── tests/
+│   ├── conftest.py                  # Test fixtures
+│   ├── ai_models/test_models.py     # Model tests
+│   └── backend/test_api.py          # API tests
+│
+├── docker/
+│   └── nginx/nginx.conf             # Nginx config
+│
+├── docker-compose.yml               # Local dev stack (PostgreSQL, Redis)
+├── .gitignore
+└── README.md
+```
 │   ├── parse_xlsx.py                # Parse xlsx → JSON
 │   └── setup_db.py                  # Database setup
 │
@@ -595,67 +586,73 @@ smart_farming_ai/
 ## Installation & Setup
 
 ### Prerequisites
-- Node.js 18+
-- Python 3.10+
-- SQLite (for development) or PostgreSQL (for production)
+- Node.js 18+ (for Worker development)
+- Python 3.12+ (for AI Service)
+- Wrangler CLI (`npm install -g wrangler`) for Cloudflare Worker
+- Docker (for local AI Service)
 
-### Quick Start
+### Quick Start (Local Development)
 
 ```bash
 # 1. Clone the repository
 git clone <repo-url>
 cd smart_farming_ai
 
-# 2. Start Frontend Server (Node.js)
+# 2. Start Frontend (Static SPA) - serves on http://localhost:3000
 cd frontend
 npm install
-node server.js
-# Server runs at http://localhost:3000
+npx serve web -p 3000
 
-# 3. Start Backend Server (FastAPI)
-cd ../backend
-pip install -r requirements.txt  # or use venv
-python -m uvicorn main:app --port 8000
-# API docs at http://localhost:8000/docs
+# 3. Start Cloudflare Worker locally - serves on http://localhost:8787
+cd ../apps/worker-api
+npm install
+cp .dev.vars.example .dev.vars  # Fill in your env vars
+npx wrangler dev
+
+# 4. Start AI Service locally (optional) - serves on http://localhost:8001
+cd ../ai-service
+docker build -t smart-farming-ai-svc .
+docker run -p 8001:8000 -e SERVICE_TOKEN=local-dev -e MODEL_PATH=/app/models/disease_model.onnx smart-farming-ai-svc
 ```
 
-### Docker Setup (Production)
+### Production Deployment
 
+**Frontend (Vercel):**
 ```bash
-# Start all services
-docker-compose up -d
-
-# Services:
-# - PostgreSQL (PostGIS) on port 5432
-# - MongoDB on port 27017
-# - Redis on port 6379
-# - FastAPI Backend on port 8000
-# - Nginx on port 80/443
+cd frontend
+vercel --prod
 ```
+
+**Worker (Cloudflare):**
+```bash
+cd apps/worker-api
+npx wrangler deploy
+# Set secrets: wrangler secret put JWT_SECRET, AI_SERVICE_TOKEN, etc.
+```
+
+**AI Service (Render):**
+- Connect GitHub repo to Render
+- Set `SERVICE_TOKEN` and `MODEL_PATH` environment variables
+- Deploy using `render.yaml`
+
+### Local Database (SQLite)
+The development database at `database/smart_farming.db` contains 86,590+ BARC soil records and 63 districts. It's used by the Worker via D1 bindings in local dev.
 
 ### Train AI Models
 
 ```bash
-# Train crop recommendation model
-cd ai_models/crop_prediction
+# Train disease detection model (outputs ONNX to ai_models/trained_models/)
+cd ai_models/disease_detection
 python train.py
 
-# Train yield prediction model
-cd ../yield_prediction
-python train.py
-
-# Train market forecasting model
-cd ../market_forecasting
-python train.py
-
-# Train disease detection model
-cd ../disease_detection
-python train.py
-
-# Train chatbot
-cd ../chatbot
-python train.py
+# Train other models
+cd ../crop_prediction && python train.py
+cd ../yield_prediction && python train.py
+cd ../market_forecasting && python train.py
+cd ../chatbot && python train.py
 ```
+
+**Note:** The AI Service requires a trained ONNX model at `MODEL_PATH`. Until a model is trained and deployed, the `/v1/disease/analyze` endpoint returns `model_unavailable`.
 
 ---
 
@@ -733,14 +730,25 @@ Crop Selection → Price Data (BBS/DAM/FAO)
 
 ## Known Issues
 
-| Issue | Severity | Notes |
-|-------|----------|-------|
-| `backend/app/` (modular FastAPI) is not wired to the deployed Worker | High | Deprecated; see `backend/app/DEPRECATED.md` and `ARCHITECTURE.md` |
-| `ai_models/trained_models/` is empty — `apps/ai-service` returns `model_unavailable` | High | Honest stub until a real ONNX model is provided (see `apps/ai-service/app/main.py`) |
-| Python backend SHA-256 password hashing | Medium | Should use bcrypt |
-| No rate limiting on scraping endpoints | Medium | Should add throttling (Redis-backed limiter exists in `backend/app/`, not yet in Worker) |
-| CORS allows all origins on the legacy monolith | Medium | Worker already restricts origins via `ALLOWED_ORIGINS`; legacy `frontend/server.js` does not |
-| Hardcoded API keys (OWM, JWT, Google) | Resolved | `frontend/server.js` now reads `OPENWEATHER_API_KEY`, `JWT_SECRET`, `GOOGLE_CLIENT_ID` from env only. `apps/worker-api` was always env-only. The Vercel OIDC token previously on disk has been rotated. |
+| Issue | Severity | Status |
+|-------|----------|--------|
+| `ai_models/trained_models/` is empty — `apps/ai-service` returns `model_unavailable` | High | 🟡 Honest stub until a real ONNX model is provided (see `apps/ai-service/app/main.py`) |
+| Python backend (`backend/main.py`) uses legacy SQLite — not connected to production D1 | Medium | 🟡 Dev-only; production uses Worker + D1 |
+| Disease detection falls back to Hugging Face API (not ONNX) | Medium | 🟡 Worker proxies to AI Service; HF is fallback |
+| No automated model training/evaluation pipeline | Medium | 🟡 Training scripts exist in `ai_models/` but no CI/CD |
+| Legacy `frontend/server.js` (Node.js) still used for dev — not deployed | Low | 🟢 Worker is production API; Node.js is dev convenience |
+
+### Resolved (v1.1)
+| Issue | Resolution |
+|-------|------------|
+| Hardcoded API keys (OWM, JWT, Google) | ✅ Moved to env-only; Vercel OIDC token rotated |
+| SHA-256 password hashing | ✅ Replaced with bcrypt in `backend/main.py` |
+| No rate limiting on API endpoints | ✅ Added KV-backed rate limiter to Worker (`apps/worker-api/src/http.ts`) |
+| CORS allows all origins | ✅ Worker restricts via `ALLOWED_ORIGINS`; legacy Node.js fixed |
+| `backend/app/` modular FastAPI not wired | ✅ Deleted (deprecated) |
+| MongoDB / Redis in compose but unused | ✅ MongoDB removed; Redis kept for Worker KV |
+| Report-generation debris in repo | ✅ Added to `.gitignore` |
+| Duplicate HTML/JS in `docs/` | ✅ Cleaned up; only `.md` remains |
 
 ---
 

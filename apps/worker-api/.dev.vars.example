@@ -1,0 +1,22 @@
+# Cloudflare Worker local development environment variables
+# Copy this file to .dev.vars and fill in your values
+# wrangler dev will automatically load this file
+
+# JWT secret for token signing (min 32 chars)
+JWT_SECRET="your-super-secret-jwt-key-min-32-chars-long"
+
+# AI Service URL and token (for disease detection proxy)
+AI_SERVICE_URL="http://localhost:8001"
+AI_SERVICE_TOKEN="local-dev-token"
+
+# Allowed CORS origins (comma-separated)
+ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173"
+
+# D1 Database binding (local)
+# This will be created automatically by wrangler dev
+
+# KV Namespace for rate limiting (local)
+# This will be created automatically by wrangler dev
+
+# R2 Bucket for disease image uploads (local)
+# This will be created automatically by wrangler dev

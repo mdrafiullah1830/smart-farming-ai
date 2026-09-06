@@ -1,5 +1,5 @@
 import { createToken, currentUser, hashPassword, verifyPassword } from './auth';
-import { corsHeaders, error, json } from './http';
+import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders } from './http';
 import type { Env } from './types';
 
 type UserRow = { id: string; email: string; name: string; password_hash: string; phone?: string | null; language?: string | null };
@@ -428,10 +428,29 @@ async function route(request: Request, env: Env): Promise<Response> {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    try { return await route(request, env); }
-    catch (cause) {
+    let rateLimitInfo: { allowed: boolean; remaining: number; resetTime: number } | null = null;
+    
+    // Apply rate limiting to all API endpoints except health
+    const url = new URL(request.url);
+    if (url.pathname !== '/health' && url.pathname.startsWith('/api/')) {
+      rateLimitInfo = await checkRateLimit(request, env);
+      if (rateLimitInfo && !rateLimitInfo.allowed) {
+        return addRateLimitHeaders(
+          new Response(JSON.stringify({ error: 'Too Many Requests' }), { 
+            status: 429, 
+            headers: corsHeaders(request, env) 
+          }), 
+          rateLimitInfo
+        );
+      }
+    }
+    
+    try { 
+      const response = await route(request, env);
+      return addRateLimitHeaders(response, rateLimitInfo);
+    } catch (cause) {
       console.error('request_failed', cause);
-      return error(request, env, 500, 'Internal server error');
+      return addRateLimitHeaders(error(request, env, 500, 'Internal server error'), rateLimitInfo);
     }
   },
 };

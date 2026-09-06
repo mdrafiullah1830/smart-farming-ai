@@ -1,3 +1,7 @@
 fastapi==0.116.1
 uvicorn[standard]==0.35.0
 pydantic==2.11.7
+onnxruntime==1.28.0
+Pillow==10.4.0
+numpy
+httpx==0.28.1
