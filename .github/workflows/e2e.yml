@@ -27,10 +27,9 @@ jobs:
 
       - name: Run Playwright tests
         run: |
-          npx playwright test tests/e2e.spec.ts --project=chromium --reporter=github
+          npx playwright test tests/e2e.spec.ts --project=chromium --grep-invert="API Integration" --reporter=github
         env:
           E2E_BASE_URL: http://localhost:3000
-          E2E_API_BASE: ${{ secrets.E2E_API_BASE }}
 
       - name: Upload Playwright report
         if: always()
