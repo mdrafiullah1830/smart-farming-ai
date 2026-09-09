@@ -57,7 +57,6 @@ def transcribe(audio_bytes, language=None):
         return {"text": "", "language": "", "confidence": 0.0, "error": err}
 
     try:
-        import numpy as np
         # Whisper pipeline accepts a filepath or numpy array. Bytes need to be
         # decoded via soundfile / torchaudio first.
         try:

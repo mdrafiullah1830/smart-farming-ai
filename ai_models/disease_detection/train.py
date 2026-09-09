@@ -3,11 +3,12 @@ Disease Detection Model Training Pipeline
 Smart Farming AI Platform Bangladesh
 Uses EfficientNet/CNN for plant disease classification
 """
-import numpy as np
-import os
 import json
-from datetime import datetime
+import os
 import pickle
+from datetime import datetime
+
+import numpy as np
 
 
 class DiseaseDetectionModel:
@@ -30,7 +31,7 @@ class DiseaseDetectionModel:
         try:
             import tensorflow as tf
             from tensorflow.keras.applications import EfficientNetB0
-            from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
+            from tensorflow.keras.layers import Dense, Dropout, GlobalAveragePooling2D
             from tensorflow.keras.models import Model
 
             base_model = EfficientNetB0(
@@ -234,7 +235,7 @@ class DiseaseDetectionModel:
         if info_path == path:
             info_path = path + '_info.json'
         if os.path.exists(info_path):
-            with open(info_path, 'r') as f:
+            with open(info_path) as f:
                 instance.model_info = json.load(f)
 
         return instance

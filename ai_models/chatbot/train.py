@@ -3,12 +3,8 @@ Bangla Agricultural Chatbot
 Smart Farming AI Platform Bangladesh
 Uses BanglaBERT for agricultural Q&A
 """
-import numpy as np
-import json
 import os
 import pickle
-from datetime import datetime
-from typing import List, Optional
 
 
 class AgriculturalChatbot:
@@ -102,7 +98,7 @@ class AgriculturalChatbot:
             },
         }
 
-    def _find_best_match(self, query: str) -> Optional[str]:
+    def _find_best_match(self, query: str) -> str | None:
         query_lower = query.lower()
         best_match = None
         best_score = 0

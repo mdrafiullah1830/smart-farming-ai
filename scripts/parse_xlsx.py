@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Parse all 88+ xlsx files from soil report/ into unified JSON."""
-import os, json, glob
+import json
+import os
+
 from openpyxl import load_workbook
 
 SOIL_REPORT_DIR = os.path.join(os.path.dirname(__file__), '..', 'soil report')

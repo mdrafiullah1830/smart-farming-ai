@@ -2,17 +2,18 @@
 Yield Prediction Model Training Pipeline
 Smart Farming AI Platform Bangladesh
 """
+import json
+import os
+import pickle
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import xgboost as xgb
-import pickle
-import os
-import json
-from datetime import datetime
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 
 class YieldPredictionModel:

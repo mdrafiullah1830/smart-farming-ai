@@ -1,7 +1,8 @@
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 import os
+from unittest.mock import MagicMock, patch
+
 import numpy as np
+from fastapi.testclient import TestClient
 
 # Set required env vars before importing app
 os.environ["SERVICE_TOKEN"] = "test-token"

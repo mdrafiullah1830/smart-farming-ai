@@ -11,7 +11,6 @@ from pathlib import Path
 
 from PIL import Image
 
-
 ROOT = Path(__file__).resolve().parent
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 

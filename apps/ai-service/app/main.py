@@ -1,11 +1,11 @@
-import os
 import logging
+import os
 from contextlib import asynccontextmanager
 from typing import Annotated, Optional
 
+import numpy as np
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
-import numpy as np
 
 SERVICE_TOKEN = os.getenv("SERVICE_TOKEN", "")
 MODEL_PATH = os.getenv("MODEL_PATH", "/app/models/disease_model.onnx")
@@ -28,15 +28,15 @@ except ImportError:
 def load_model() -> bool:
     """Load ONNX model at startup."""
     global model_session, model_loaded
-    
+
     if not ORT_AVAILABLE:
         logger.error("onnxruntime not installed")
         return False
-    
+
     if not os.path.exists(MODEL_PATH):
         logger.warning(f"Model file not found at {MODEL_PATH}")
         return False
-    
+
     try:
         model_session = ort.InferenceSession(MODEL_PATH, providers=['CPUExecutionProvider'])
         model_loaded = True
@@ -49,9 +49,10 @@ def load_model() -> bool:
 
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
     """Preprocess image for model input."""
-    from PIL import Image
     import io
-    
+
+    from PIL import Image
+
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     img = img.resize((224, 224))
     img_array = np.array(img, dtype=np.float32) / 255.0
@@ -103,7 +104,7 @@ class DiseaseResponse(BaseModel):
     job_id: str
     status: str
     message: str
-    predictions: Optional[list] = None
+    predictions: list | None = None
 
 
 def require_service_token(authorization: Annotated[str | None, Header()] = None) -> None:
@@ -125,14 +126,14 @@ async def analyze_disease(
     authorization: Annotated[str | None, Header()] = None,
 ) -> DiseaseResponse:
     require_service_token(authorization)
-    
+
     if not model_loaded:
         return DiseaseResponse(
             job_id=request.job_id,
             status="model_unavailable",
             message="A verified disease model has not been deployed yet. Set MODEL_PATH to a valid ONNX model.",
         )
-    
+
     try:
         # Download image
         import httpx
@@ -140,19 +141,19 @@ async def analyze_disease(
             response = await client.get(request.image_url)
             response.raise_for_status()
             image_bytes = response.content
-        
+
         # Preprocess
         input_tensor = preprocess_image(image_bytes)
-        
+
         # Inference
         input_name = model_session.get_inputs()[0].name
         outputs = model_session.run(None, {input_name: input_tensor})
         logits = outputs[0][0]
-        
+
         # Softmax
         exp_logits = np.exp(logits - np.max(logits))
         probs = exp_logits / np.sum(exp_logits)
-        
+
         # Top 5 predictions
         top_indices = np.argsort(probs)[::-1][:5]
         predictions = []
@@ -163,7 +164,7 @@ async def analyze_disease(
                 "confidence": float(probs[idx]),
                 "severity": "high" if probs[idx] > 0.7 else "medium" if probs[idx] > 0.4 else "low"
             })
-        
+
         return DiseaseResponse(
             job_id=request.job_id,
             status="success",

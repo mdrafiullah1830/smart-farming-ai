@@ -2,23 +2,22 @@
 """
 Train EfficientNetB0 on Paddy Doctor rice disease dataset and export to ONNX.
 """
-import os
 import json
+import os
+from datetime import datetime
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
-from datetime import datetime
-from collections import Counter
-
 import tensorflow as tf
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.applications import EfficientNetB0
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout, Input
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.layers import Dense, Dropout, GlobalAveragePooling2D, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 from tensorflow.keras.utils import to_categorical
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
 
 # Try to import tf2onnx for ONNX export
 try:
@@ -76,11 +75,11 @@ def load_dataset():
     df = pd.read_csv(TRAIN_CSV)
     print(f"Total samples: {len(df)}")
     print(f"Label distribution:\n{df['label'].value_counts()}")
-    
+
     # Map labels to our standard classes
     df['class_idx'] = df['label'].map(LABEL_MAPPING)
     df['image_path'] = df['image_id'].apply(lambda x: str(TRAIN_IMG_DIR / x))
-    
+
     # Verify images exist
     df['exists'] = df['image_path'].apply(os.path.exists)
     missing = df[~df['exists']]
@@ -88,7 +87,7 @@ def load_dataset():
         print(f"WARNING: {len(missing)} images not found")
     df = df[df['exists']].copy()
     print(f"Valid samples after verification: {len(df)}")
-    
+
     return df
 
 
@@ -99,12 +98,12 @@ def create_tf_dataset(df, batch_size=32, shuffle=True, augment=False):
         img = tf.image.decode_jpeg(img, channels=3)
         img = tf.image.resize(img, IMAGE_SIZE)
         img = tf.cast(img, tf.float32) / 255.0
-        
+
         # ImageNet normalization
         mean = tf.constant([0.485, 0.456, 0.406])
         std = tf.constant([0.229, 0.224, 0.225])
         img = (img - mean) / std
-        
+
         # Augmentation
         if augment:
             img = tf.image.random_flip_left_right(img)
@@ -112,18 +111,18 @@ def create_tf_dataset(df, batch_size=32, shuffle=True, augment=False):
             img = tf.image.random_contrast(img, 0.8, 1.2)
             img = tf.image.random_saturation(img, 0.8, 1.2)
             img = tf.clip_by_value(img, 0, 1)
-        
+
         return img, label
-    
+
     paths = df['image_path'].values
     labels = to_categorical(df['class_idx'].values, num_classes=len(CLASS_NAMES))
-    
+
     dataset = tf.data.Dataset.from_tensor_slices((paths, labels))
     dataset = dataset.map(load_and_preprocess, num_parallel_calls=tf.data.AUTOTUNE)
-    
+
     if shuffle:
         dataset = dataset.shuffle(buffer_size=min(1000, len(df)), reshuffle_each_iteration=True)
-    
+
     dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
     return dataset
 
@@ -135,13 +134,13 @@ def build_model(num_classes=10):
         include_top=False,
         input_shape=(*IMAGE_SIZE, 3),
     )
-    
+
     # Freeze early layers, unfreeze last 30
     for layer in base_model.layers[:-30]:
         layer.trainable = False
     for layer in base_model.layers[-30:]:
         layer.trainable = True
-    
+
     inputs = Input(shape=(*IMAGE_SIZE, 3))
     x = base_model(inputs, training=False)
     x = GlobalAveragePooling2D()(x)
@@ -150,44 +149,44 @@ def build_model(num_classes=10):
     x = Dense(256, activation='relu')(x)
     x = Dropout(0.3)(x)
     outputs = Dense(num_classes, activation='softmax')(x)
-    
+
     model = Model(inputs, outputs)
-    
+
     model.compile(
         optimizer=Adam(learning_rate=LEARNING_RATE),
         loss='categorical_crossentropy',
         metrics=['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=3, name='top3_acc')],
     )
-    
+
     return model
 
 
 def train_model():
     """Main training pipeline."""
     df = load_dataset()
-    
+
     # Split data
     train_df, temp_df = train_test_split(
-        df, test_size=VALIDATION_SPLIT + TEST_SPLIT, 
+        df, test_size=VALIDATION_SPLIT + TEST_SPLIT,
         stratify=df['class_idx'], random_state=42
     )
     val_size = VALIDATION_SPLIT / (VALIDATION_SPLIT + TEST_SPLIT)
     val_df, test_df = train_test_split(
-        temp_df, test_size=1-val_size, 
+        temp_df, test_size=1-val_size,
         stratify=temp_df['class_idx'], random_state=42
     )
-    
+
     print(f"Train: {len(train_df)}, Val: {len(val_df)}, Test: {len(test_df)}")
-    
+
     # Create datasets
     train_ds = create_tf_dataset(train_df, BATCH_SIZE, shuffle=True, augment=True)
     val_ds = create_tf_dataset(val_df, BATCH_SIZE, shuffle=False)
     test_ds = create_tf_dataset(test_df, BATCH_SIZE, shuffle=False)
-    
+
     # Build model
     model = build_model(len(CLASS_NAMES))
     model.summary()
-    
+
     # Callbacks
     callbacks = [
         EarlyStopping(monitor='val_accuracy', patience=8, restore_best_weights=True, verbose=1),
@@ -197,7 +196,7 @@ def train_model():
             monitor='val_accuracy', save_best_only=True, verbose=1
         ),
     ]
-    
+
     # Train
     print("\nStarting training...")
     history = model.fit(
@@ -207,13 +206,13 @@ def train_model():
         callbacks=callbacks,
         verbose=1,
     )
-    
+
     # Evaluate on test set
     print("\nEvaluating on test set...")
     test_results = model.evaluate(test_ds, verbose=1)
     test_loss, test_acc, test_top3 = test_results
     print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}, Test Top-3: {test_top3:.4f}")
-    
+
     # Detailed predictions
     y_true = []
     y_pred = []
@@ -221,10 +220,10 @@ def train_model():
         preds = model.predict(batch_x, verbose=0)
         y_true.extend(np.argmax(batch_y, axis=1))
         y_pred.extend(np.argmax(preds, axis=1))
-    
+
     print("\nClassification Report:")
     print(classification_report(y_true, y_pred, target_names=CLASS_NAMES))
-    
+
     # Save model info
     model_info = {
         'model_type': 'EfficientNetB0',
@@ -243,18 +242,18 @@ def train_model():
         'label_mapping': LABEL_MAPPING,
         'training_history': {k: [float(v) for v in vals] for k, vals in history.history.items()},
     }
-    
+
     # Save Keras model
     keras_path = OUTPUT_DIR / 'disease_model.keras'
     model.save(keras_path)
     print(f"\nKeras model saved to {keras_path}")
-    
+
     # Save model info
     info_path = OUTPUT_DIR / 'disease_model_info.json'
     with open(info_path, 'w') as f:
         json.dump(model_info, f, indent=2)
     print(f"Model info saved to {info_path}")
-    
+
     # Export to ONNX
     if ONNX_AVAILABLE:
         print("\nExporting to ONNX...")
@@ -264,7 +263,7 @@ def train_model():
         with open(onnx_path, "wb") as f:
             f.write(model_proto.SerializeToString())
         print(f"ONNX model saved to {onnx_path}")
-        
+
         # Verify ONNX model
         import onnxruntime as ort
         sess = ort.InferenceSession(str(onnx_path))
@@ -274,7 +273,7 @@ def train_model():
         print(f"ONNX verification: output shape {outputs[0].shape}")
     else:
         print("\nSkipping ONNX export (tf2onnx not installed)")
-    
+
     return model, model_info
 
 

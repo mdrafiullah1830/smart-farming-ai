@@ -10,7 +10,6 @@ import zipfile
 from collections import defaultdict
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent
 RAW = ROOT / "raw"
 OUT = ROOT / "processed"

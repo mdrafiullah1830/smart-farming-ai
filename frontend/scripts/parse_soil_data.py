@@ -3,8 +3,9 @@
 Parse all soil report Excel files and generate a single JSON file
 organized by District → Upazila with all soil features.
 """
-import os
 import json
+import os
+
 import openpyxl
 
 BASE = "/Users/mdrafiullah/smart_farming_ai/soil report"

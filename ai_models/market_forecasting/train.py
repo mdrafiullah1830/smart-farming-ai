@@ -3,14 +3,15 @@ Market Price Forecasting Model
 Smart Farming AI Platform Bangladesh
 Uses LSTM for time-series price prediction
 """
+import json
+import os
+import pickle
+from datetime import datetime, timedelta
+
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-import pickle
-import os
-import json
-from datetime import datetime, timedelta
 
 
 class MarketForecastingModel:
@@ -83,8 +84,8 @@ class MarketForecastingModel:
             y_train, y_test = y[:split], y[split:]
 
             try:
-                from tensorflow.keras.models import Sequential
                 from tensorflow.keras.layers import LSTM, Dense, Dropout
+                from tensorflow.keras.models import Sequential
 
                 model = Sequential([
                     LSTM(50, return_sequences=True, input_shape=(self.sequence_length, 1)),

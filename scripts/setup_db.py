@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Create SQLite database with all tables from schema.sql concept."""
-import sqlite3, os, json
+import json
+import os
+import sqlite3
 
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'database', 'smart_farming.db')
 
@@ -194,7 +196,7 @@ def load_soil_data(conn):
         print('No parsed soil data found. Run parse_xlsx.py first.')
         return
 
-    with open(json_path, 'r', encoding='utf-8') as f:
+    with open(json_path, encoding='utf-8') as f:
         data = json.load(f)
 
     c = conn.cursor()

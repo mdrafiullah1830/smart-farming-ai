@@ -16,7 +16,7 @@ Output:
 import csv
 import os
 import re
-import sys
+
 import pdfplumber
 
 DOCS_DIR = os.path.join(

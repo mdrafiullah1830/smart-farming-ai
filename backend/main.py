@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Smart Farming AI - FastAPI Backend with SQLite database."""
-import os, json, sqlite3, secrets
+import json
+import os
+import sqlite3
 from datetime import datetime, timedelta
-from typing import Optional
-from fastapi import FastAPI, HTTPException, Depends, Query
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+
 import bcrypt
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'database', 'smart_farming.db')
 

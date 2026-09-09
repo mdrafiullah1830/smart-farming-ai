@@ -22,7 +22,6 @@ import csv
 import datetime as dt
 import os
 import re
-import sys
 import xml.etree.ElementTree as ET
 
 import requests
@@ -48,14 +47,14 @@ TYPE_PATTERNS = [
 ]
 
 # Coastal districts that get cyclone / storm-surge warnings.
-COASTAL = {"Bhola", "Barisal", "Barguna", "Patuakhali", "Bhola", "Lakshmipur",
+COASTAL = {"Bhola", "Barisal", "Barguna", "Patuakhali", "Lakshmipur",
            "Noakhali", "Feni", "Chittagong", "Cox's Bazar", "Chandpur",
            "Khulna", "Satkhira", "Bagerhat", "Pirojpur", "Jhalokati",
            "Sylhet", "Sunamganj", "Netrokona", "Kishoreganj"}
 
 # Northern districts that get cold-wave warnings.
 NORTHERN = {"Rangpur", "Nilphamari", "Lalmonirhat", "Kurigram", "Gaibandha",
-            "Joypurhat", "Bogra", "Naogaon", "Joypurhat", "Dinajpur",
+            "Joypurhat", "Bogra", "Naogaon", "Dinajpur",
             "Thakurgaon", "Panchagarh", "Mymensingh", "Netrokona"}
 
 

@@ -2,17 +2,18 @@
 Crop Recommendation Model Training Pipeline
 Smart Farming AI Platform Bangladesh
 """
+import json
+import os
+import pickle
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.metrics import classification_report, accuracy_score
 import xgboost as xgb
-import pickle
-import os
-import json
-from datetime import datetime
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 
 class CropRecommendationModel:

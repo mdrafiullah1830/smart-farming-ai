@@ -6,8 +6,6 @@ Uses comprehensive Q&A dataset for agricultural advice
 import json
 import os
 import pickle
-import re
-from typing import List, Optional, Dict
 from difflib import SequenceMatcher
 
 
@@ -23,7 +21,7 @@ class AgriculturalChatbot:
         """Load training data from JSON file."""
         data_path = os.path.join(os.path.dirname(__file__), "training_data.json")
         try:
-            with open(data_path, "r", encoding="utf-8") as f:
+            with open(data_path, encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
             print(f"Training data not found at {data_path}")
@@ -43,7 +41,7 @@ class AgriculturalChatbot:
         """Calculate similarity between two texts."""
         return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
-    def _find_best_match(self, query: str, language: str = "bn") -> Optional[dict]:
+    def _find_best_match(self, query: str, language: str = "bn") -> dict | None:
         """Find the best matching QA pair for a query."""
         query_lower = query.lower().strip()
         best_match = None
@@ -152,8 +150,7 @@ class AgriculturalChatbot:
         """Get general suggestions."""
         if language == "bn":
             return ["ধান চাষ কিভাবে করব?", "ফসলে রোগ হয়েছে", "কোন ফসলে বেশি লাভ?", "সেচ কিভাবে দেবেন?"]
-        else:
-            return ["How to cultivate rice?", "Crop disease detected", "Which crop is profitable?", "How to irrigate?"]
+        return ["How to cultivate rice?", "Crop disease detected", "Which crop is profitable?", "How to irrigate?"]
 
     def _get_contextual_suggestions(self, topic: str, language: str) -> list:
         """Get contextual suggestions based on topic."""

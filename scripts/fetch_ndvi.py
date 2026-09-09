@@ -10,8 +10,6 @@ Usage:
 import argparse
 import datetime as dt
 import json
-import os
-import sys
 
 import requests
 
@@ -96,9 +94,7 @@ def fetch_ndvi(lat, lng, days=30, max_cloud=30):
     ndvi_est = None
     if all([b08, b04]):
         try:
-            import numpy as np
             import rasterio
-            from rasterio.warp import transform_geom
             with rasterio.open(b04) as red, rasterio.open(b08) as nir:
                 # sample the centre pixel of each band
                 r = red.read(1)
