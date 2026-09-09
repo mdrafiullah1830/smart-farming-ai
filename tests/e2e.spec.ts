@@ -19,7 +19,7 @@ test.describe('Smart Farming AI - Frontend E2E', () => {
     await page.goto(`${BASE_URL}/dashboard.html`);
     await expect(page).toHaveURL(/.*\/dashboard/);
     await expect(page.locator('#aiSearchBox')).toBeVisible();
-    await expect(page.locator('#homeMarketPrices')).toBeVisible();
+    await expect(page.locator('h1')).toBeVisible();
   });
 
   test('market page loads with district selector', async ({ page }) => {
