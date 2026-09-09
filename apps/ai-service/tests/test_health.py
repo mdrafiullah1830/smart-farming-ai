@@ -9,7 +9,12 @@ client = TestClient(app)
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "smart-farming-ai"}
+    data = response.json()
+    assert data == {
+        "status": "ok",
+        "service": "smart-farming-ai",
+        "model_loaded": str(False),  # no model deployed in the test env
+    }
 
 
 def test_disease_requires_service_token() -> None:
