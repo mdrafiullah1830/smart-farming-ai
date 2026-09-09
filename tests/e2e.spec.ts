@@ -17,27 +17,27 @@ test.describe('Smart Farming AI - Frontend E2E', () => {
 
   test('dashboard page loads', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard.html`);
-    await expect(page).toHaveURL(/.*dashboard\.html/);
+    await expect(page).toHaveURL(/.*\/dashboard/);
     await expect(page.locator('#aiSearchBox')).toBeVisible();
     await expect(page.locator('#homeMarketPrices')).toBeVisible();
   });
 
   test('market page loads with district selector', async ({ page }) => {
     await page.goto(`${BASE_URL}/market.html`);
-    await expect(page).toHaveURL(/.*market\.html/);
+    await expect(page).toHaveURL(/.*\/market/);
     await expect(page.locator('#calcDistrict')).toBeVisible();
   });
 
   test('soil analysis page loads', async ({ page }) => {
     await page.goto(`${BASE_URL}/soil.html`);
-    await expect(page).toHaveURL(/.*soil\.html/);
+    await expect(page).toHaveURL(/.*\/soil/);
     await expect(page.locator('#locationSection')).toBeVisible();
     await expect(page.locator('#locationBtn')).toBeVisible();
   });
 
   test('AI search page loads with search box', async ({ page }) => {
     await page.goto(`${BASE_URL}/ai-search.html`);
-    await expect(page).toHaveURL(/.*ai-search\.html/);
+    await expect(page).toHaveURL(/.*\/ai-search/);
     await expect(page.locator('#searchInput')).toBeVisible();
   });
 });
