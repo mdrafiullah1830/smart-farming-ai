@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 import os
+import numpy as np
 
 # Set required env vars before importing app
 os.environ["SERVICE_TOKEN"] = "test-token"
@@ -62,47 +63,41 @@ def test_disease_missing_job_id():
 @patch('app.main.model_loaded', True)
 @patch('app.main.model_session')
 def test_disease_success_with_model(mock_session):
-    # Mock the ONNX session
+    # Mock the ONNX session to return a real 10-class logits array.
+    # The Paddy Doctor label order matches app.main.DISEASE_CLASSES:
+    #   BLB, BLS, BPB, Blast, BrownSpot, DeadHeart, DownyMildew, Hispa, Healthy, Tungro
+    logits = np.array(
+        [0.1, 0.7, 0.05, 0.05, 0.03, 0.02, 0.02, 0.01, 3.0, 0.01],
+        dtype=np.float32,
+    )
     mock_output = MagicMock()
-    mock_output.__getitem__.return_value = [0.1, 0.7, 0.05, 0.05, 0.03, 0.02, 0.02, 0.01, 0.01, 0.01]
+    mock_output.__getitem__.return_value = logits
     mock_session.run.return_value = [mock_output]
     mock_session.get_inputs.return_value = [MagicMock(name='input')]
-    
+
+    dummy_input = np.zeros((1, 3, 224, 224), dtype=np.float32)
+
     with patch('httpx.AsyncClient.get') as mock_get:
         mock_response = MagicMock()
         mock_response.content = b'fake image data'
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value.__aenter__.return_value = mock_response
-        
-        with patch('PIL.Image.open') as mock_open:
-            mock_img = MagicMock()
-            mock_img.convert.return_value = mock_img
-            mock_img.resize.return_value = mock_img
-            mock_open.return_value = mock_img
-            
-            with patch('numpy.array') as mock_array:
-                mock_array.return_value = MagicMock()
-                with patch('numpy.transpose') as mock_transpose:
-                    mock_transpose.return_value = MagicMock()
-                    with patch('numpy.expand_dims') as mock_expand:
-                        mock_expand.return_value = MagicMock()
-                        with patch('numpy.exp') as mock_exp:
-                            mock_exp.return_value = MagicMock()
-                            with patch('numpy.sum') as mock_sum:
-                                mock_sum.return_value = 1.0
-                                with patch('numpy.argsort') as mock_argsort:
-                                    mock_argsort.return_value = [1, 0, 2, 3, 4]
-                                    
-                                    response = client.post(
-                                        "/v1/disease/analyze",
-                                        json={"job_id": "job-1", "image_url": "https://example.com/image.jpg"},
-                                        headers={"Authorization": "Bearer test-token"},
-                                    )
-                                    assert response.status_code == 200
-                                    data = response.json()
-                                    assert data["status"] == "success"
-                                    assert "predictions" in data
-                                    assert len(data["predictions"]) <= 5
+
+        # preprocess_image is already covered by its own tests; here we feed a
+        # real tensor so the softmax + top-5 + severity logic runs on real numpy.
+        with patch('app.main.preprocess_image', return_value=dummy_input):
+            response = client.post(
+                "/v1/disease/analyze",
+                json={"job_id": "job-1", "image_url": "https://example.com/image.jpg"},
+                headers={"Authorization": "Bearer test-token"},
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["status"] == "success"
+            assert "predictions" in data
+            assert len(data["predictions"]) <= 5
+            # "Healthy" (index 8) has the highest logit -> must be top prediction.
+            assert data["predictions"][0]["disease_en"] == "Healthy"
 
 
 def test_disease_download_failure():

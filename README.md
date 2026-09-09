@@ -732,9 +732,7 @@ Crop Selection → Price Data (BBS/DAM/FAO)
 
 | Issue | Severity | Status |
 |-------|----------|--------|
-| `ai_models/trained_models/` ONNX model training in progress | High | 🟡 EfficientNetB0 training on Paddy Doctor rice dataset (10,407 images, 10 classes) |
 | Python backend (`backend/main.py`) uses legacy SQLite — not connected to production D1 | Medium | 🟡 Dev-only; production uses Worker + D1 |
-| Disease detection falls back to Hugging Face API (not ONNX) | Medium | 🟡 Worker proxies to AI Service; HF is fallback until ONNX deployed |
 | No automated model training/evaluation pipeline | Medium | 🟡 Training scripts exist in `ai_models/` but no CI/CD |
 | Legacy `frontend/server.js` (Node.js) still used for dev — not deployed | Low | 🟢 Worker is production API; Node.js is dev convenience |
 
@@ -752,11 +750,12 @@ Crop Selection → Price Data (BBS/DAM/FAO)
 | No security headers | ✅ Added CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy |
 | Test coverage < 5% | ✅ 19 unit tests + E2E Playwright suite (15 tests) |
 
-### Resolved (v1.2 - In Progress)
+### Resolved (v1.2)
 | Issue | Resolution |
 |-------|------------|
-| Empty `ai_models/trained_models/` | 🟡 Training EfficientNetB0 on Paddy Doctor dataset → ONNX export |
-| AI Service returns `model_unavailable` | 🟡 Will resolve once ONNX model deployed to Render |
+| Empty `ai_models/trained_models/` | ✅ EfficientNetB0 trained on Paddy Doctor dataset (10,407 images) → ONNX exported |
+| AI Service returns `model_unavailable` | ✅ ONNX model loaded at startup; inference working |
+| Disease detection falls back to Hugging Face API | ✅ Primary: ONNX model via AI Service; HF as fallback |
 
 ---
 

@@ -4,6 +4,7 @@ Train EfficientNetB0 on Paddy Doctor rice disease dataset using PyTorch and expo
 """
 import os
 import json
+import argparse
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -29,12 +30,11 @@ except ImportError:
     ONNX_AVAILABLE = False
     print("ONNX not available - install with: pip install onnx onnxruntime")
 
-# Configuration
-DATA_DIR = Path("/Users/mdrafiullah/smart_farming_ai/datasets/crop_disease_images/rice")
+# Configuration (overridden by CLI in main)
+DATA_DIR = Path(os.getenv("DATA_DIR", "/content/dataset"))
 TRAIN_CSV = DATA_DIR / "train.csv"
 TRAIN_IMG_DIR = DATA_DIR / "train_images"
-OUTPUT_DIR = Path("/Users/mdrafiullah/smart_farming_ai/ai_models/trained_models")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "ai_models/trained_models"))
 
 IMAGE_SIZE = (224, 224)
 BATCH_SIZE = 32
@@ -46,29 +46,20 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.ba
 
 # Label mapping from dataset to our standard classes
 LABEL_MAPPING = {
-    'bacterial_leaf_blight': 0,  # Bacterial Leaf Blight
-    'bacterial_leaf_streak': 1,  # Blast (closest)
-    'bacterial_panicle_blight': 2,  # Brown Spot (closest)
-    'blast': 3,  # Blast
-    'brown_spot': 4,  # Brown Spot
-    'dead_heart': 5,  # Tungro (closest - viral)
-    'downy_mildew': 6,  # Powdery Mildew (closest)
-    'hispa': 7,  # Leaf Rust (closest)
-    'normal': 8,  # Healthy
-    'tungro': 9,  # Tungro
+    'bacterial_leaf_blight': 0, 'bacterial_leaf_streak': 1,
+    'bacterial_panicle_blight': 2, 'blast': 3, 'brown_spot': 4,
+    'dead_heart': 5, 'downy_mildew': 6, 'hispa': 7, 'normal': 8, 'tungro': 9,
 }
 
 # Our standard class names (matching AI service)
 CLASS_NAMES = [
-    "Bacterial Leaf Blight", "Blast", "Brown Spot", "Tungro",
-    "Leaf Rust", "Powdery Mildew", "Late Blight", "Early Blight",
-    "Anthracnose", "Healthy"
+    "Bacterial Leaf Blight", "Bacterial Leaf Streak", "Bacterial Panicle Blight",
+    "Blast", "Brown Spot", "Dead Heart", "Downy Mildew", "Hispa", "Healthy", "Tungro"
 ]
 
 CLASS_NAMES_BN = [
-    "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্লাস্ট", "ব্রাউন স্পট", "তুঙ্গরো",
-    "লিফ রাস্ট", "পাউডারি মিলডিউ", "লেট ব্লাইট", "আর্লি ব্লাইট",
-    "অ্যান্থ্রাকনোজ", "সুস্থ"
+    "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্যাকটেরিয়াল লিফ স্ট্রিক", "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
+    "ব্লাস্ট", "ব্রাউন স্পট", "ডেড হার্ট", "ডাউনি মিলডিউ", "হিসপা", "সুস্থ", "তুঙ্গরো"
 ]
 
 print(f"Using device: {DEVICE}")
@@ -344,8 +335,8 @@ def train_model():
         outputs = sess.run(None, {input_name: test_input})
         print(f"ONNX verification: output shape {outputs[0].shape}")
         
-        # Test with actual image
-        test_img = val_dataset[0][0].unsqueeze(0).numpy()
+        # Test with actual image (move to CPU first so .numpy() is device-safe)
+        test_img = val_dataset[0][0].unsqueeze(0).detach().cpu().numpy()
         outputs = sess.run(None, {input_name: test_img})
         pred_class = np.argmax(outputs[0])
         print(f"Sample prediction: {CLASS_NAMES[pred_class]} (confidence: {np.max(outputs[0]):.4f})")
@@ -356,4 +347,16 @@ def train_model():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument("--epochs", type=int, default=EPOCHS)
+    parser.add_argument("--batch-size", type=int, default=BATCH_SIZE)
+    args = parser.parse_args()
+    DATA_DIR = args.data_dir
+    TRAIN_CSV = DATA_DIR / "train.csv"
+    TRAIN_IMG_DIR = DATA_DIR / "train_images"
+    OUTPUT_DIR = args.output_dir
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    EPOCHS, BATCH_SIZE = args.epochs, args.batch_size
     train_model()
