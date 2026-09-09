@@ -1,6 +1,7 @@
 export interface Env {
   DB: D1Database;
   UPLOADS: R2Bucket;
+  RATE_LIMIT_KV: KVNamespace;
   APP_ENV: string;
   ALLOWED_ORIGINS: string;
   AI_SERVICE_URL: string;

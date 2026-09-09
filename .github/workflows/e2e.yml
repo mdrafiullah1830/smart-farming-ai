@@ -13,38 +13,25 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
-      
-      - name: Install dependencies
+
+      - name: Install Playwright (root, where config + tests live)
         run: |
-          cd frontend
-          npm ci
+          npm init -y
+          npm install -D @playwright/test serve
           npx playwright install --with-deps chromium
-      
-      - name: Build frontend
-        run: |
-          cd frontend
-          npm run build 2>/dev/null || true
-      
-      - name: Start preview server
-        run: |
-          cd frontend
-          npx serve web -p 3000 &
-          sleep 5
-      
+
       - name: Run Playwright tests
         run: |
           npx playwright test tests/e2e.spec.ts --reporter=github
         env:
           E2E_BASE_URL: http://localhost:3000
           E2E_API_BASE: ${{ secrets.E2E_API_BASE }}
-      
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,18 +46,21 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
-      - name: Install Playwright
-        run: npx playwright install --with-deps chromium
-      
+
+      - name: Install Playwright (root, where config + tests live)
+        run: |
+          npm init -y
+          npm install -D @playwright/test
+          npx playwright install --with-deps chromium
+
       - name: Run API tests against deployed Worker
         run: |
-          npx playwright test tests/e2e.spec.ts --project=chromium --grep="API Integration"
+          npx playwright test tests/e2e.spec.ts --project=chromium --grep="API Integration" --reporter=github
         env:
           E2E_BASE_URL: https://smart-farming-ai-bice.vercel.app
           E2E_API_BASE: https://smart-farming-api.mdrafiullah1830.workers.dev

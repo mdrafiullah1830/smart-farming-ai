@@ -67,15 +67,13 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
 
 
 DISEASE_CLASSES = [
-    "Bacterial Leaf Blight", "Blast", "Brown Spot", "Tungro",
-    "Leaf Rust", "Powdery Mildew", "Late Blight", "Early Blight",
-    "Anthracnose", "Healthy"
+    "Bacterial Leaf Blight", "Bacterial Leaf Streak", "Bacterial Panicle Blight",
+    "Blast", "Brown Spot", "Dead Heart", "Downy Mildew", "Hispa", "Healthy", "Tungro"
 ]
 
 DISEASE_CLASSES_BN = [
-    "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্লাস্ট", "ব্রাউন স্পট", "তুঙ্গরো",
-    "লিফ রাস্ট", "পাউডারি মিলডিউ", "লেট ব্লাইট", "আর্লি ব্লাইট",
-    "অ্যান্থ্রাকনোজ", "সুস্থ"
+    "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্যাকটেরিয়াল লিফ স্ট্রিক", "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
+    "ব্লাস্ট", "ব্রাউন স্পট", "ডেড হার্ট", "ডাউনি মিলডিউ", "হিসপা", "সুস্থ", "তুঙ্গরো",
 ]
 
 

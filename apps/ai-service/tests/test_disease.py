@@ -100,10 +100,13 @@ def test_disease_success_with_model(mock_session):
             assert data["predictions"][0]["disease_en"] == "Healthy"
 
 
-def test_disease_download_failure():
+@patch('app.main.ORT_AVAILABLE', True)
+@patch('app.main.model_loaded', True)
+@patch('app.main.model_session')
+def test_disease_download_failure(mock_session):
     with patch('httpx.AsyncClient.get') as mock_get:
         mock_get.side_effect = Exception("Network error")
-        
+
         response = client.post(
             "/v1/disease/analyze",
             json={"job_id": "job-1", "image_url": "https://example.com/image.jpg"},
