@@ -1,4 +1,4 @@
-import type { Env } from './types';
+import type { Env } from './types.ts';
 
 export function corsHeaders(request: Request, env: Env): HeadersInit {
   const origin = request.headers.get('Origin') ?? '';

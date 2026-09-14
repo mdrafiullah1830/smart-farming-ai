@@ -1,6 +1,6 @@
-import { createToken, currentUser, hashPassword, verifyPassword } from './auth';
-import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders } from './http';
-import type { Env } from './types';
+import { createToken, currentUser, hashPassword, verifyPassword } from './auth.ts';
+import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders } from './http.ts';
+import type { Env } from './types.ts';
 
 type UserRow = { id: string; email: string; name: string; password_hash: string; phone?: string | null; language?: string | null };
 type OpenMeteo = {
@@ -170,7 +170,7 @@ async function aiSearch(request: Request, env: Env): Promise<Response> {
 
 const CACHE_NAME = "smart-farming-live-v1";
 
-async function fetchJson(url: string): Promise<unknown> {
+async function fetchText(url: string): Promise<string> {
   let cache: Cache;
   try {
     cache = await caches.open(CACHE_NAME);
@@ -178,24 +178,48 @@ async function fetchJson(url: string): Promise<unknown> {
     // No cache available (e.g. local wrangler dev) — fetch directly.
     const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     if (!r.ok) throw new Error(`upstream ${r.status} for ${url}`);
-    return r.json();
+    return r.text();
   }
   const cached = await cache.match(url);
-  if (cached) return cached.json();
+  if (cached) return cached.text();
   const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
   if (!r.ok) throw new Error(`upstream ${r.status} for ${url}`);
-  const data = await r.json();
-  await cache.put(url, new Response(JSON.stringify(data), {
-    headers: { "Content-Type": "application/json", "Cache-Control": "max-age=600" },
+  const data = await r.text();
+  await cache.put(url, new Response(data, {
+    headers: { "Content-Type": r.headers.get("Content-Type") ?? "text/plain", "Cache-Control": "max-age=600" },
   }));
   return data;
+}
+
+async function fetchJson(url: string): Promise<unknown> {
+  return JSON.parse(await fetchText(url));
+}
+
+function stripMarkup(value: string): string {
+  return value.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/\s+/g, ' ').trim();
+}
+
+function htmlTableRows(html: string): string[][] {
+  return [...html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)].map((row) =>
+    [...row[1].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((cell) => stripMarkup(cell[1]))
+  ).filter((row) => row.some(Boolean));
+}
+
+function csvRows(text: string): Record<string, string>[] {
+  const lines = text.replace(/^\uFEFF/, '').trim().split(/\r?\n/);
+  const split = (line: string) => [...line.matchAll(/(?:^|,)(?:"((?:[^"]|"")*)"|([^,]*))/g)]
+    .map((m) => (m[1] ?? m[2] ?? '').replace(/""/g, '"').trim());
+  const headers = split(lines.shift() ?? '');
+  return lines.filter(Boolean).map((line) => Object.fromEntries(headers.map((key, i) => [key, split(line)[i] ?? ''])));
 }
 
 async function marketLive(request: Request, env: Env): Promise<Response> {
   // Proxy the DAM daily wholesale marquee (BDT/kg), converted to JSON.
   try {
-    const data = await fetchJson("https://market.dam.gov.bd/?L=E");
-    return json(request, env, { success: true, source: "DAM", prices: data });
+    const rows = htmlTableRows(await fetchText("https://market.dam.gov.bd/?L=E"));
+    return json(request, env, { success: true, source: "DAM", rows });
   } catch (cause) {
     return error(request, env, 502, `DAM price fetch failed: ${(cause as Error).message}`);
   }
@@ -203,8 +227,8 @@ async function marketLive(request: Request, env: Env): Promise<Response> {
 
 async function marketUpazila(request: Request, env: Env): Promise<Response> {
   try {
-    const data = await fetchJson("https://market.dam.gov.bd/subdistrict_retail_price_report");
-    return json(request, env, { success: true, source: "DAM", rows: data });
+    const rows = htmlTableRows(await fetchText("https://market.dam.gov.bd/subdistrict_retail_price_report"));
+    return json(request, env, { success: true, source: "DAM", rows });
   } catch (cause) {
     return error(request, env, 502, `DAM upazila price fetch failed: ${(cause as Error).message}`);
   }
@@ -212,8 +236,14 @@ async function marketUpazila(request: Request, env: Env): Promise<Response> {
 
 async function disasterAlerts(request: Request, env: Env): Promise<Response> {
   try {
-    const data = await fetchJson("https://cap.bmd.gov.bd/api/cap/rss.xml");
-    return json(request, env, { success: true, source: "BMD CAP RSS", alerts: data });
+    const xml = await fetchText("https://cap.bmd.gov.bd/api/cap/rss.xml");
+    const alerts = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)].map((item) => ({
+      title: stripMarkup(item[1].match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? ''),
+      description: stripMarkup(item[1].match(/<description[^>]*>([\s\S]*?)<\/description>/i)?.[1] ?? ''),
+      publishedAt: stripMarkup(item[1].match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i)?.[1] ?? ''),
+      link: stripMarkup(item[1].match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1] ?? ''),
+    }));
+    return json(request, env, { success: true, source: "BMD CAP RSS", alerts });
   } catch (cause) {
     return error(request, env, 502, `BMD alert fetch failed: ${(cause as Error).message}`);
   }
@@ -240,19 +270,7 @@ async function fertilizer(request: Request, env: Env): Promise<Response> {
   const crop = new URL(request.url).searchParams.get("crop");
   const region = new URL(request.url).searchParams.get("region") ?? "alluvial";
   try {
-    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/fertilizer/barc_fertilizer_recommendation.csv");
-    const text = typeof data === "string" ? data : JSON.stringify(data);
-    const lines = text.trim().split("\n");
-    const header = lines[0].split(",");
-    const idx: Record<string, number> = {};
-    header.forEach((h, i) => idx[h.trim()] = i);
-    const out = lines.slice(1)
-      .map((l) => {
-        const c = l.split(",");
-        const row: Record<string, string> = {};
-        header.forEach((h, i) => row[h.trim()] = (c[i] ?? "").trim());
-        return row;
-      })
+    const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/fertilizer/barc_fertilizer_recommendation.csv"))
       .filter((r) => !crop || r.crop === crop)
       .filter((r) => !region || r.soil_type === region || r.soil_type === "all");
     return json(request, env, { success: true, rows: out });
@@ -264,19 +282,75 @@ async function fertilizer(request: Request, env: Env): Promise<Response> {
 async function groundwater(request: Request, env: Env): Promise<Response> {
   const district = new URL(request.url).searchParams.get("district");
   try {
-    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/irrigation/groundwater_depth.csv");
-    const text = typeof data === "string" ? data : JSON.stringify(data);
-    const lines = text.trim().split("\n");
-    const out = lines.slice(1)
-      .map((l) => {
-        const c = l.split(",");
-        return { district: c[0], division: c[1], depth_m: Number(c[2]), stress_level: c[3] };
-      })
-      .filter((r) => !district || r.district.toLowerCase() === district.toLowerCase());
+    const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/irrigation/groundwater_depth.csv"))
+      .map((r): Record<string, string | number> => ({ ...r, depth_m: Number(r.depth_m) }))
+      .filter((r) => !district || String(r.district).toLowerCase() === district.toLowerCase());
     return json(request, env, { success: true, rows: out });
   } catch (cause) {
     return error(request, env, 502, `groundwater fetch failed: ${(cause as Error).message}`);
   }
+}
+
+function bytesToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+
+async function analyzeDiseaseUpload(request: Request, env: Env): Promise<Response> {
+  const form = await request.formData();
+  const image = form.get('image');
+  if (!(image instanceof File)) return error(request, env, 400, 'image is required');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(image.type)) return error(request, env, 415, 'Only JPEG, PNG and WebP images are accepted');
+  if (!image.size || image.size > 5 * 1024 * 1024) return error(request, env, 413, 'Image must be between 1 byte and 5 MB');
+  const upstream = await fetch(`${env.AI_SERVICE_URL}/v1/disease/analyze`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.AI_SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ job_id: crypto.randomUUID(), image_base64: `data:${image.type};base64,${bytesToBase64(await image.arrayBuffer())}` }),
+  });
+  const result = await upstream.json<{ status?: string; message?: string; predictions?: Array<{ disease_en: string; disease_bn: string; confidence: number; severity: string }> }>();
+  if (!upstream.ok) return error(request, env, upstream.status, result.message ?? 'Disease service unavailable');
+  if (result.status !== 'success') return json(request, env, { success: false, status: result.status, message: result.message, diseases: [] }, 503);
+  return json(request, env, {
+    success: true,
+    diseases: (result.predictions ?? []).map((p) => ({ en: p.disease_en, bn: p.disease_bn, confidence: Math.round(p.confidence * 100), severity: p.severity, cause: '', treatments: [] })),
+  });
+}
+
+async function saveSensorReading(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return error(request, env, 401, 'Authentication required');
+  const data = await body<Record<string, unknown>>(request);
+  const deviceId = String(data?.device_id ?? '').trim();
+  const raw = Number(data?.moisture_raw);
+  if (!deviceId || !Number.isFinite(raw)) return error(request, env, 400, 'device_id and moisture_raw are required');
+  const numberOrNull = (value: unknown) => value === undefined || value === null || value === '' ? null : Number(value);
+  await env.DB.prepare('INSERT OR IGNORE INTO sensor_devices (id, owner_id, name, firmware_version) VALUES (?, ?, ?, ?)')
+    .bind(deviceId, user.id, String(data?.device_name ?? deviceId), String(data?.firmware_version ?? '')).run();
+  await env.DB.prepare('UPDATE sensor_devices SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ? AND owner_id = ?').bind(deviceId, user.id).run();
+  const id = crypto.randomUUID();
+  await env.DB.prepare(`INSERT INTO sensor_readings
+    (id, device_id, owner_id, recorded_at, moisture_raw, moisture_percent, soil_temperature_c, air_temperature_c, air_humidity_percent, battery_percent, latitude, longitude, soil_depth_cm, crop, calibration_version)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(id, deviceId, user.id, String(data?.recorded_at ?? new Date().toISOString()), raw,
+      numberOrNull(data?.moisture_percent), numberOrNull(data?.soil_temperature_c), numberOrNull(data?.air_temperature_c),
+      numberOrNull(data?.air_humidity_percent), numberOrNull(data?.battery_percent), numberOrNull(data?.latitude),
+      numberOrNull(data?.longitude), numberOrNull(data?.soil_depth_cm), String(data?.crop ?? ''), String(data?.calibration_version ?? '')).run();
+  return json(request, env, { success: true, id }, 201);
+}
+
+async function sensorHistory(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return error(request, env, 401, 'Authentication required');
+  const url = new URL(request.url);
+  const deviceId = url.searchParams.get('device_id');
+  const limit = Math.min(500, Math.max(1, Number(url.searchParams.get('limit') ?? 100)));
+  const query = deviceId
+    ? env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? AND device_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(user.id, deviceId, limit)
+    : env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(user.id, limit);
+  const result = await query.all();
+  return json(request, env, { success: true, readings: result.results });
 }
 
 async function route(request: Request, env: Env): Promise<Response> {
@@ -364,12 +438,22 @@ async function route(request: Request, env: Env): Promise<Response> {
     return weather(request, env);
   }
   if (url.pathname === '/api/v1/market/prices' && request.method === 'GET') return market(request, env);
-  if (url.pathname === '/api/v1/market/districts' && request.method === 'GET') return json(request, env, { success: true, districts: [] });
-  if (url.pathname.startsWith('/api/v1/market/history/') && request.method === 'GET') return json(request, env, { success: true, history: [] });
+  if (url.pathname === '/api/v1/market/districts' && request.method === 'GET') {
+    const result = await env.DB.prepare('SELECT DISTINCT COALESCE(d.name_en, mp.market_name) AS district FROM market_prices mp LEFT JOIN districts d ON d.id = mp.district_id WHERE COALESCE(d.name_en, mp.market_name) IS NOT NULL ORDER BY district').all<{ district: string }>();
+    return json(request, env, { success: true, districts: result.results.map((row) => row.district) });
+  }
+  if (url.pathname.startsWith('/api/v1/market/history/') && request.method === 'GET') {
+    const crop = decodeURIComponent(url.pathname.slice('/api/v1/market/history/'.length));
+    const result = await env.DB.prepare('SELECT price_min, price_max, unit, source, recorded_at FROM market_prices WHERE crop_id = ? ORDER BY recorded_at DESC LIMIT 90').bind(crop).all();
+    return json(request, env, { success: true, crop, history: result.results });
+  }
   if ((url.pathname === '/api/v1/db/notifications' || url.pathname === '/api/v1/notifications') && request.method === 'GET') return json(request, env, { success: true, items: [], notifications: [] });
   if (url.pathname === '/api/v1/chat' && request.method === 'POST') return chat(request, env);
   if (url.pathname === '/api/v1/crop/recommend-dynamic' && request.method === 'POST') return cropRecommendation(request, env);
   if (url.pathname === '/api/v1/ai-search' && request.method === 'GET') return aiSearch(request, env);
+  if (url.pathname === '/api/v1/disease/analyze' && request.method === 'POST') return analyzeDiseaseUpload(request, env);
+  if (url.pathname === '/api/v1/sensors/readings' && request.method === 'POST') return saveSensorReading(request, env);
+  if (url.pathname === '/api/v1/sensors/readings' && request.method === 'GET') return sensorHistory(request, env);
   if (url.pathname === '/api/v1/integrations/ai/health' && request.method === 'GET') {
     const upstream = await fetch(`${env.AI_SERVICE_URL}/v1/disease/analyze`, {
       method: 'POST',

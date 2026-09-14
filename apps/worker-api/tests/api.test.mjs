@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { describe, it, before } from 'node:test';
-import worker from '../src/index.ts' with { type: 'macro' };
+import worker from '../src/index.ts';
 
 const env = {
   JWT_SECRET: 'test-secret-key-min-32-chars-long',
@@ -9,8 +9,8 @@ const env = {
   AI_SERVICE_URL: 'https://ai.example.com',
   AI_SERVICE_TOKEN: 'test-ai-token',
   DB: {
-    prepare: (sql: string) => ({
-      bind: (...args: unknown[]) => ({
+    prepare: (_sql) => ({
+      bind: (..._args) => ({
         first: async () => null,
         all: async () => ({ results: [] }),
         run: async () => ({ success: true }),
@@ -19,17 +19,17 @@ const env = {
       first: async () => null,
       run: async () => ({ success: true }),
     }),
-  } as any,
+  },
   UPLOADS: {
     put: async () => {},
-  } as any,
+  },
   RATE_LIMIT_KV: {
     get: async () => null,
     put: async () => {},
-  } as any,
+  },
 };
 
-function createRequest(path: string, options: RequestInit = {}) {
+function createRequest(path, options = {}) {
   return new Request(`http://localhost${path}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
@@ -125,7 +125,7 @@ describe('Worker API', () => {
   });
 
   it('rate limit headers present when KV configured', async () => {
-    const req = createRequest('/health');
+    const req = createRequest('/api/v1/districts');
     const res = await worker.fetch(req, env);
     // Rate limit headers should be present
     assert.ok(res.headers.has('X-RateLimit-Limit') || !env.RATE_LIMIT_KV);

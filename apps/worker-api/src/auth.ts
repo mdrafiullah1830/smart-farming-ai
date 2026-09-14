@@ -1,4 +1,4 @@
-import type { AuthUser, Env } from './types';
+import type { AuthUser, Env } from './types.ts';
 
 const encoder = new TextEncoder();
 

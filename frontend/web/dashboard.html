@@ -833,7 +833,7 @@ function handleDiseaseUpload(ev){
       
       showToast(currentLang==='en'?'Disease detected!':'রোগ শনাক্ত হয়েছে!','warning');
     } else {
-      html='<div style="text-align:center;padding:20px;color:var(--text-secondary)">রোগ শনাক্ত করা যায়নি। আবার চেষ্টা করুন।</div>';
+      html='<div style="text-align:center;padding:20px;color:var(--text-secondary)">'+(d.message||(currentLang==='en'?'Disease model is not available yet.':'রোগ শনাক্তকরণ মডেল এখনো প্রস্তুত নয়।'))+'</div>';
     }
     
     ra.innerHTML=html;

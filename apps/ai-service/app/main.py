@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -97,7 +98,8 @@ app = FastAPI(
 
 class DiseaseRequest(BaseModel):
     job_id: str = Field(min_length=1, max_length=100)
-    image_url: str = Field(pattern=r"^https://")
+    image_url: str | None = Field(default=None, pattern=r"^https://")
+    image_base64: str | None = None
 
 
 class DiseaseResponse(BaseModel):
@@ -135,12 +137,18 @@ async def analyze_disease(
         )
 
     try:
-        # Download image
-        import httpx
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(request.image_url)
-            response.raise_for_status()
-            image_bytes = response.content
+        if request.image_base64:
+            image_bytes = base64.b64decode(request.image_base64.split(',', 1)[-1], validate=True)
+        elif request.image_url:
+            import httpx
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(request.image_url)
+                response.raise_for_status()
+                image_bytes = response.content
+        else:
+            raise ValueError("image_url or image_base64 is required")
+        if len(image_bytes) > 5 * 1024 * 1024:
+            raise ValueError("image exceeds 5 MB")
 
         # Preprocess
         input_tensor = preprocess_image(image_bytes)
