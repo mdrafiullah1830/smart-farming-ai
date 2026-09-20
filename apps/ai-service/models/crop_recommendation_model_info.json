@@ -26,6 +26,6 @@
   ],
   "n_samples": 996,
   "trained_at": "2026-06-23T19:59:56.402827",
-  "exported_at": "2026-09-21T02:38:36.928813",
+  "exported_at": "2026-09-21T03:53:23.061971",
   "export": "skl2onnx Pipeline(StandardScaler -> RandomForestClassifier), zipmap disabled"
 }

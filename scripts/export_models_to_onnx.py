@@ -50,12 +50,24 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CROP_DIR = REPO_ROOT / "ai_models" / "crop_prediction" / "trained_models"
 YIELD_DIR = REPO_ROOT / "ai_models" / "yield_prediction" / "trained_models"
+DISEASE_DIR = REPO_ROOT / "ai_models" / "trained_models"
 DEFAULT_OUT = REPO_ROOT / "apps" / "ai-service" / "models"
 
 # Sanity ceiling: the largest ONNX we are ever willing to write into the repo.
 # The crop Random Forest (200 trees, depth 15) exports to a few MB; anything
 # dramatically larger signals a misconfigured export, not a better model.
 MAX_ONNX_BYTES = 25 * 1024 * 1024
+
+# Disease detection model metadata (matches ai_models/disease_detection/train_pytorch_onnx.py
+# and apps/ai-service/app/main.py:DISEASE_CLASSES / DISEASE_CLASSES_BN)
+DISEASE_CLASSES = [
+    "Bacterial Leaf Blight", "Bacterial Leaf Streak", "Bacterial Panicle Blight",
+    "Blast", "Brown Spot", "Dead Heart", "Downy Mildew", "Hispa", "Healthy", "Tungro"
+]
+DISEASE_CLASSES_BN = [
+    "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্যাকটেরিয়াল লিফ স্ট্রিক", "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
+    "ব্লাস্ট", "ব্রাউন স্পট", "ডেড হার্ট", "ডাউনি মিলডিউ", "হিসপা", "সুস্থ", "তুঙ্গরো",
+]
 
 # Same parameters as ai_models/market_forecasting/train.py — kept in sync by
 # hand because the trainer has no importable module structure.
@@ -226,6 +238,52 @@ def export_market(out_dir: Path):
 
 
 # --------------------------------------------------------------------------
+# Disease detection: EfficientNetB0 exported from PyTorch (train_pytorch_onnx.py)
+# --------------------------------------------------------------------------
+def export_disease(out_dir: Path) -> tuple[Path, dict]:
+    """Copy the pre-trained disease ONNX model and create metadata."""
+    onnx_path = DISEASE_DIR / "disease_model.onnx"
+    if not onnx_path.exists():
+        die(f"missing {onnx_path}. Train the disease model first (ai_models/disease_detection/train_pytorch_onnx.py).")
+
+    # Copy the ONNX file
+    onnx_bytes = onnx_path.read_bytes()
+
+    # Also copy external data file if it exists
+    data_path = DISEASE_DIR / "disease_model.onnx.data"
+    if data_path.exists():
+        out_data_path = out_dir / "disease_model.onnx.data"
+        shutil.copy2(data_path, out_data_path)
+        print(f"  wrote {out_data_path.relative_to(REPO_ROOT)} ({data_path.stat().st_size / 1024:.0f} KB)")
+
+    # Try to read existing metadata from training output
+    metadata_path = DISEASE_DIR / "disease_model_info.json"
+    if metadata_path.exists():
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    else:
+        # Fallback metadata matching train_pytorch_onnx.py output
+        metadata = {
+            "model_type": "EfficientNetB0_PyTorch",
+            "num_classes": len(DISEASE_CLASSES),
+            "classes": DISEASE_CLASSES,
+            "classes_bn": DISEASE_CLASSES_BN,
+            "image_size": [224, 224],
+            "trained_at": datetime.now().isoformat(),
+            "label_mapping": {
+                'bacterial_leaf_blight': 0, 'bacterial_leaf_streak': 1,
+                'bacterial_panicle_blight': 2, 'blast': 3, 'brown_spot': 4,
+                'dead_heart': 5, 'downy_mildew': 6, 'hispa': 7, 'normal': 8, 'tungro': 9,
+            },
+        }
+
+    metadata["exported_at"] = datetime.now().isoformat()
+    metadata["export"] = "torch.onnx.export EfficientNetB0 (opset 13, ImageNet normalized, CHW input)"
+    metadata["input_format"] = "CHW, ImageNet normalized (mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])"
+
+    return save_bundle(onnx_bytes, metadata, out_dir, "disease_model"), metadata
+
+
+# --------------------------------------------------------------------------
 # Verification: ONNX vs sklearn on random inputs
 # --------------------------------------------------------------------------
 def verify_crop(path: Path, metadata: dict) -> None:
@@ -281,6 +339,26 @@ def verify_market(path: Path, metadata: dict) -> None:
         die("market ONNX produced non-finite output")
 
 
+def verify_disease(path: Path, metadata: dict) -> None:
+    import onnxruntime as ort
+
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    name = session.get_inputs()[0].name
+    # Test with random input (CHW format, ImageNet normalized)
+    rng = np.random.default_rng(17)
+    x = rng.normal(0, 1, size=(1, 3, 224, 224)).astype(np.float32)
+    out = np.asarray(session.run(None, {name: x})[0])
+    if out.shape != (1, 10):
+        die(f"disease ONNX should emit (1, 10), got shape {out.shape}")
+    if not np.all(np.isfinite(out)):
+        die("disease ONNX produced non-finite output")
+    # Check that softmax produces valid probabilities
+    exp_logits = np.exp(out[0] - np.max(out[0]))
+    probs = exp_logits / np.sum(exp_logits)
+    if abs(np.sum(probs) - 1.0) > 1e-5:
+        die(f"softmax probabilities don't sum to 1: {np.sum(probs)}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export trained sklearn models to ONNX")
     parser.add_argument("--models-dir", type=Path, default=DEFAULT_OUT,
@@ -303,12 +381,15 @@ def main() -> None:
     yield_path, yield_meta = export_yield(args.models_dir)
     print("Exporting market fallback ...")
     market_path, market_meta = export_market(args.models_dir)
+    print("Exporting disease detection ...")
+    disease_path, disease_meta = export_disease(args.models_dir)
 
     if args.verify:
         print("Verifying ...")
         verify_crop(crop_path, crop_meta)
         verify_yield(yield_path, yield_meta)
         verify_market(market_path, market_meta)
+        verify_disease(disease_path, disease_meta)
         print("All ONNX graphs agree with their sklearn estimators.")
 
     print("Done.")

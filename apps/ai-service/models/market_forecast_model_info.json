@@ -36,8 +36,8 @@
       "max": 112.5
     }
   },
-  "trained_at": "2026-09-21T02:38:40.229250",
-  "exported_at": "2026-09-21T02:38:40.229423",
+  "trained_at": "2026-09-21T03:53:34.763062",
+  "exported_at": "2026-09-21T03:53:34.763171",
   "data_source": "Synthetic series from the documented generator in ai_models/market_forecasting/train.py — real DAM snapshots are a single daily observation and cannot train a time series. Replace with a model trained on accumulated history as it grows.",
   "export": "skl2onnx RandomForestRegressor on flattened 30-day windows, rolled forward per step"
 }

@@ -80,3 +80,5 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+.kilo/
+:memory:.ses

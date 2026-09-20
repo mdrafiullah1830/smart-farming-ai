@@ -1,5 +1,5 @@
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import numpy as np
 from fastapi.testclient import TestClient
@@ -78,11 +78,19 @@ def test_disease_success_with_model(mock_session):
 
     dummy_input = np.zeros((1, 3, 224, 224), dtype=np.float32)
 
-    with patch('httpx.AsyncClient.get') as mock_get:
+    # Mock httpx.AsyncClient as a context manager that returns a client with get()
+    with patch('httpx.AsyncClient') as mock_client_class:
+        mock_client = AsyncMock()
         mock_response = MagicMock()
         mock_response.content = b'fake image data'
         mock_response.raise_for_status = MagicMock()
-        mock_get.return_value.__aenter__.return_value = mock_response
+        mock_client.get.return_value = mock_response
+        
+        # AsyncClient() returns an async context manager
+        mock_cm = AsyncMock()
+        mock_cm.__aenter__.return_value = mock_client
+        mock_cm.__aexit__.return_value = None
+        mock_client_class.return_value = mock_cm
 
         # preprocess_image is already covered by its own tests; here we feed a
         # real tensor so the softmax + top-5 + severity logic runs on real numpy.

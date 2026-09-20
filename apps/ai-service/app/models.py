@@ -41,6 +41,11 @@ class OnnxModel:
         self.metadata = metadata
         self.input_name = session.get_inputs()[0].name
 
+    @property
+    def model_version(self) -> str:
+        """Get model version from metadata."""
+        return self.metadata.get("model_version", self.metadata.get("exported_at", "unknown")[:10])
+
     @classmethod
     def load(cls, onnx_path: Path, metadata_path: Path) -> "OnnxModel | None":
         if not ORT_AVAILABLE or not onnx_path.exists():

@@ -1,0 +1,48 @@
+{
+  "model_type": "EfficientNetB0_PyTorch",
+  "num_classes": 10,
+  "classes": [
+    "Bacterial Leaf Blight",
+    "Bacterial Leaf Streak",
+    "Bacterial Panicle Blight",
+    "Blast",
+    "Brown Spot",
+    "Dead Heart",
+    "Downy Mildew",
+    "Hispa",
+    "Healthy",
+    "Tungro"
+  ],
+  "classes_bn": [
+    "ব্যাকটেরিয়াল লিফ ব্লাইট",
+    "ব্যাকটেরিয়াল লিফ স্ট্রিক",
+    "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
+    "ব্লাস্ট",
+    "ব্রাউন স্পট",
+    "ডেড হার্ট",
+    "ডাউনি মিলডিউ",
+    "হিসপা",
+    "সুস্থ",
+    "তুঙ্গরো"
+  ],
+  "image_size": [
+    224,
+    224
+  ],
+  "trained_at": "2026-09-21T03:53:34.795907",
+  "label_mapping": {
+    "bacterial_leaf_blight": 0,
+    "bacterial_leaf_streak": 1,
+    "bacterial_panicle_blight": 2,
+    "blast": 3,
+    "brown_spot": 4,
+    "dead_heart": 5,
+    "downy_mildew": 6,
+    "hispa": 7,
+    "normal": 8,
+    "tungro": 9
+  },
+  "exported_at": "2026-09-21T03:53:34.795936",
+  "export": "torch.onnx.export EfficientNetB0 (opset 13, ImageNet normalized, CHW input)",
+  "input_format": "CHW, ImageNet normalized (mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])"
+}

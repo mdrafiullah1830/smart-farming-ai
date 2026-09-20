@@ -28,6 +28,6 @@
   ],
   "n_samples": 1000,
   "trained_at": "2026-06-23T20:00:14.825132",
-  "exported_at": "2026-09-21T02:38:37.091248",
+  "exported_at": "2026-09-21T03:53:23.781913",
   "export": "skl2onnx Pipeline(StandardScaler -> GradientBoostingRegressor)"
 }

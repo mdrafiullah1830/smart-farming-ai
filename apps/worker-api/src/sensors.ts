@@ -277,5 +277,81 @@ export async function sensorSummary(request: Request, env: Env): Promise<Respons
   });
 }
 
+/** POST /api/v1/sensors/readings — ingest a sensor reading from firmware or dashboard. */
+export async function saveSensorReading(request: Request, env: Env): Promise<Response> {
+  const context = await authenticateDevice(request, env);
+  if (!context) return error(request, env, 401, 'Authentication required');
+
+  const data = await parseJson<Record<string, unknown>>(request);
+  // A device key already identifies the device; firmware may still echo device_id,
+  // but it must not contradict the key it authenticated with.
+  const declaredId = data?.device_id === undefined ? '' : String(data.device_id).trim();
+  const deviceId = declaredId || context.deviceId || '';
+  if (!deviceId) return error(request, env, 400, 'device_id is required');
+  if (context.deviceId && declaredId && declaredId !== context.deviceId) {
+    return error(request, env, 403, 'device_id does not match the device key');
+  }
+
+  const raw = Number(data?.moisture_raw);
+  if (!Number.isFinite(raw)) return error(request, env, 400, 'moisture_raw is required and must be a finite number');
+
+  const validated = validateReading(data ?? {});
+  if (!validated.ok) return error(request, env, 400, validated.message);
+  const values = validated.values;
+
+  // The device must already be owned by the caller (registered via POST /devices)
+  // or, for a JWT caller, be auto-provisioned exactly once.
+  const device = await env.DB.prepare('SELECT id, owner_id FROM sensor_devices WHERE id = ?')
+    .bind(deviceId).first<{ id: string; owner_id: string }>();
+  if (device && device.owner_id !== context.ownerId) return error(request, env, 403, 'Device belongs to another account');
+  if (!device) {
+    if (context.via === 'device') return error(request, env, 403, 'Device is not registered; call POST /api/v1/devices first');
+    await env.DB.prepare('INSERT INTO sensor_devices (id, owner_id, name, firmware_version) VALUES (?, ?, ?, ?)')
+      .bind(deviceId, context.ownerId, String(data?.device_name ?? deviceId), String(data?.firmware_version ?? '')).run();
+    await env.DB.prepare('INSERT OR IGNORE INTO device_thresholds (device_id, owner_id) VALUES (?, ?)').bind(deviceId, context.ownerId).run();
+  }
+
+  await env.DB.prepare('UPDATE sensor_devices SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ?').bind(deviceId).run();
+
+  const id = crypto.randomUUID();
+  await env.DB.prepare(`INSERT INTO sensor_readings
+    (id, device_id, owner_id, recorded_at, moisture_raw, moisture_percent, soil_temperature_c, air_temperature_c, air_humidity_percent, battery_percent, latitude, longitude, soil_depth_cm, crop, calibration_version)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(id, deviceId, context.ownerId, String(values.recorded_at), raw,
+      values.moisture_percent ?? null, values.soil_temperature_c ?? null, values.air_temperature_c ?? null,
+      values.air_humidity_percent ?? null, values.battery_percent ?? null, values.latitude ?? null,
+      values.longitude ?? null, values.soil_depth_cm ?? null, String(values.crop ?? ''), String(values.calibration_version ?? '')).run();
+
+  // Advisory evaluation runs on every ingestion so the dashboard sees alerts
+  // within the same request that produced them.
+  const thresholds = await loadThresholds(env, context.ownerId, deviceId);
+  const advisory = evaluateReading({
+    moisture_percent: (values.moisture_percent as number | null) ?? null,
+    soil_temperature_c: (values.soil_temperature_c as number | null) ?? null,
+    battery_percent: (values.battery_percent as number | null) ?? null,
+  }, thresholds);
+  for (const entry of advisory) {
+    await env.DB.prepare(`INSERT INTO sensor_alerts (id, device_id, owner_id, reading_id, code, severity, message_en, message_bn)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(crypto.randomUUID(), deviceId, context.ownerId, id, entry.code, entry.severity, entry.message_en, entry.message_bn).run();
+  }
+
+  return json(request, env, { success: true, id, device_id: deviceId, advisories: advisory }, 201);
+}
+
+/** GET /api/v1/sensors/readings — fetch sensor reading history. */
+export async function sensorHistory(request: Request, env: Env): Promise<Response> {
+  const context = await authenticateDevice(request, env);
+  if (!context) return error(request, env, 401, 'Authentication required');
+  const url = new URL(request.url);
+  const deviceId = url.searchParams.get('device_id') ?? context.deviceId;
+  const limit = Math.min(500, Math.max(1, Number(url.searchParams.get('limit') ?? 100)));
+  const query = deviceId
+    ? env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? AND device_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(context.ownerId, deviceId, limit)
+    : env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(context.ownerId, limit);
+  const result = await query.all();
+  return json(request, env, { success: true, readings: result.results });
+}
+
 
 

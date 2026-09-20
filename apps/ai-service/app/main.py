@@ -1,18 +1,44 @@
 import base64
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from typing import Annotated, Optional
 
 import numpy as np
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request, Response
 from pydantic import BaseModel, Field
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+
+from app.routers import advisory, crop, market, yield_
 
 SERVICE_TOKEN = os.getenv("SERVICE_TOKEN", "")
 MODEL_PATH = os.getenv("MODEL_PATH", "/app/models/disease_model.onnx")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Prometheus metrics
+REQUEST_COUNT = Counter(
+    'http_requests_total',
+    'Total HTTP requests',
+    ['method', 'endpoint', 'status']
+)
+REQUEST_LATENCY = Histogram(
+    'http_request_duration_seconds',
+    'HTTP request latency in seconds',
+    ['method', 'endpoint']
+)
+MODEL_INFERENCE_COUNT = Counter(
+    'model_inference_total',
+    'Total model inferences',
+    ['model', 'status']
+)
+MODEL_INFERENCE_LATENCY = Histogram(
+    'model_inference_duration_seconds',
+    'Model inference latency in seconds',
+    ['model']
+)
 
 # Global model session
 model_session: Optional["ort.InferenceSession"] = None
@@ -82,8 +108,12 @@ DISEASE_CLASSES_BN = [
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # Load ONNX model at startup
+    # Load every model at startup so /health can report readiness honestly and
+    # the first user request does not pay the load cost.
     load_model()
+    crop.load()
+    yield_.load()
+    market.load()
     yield
 
 
@@ -94,6 +124,63 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    """Collect Prometheus metrics for each request."""
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=request.url.path,
+        status=response.status_code
+    ).inc()
+    REQUEST_LATENCY.labels(
+        method=request.method,
+        endpoint=request.url.path
+    ).observe(duration)
+
+    return response
+
+
+@app.middleware("http")
+async def model_version_header(request: Request, call_next):
+    """Add model version header to ML endpoints."""
+    response = await call_next(request)
+    
+    # Add model version headers for ML endpoints
+    path = request.url.path
+    if path.startswith("/v1/crop/"):
+        if crop.MODEL:
+            response.headers["X-Model-Version"] = crop.MODEL.model_version
+    elif path.startswith("/v1/yield/"):
+        if yield_.MODEL:
+            response.headers["X-Model-Version"] = yield_.MODEL.model_version
+    elif path.startswith("/v1/market/"):
+        if market.MODEL:
+            response.headers["X-Model-Version"] = market.MODEL.model_version
+    elif path.startswith("/v1/disease/"):
+        if model_loaded:
+            response.headers["X-Model-Version"] = "1.0.0"  # Disease model version from metadata
+    
+    return response
+
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint."""
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+# Prediction domains. Each router degrades to a `model_unavailable` status when
+# its artifact is missing, so mounting them unconditionally is always safe.
+app.include_router(crop.router)
+app.include_router(yield_.router)
+app.include_router(market.router)
+app.include_router(advisory.router)
 
 
 class DiseaseRequest(BaseModel):
@@ -117,9 +204,25 @@ def require_service_token(authorization: Annotated[str | None, Header()] = None)
 
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    """Cheap endpoint for Render health checks and an uptime monitor."""
-    return {"status": "ok", "service": "smart-farming-ai", "model_loaded": str(model_loaded)}
+async def health() -> dict[str, object]:
+    """Cheap endpoint for Render health checks and an uptime monitor.
+
+    Reports each prediction domain honestly: `ok` when its artifact is loaded,
+    `unavailable` otherwise, so an operator can see exactly what this deployment
+    can serve without probing every endpoint.
+    """
+    return {
+        "status": "ok",
+        "service": "smart-farming-ai",
+        "models": {
+            "disease": "ok" if model_loaded else "unavailable",
+            "crop": "ok" if crop.MODEL is not None else "unavailable",
+            "yield": "ok" if yield_.MODEL is not None else "unavailable",
+            "market": "ok" if market.MODEL is not None else "unavailable",
+            # Advisory is rule-based; it never has an artifact to load.
+            "advisory": "ok",
+        },
+    }
 
 
 @app.post("/v1/disease/analyze", response_model=DiseaseResponse)
@@ -130,6 +233,7 @@ async def analyze_disease(
     require_service_token(authorization)
 
     if not model_loaded:
+        MODEL_INFERENCE_COUNT.labels(model='disease', status='unavailable').inc()
         return DiseaseResponse(
             job_id=request.job_id,
             status="model_unavailable",
@@ -153,9 +257,12 @@ async def analyze_disease(
         # Preprocess
         input_tensor = preprocess_image(image_bytes)
 
-        # Inference
+        # Inference with metrics
+        inference_start = time.time()
         input_name = model_session.get_inputs()[0].name
         outputs = model_session.run(None, {input_name: input_tensor})
+        inference_duration = time.time() - inference_start
+        MODEL_INFERENCE_LATENCY.labels(model='disease').observe(inference_duration)
         logits = outputs[0][0]
 
         # Softmax
@@ -173,6 +280,7 @@ async def analyze_disease(
                 "severity": "high" if probs[idx] > 0.7 else "medium" if probs[idx] > 0.4 else "low"
             })
 
+        MODEL_INFERENCE_COUNT.labels(model='disease', status='success').inc()
         return DiseaseResponse(
             job_id=request.job_id,
             status="success",
@@ -181,6 +289,7 @@ async def analyze_disease(
         )
     except Exception as e:
         logger.error(f"Disease analysis failed: {e}")
+        MODEL_INFERENCE_COUNT.labels(model='disease', status='error').inc()
         return DiseaseResponse(
             job_id=request.job_id,
             status="error",

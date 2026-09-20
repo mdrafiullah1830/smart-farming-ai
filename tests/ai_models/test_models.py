@@ -1,12 +1,12 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ai_models'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 
 class TestCropRecommendation:
     def setup_method(self):
-        from crop_prediction.train import CropRecommendationModel
+        from ai_models.crop_prediction.train import CropRecommendationModel
         self.model = CropRecommendationModel()
         self.model.train()
 
@@ -35,7 +35,7 @@ class TestCropRecommendation:
 
 class TestYieldPrediction:
     def setup_method(self):
-        from yield_prediction.train import YieldPredictionModel
+        from ai_models.yield_prediction.train import YieldPredictionModel
         self.model = YieldPredictionModel()
         self.model.train()
 
@@ -57,7 +57,7 @@ class TestYieldPrediction:
 
 class TestMarketForecasting:
     def setup_method(self):
-        from market_forecasting.train import MarketForecastingModel
+        from ai_models.market_forecasting.train import MarketForecastingModel
         self.model = MarketForecastingModel()
         self.model.train()
 
@@ -70,7 +70,7 @@ class TestMarketForecasting:
 
 class TestDiseaseDetection:
     def setup_method(self):
-        from disease_detection.train import DiseaseDetectionModel
+        from ai_models.disease_detection.train import DiseaseDetectionModel
         self.model = DiseaseDetectionModel()
         self.model.train(epochs=5)
 
@@ -84,7 +84,7 @@ class TestDiseaseDetection:
 
 class TestChatbot:
     def setup_method(self):
-        from chatbot.train import AgriculturalChatbot
+        from ai_models.chatbot.train import AgriculturalChatbot
         self.chatbot = AgriculturalChatbot()
 
     def test_rice_query(self):
