@@ -11,7 +11,13 @@ def test_health() -> None:
     assert data == {
         "status": "ok",
         "service": "smart-farming-ai",
-        "model_loaded": str(False),  # no model deployed in the test env
+        "models": {
+            "disease": "unavailable",   # no model deployed in the test env
+            "crop": "unavailable",
+            "yield": "unavailable",
+            "market": "unavailable",
+            "advisory": "ok",           # rule-based, no artifact needed
+        },
     }
 
 

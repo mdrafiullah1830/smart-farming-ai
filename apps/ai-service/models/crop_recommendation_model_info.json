@@ -1,0 +1,31 @@
+{
+  "model_name": "random_forest",
+  "accuracy": 0.655,
+  "classes": [
+    "banana",
+    "chili",
+    "jute",
+    "lentil",
+    "mango",
+    "mustard",
+    "onion",
+    "potato",
+    "rice",
+    "sugarcane",
+    "tomato",
+    "wheat"
+  ],
+  "feature_names": [
+    "temperature",
+    "humidity",
+    "rainfall",
+    "ph",
+    "nitrogen",
+    "phosphorus",
+    "potassium"
+  ],
+  "n_samples": 996,
+  "trained_at": "2026-06-23T19:59:56.402827",
+  "exported_at": "2026-09-21T02:38:36.928813",
+  "export": "skl2onnx Pipeline(StandardScaler -> RandomForestClassifier), zipmap disabled"
+}

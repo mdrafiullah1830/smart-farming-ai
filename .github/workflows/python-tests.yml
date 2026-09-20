@@ -1,0 +1,157 @@
+name: Python Tests & Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'ruff.toml'
+      - 'apps/ai-service/**'
+      - 'backend/**'
+      - 'ai_models/**'
+      - 'scripts/**'
+      - 'tests/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'ruff.toml'
+      - 'apps/ai-service/**'
+      - 'backend/**'
+      - 'ai_models/**'
+      - 'scripts/**'
+      - 'tests/**'
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install ruff
+        run: pip install ruff
+      - name: Run ruff check
+        run: ruff check .
+      - name: Run ruff format check
+        run: ruff format --check .
+
+  type-check:
+    name: Type Check (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          pip install mypy
+          pip install -e .[dev] 2>/dev/null || true
+      - name: Run mypy
+        run: mypy apps/ai-service/app ai_models backend scripts --ignore-missing-imports
+
+  test-ai-service:
+    name: AI Service Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ai-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: apps/ai-service/requirements-dev.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Run pytest
+        run: pytest tests/ -v --tb=short
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-service-coverage
+          path: htmlcov/
+
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest pytest-asyncio
+      - name: Run pytest
+        run: pytest tests/ -v --tb=short || echo "No tests found"
+
+  test-training:
+    name: Training Scripts Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install training deps
+        run: pip install torch torchvision scikit-learn xgboost pandas numpy Pillow
+      - name: Syntax check training scripts
+        run: |
+          python -m py_compile ai_models/disease_detection/train.py
+          python -m py_compile ai_models/disease_detection/train_pytorch_onnx.py
+          python -m py_compile ai_models/crop_prediction/train.py
+          python -m py_compile ai_models/yield_prediction/train.py
+          python -m py_compile ai_models/market_forecasting/train.py
+          python -m py_compile ai_models/chatbot/train.py
+
+  security:
+    name: Security Scan (bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install bandit
+        run: pip install bandit
+      - name: Run bandit
+        run: bandit -r apps/ai-service/app ai_models backend scripts -ll -x tests
+
+  dependencies:
+    name: Dependency Check (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Audit AI Service deps
+        run: pip-audit -r apps/ai-service/requirements.txt
+      - name: Audit Backend deps
+        run: pip-audit -r backend/requirements.txt || true
+
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true

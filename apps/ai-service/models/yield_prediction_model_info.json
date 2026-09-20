@@ -1,0 +1,33 @@
+{
+  "model_name": "gradient_boosting",
+  "r2_score": 0.8993953784271396,
+  "feature_names": [
+    "crop_encoded",
+    "temperature",
+    "humidity",
+    "rainfall",
+    "ph",
+    "nitrogen",
+    "area_acres",
+    "irrigation_used",
+    "season_encoded"
+  ],
+  "crop_classes": [
+    "chili",
+    "jute",
+    "onion",
+    "potato",
+    "rice",
+    "tomato",
+    "wheat"
+  ],
+  "season_classes": [
+    "kharif",
+    "rabi",
+    "summer"
+  ],
+  "n_samples": 1000,
+  "trained_at": "2026-06-23T20:00:14.825132",
+  "exported_at": "2026-09-21T02:38:37.091248",
+  "export": "skl2onnx Pipeline(StandardScaler -> GradientBoostingRegressor)"
+}

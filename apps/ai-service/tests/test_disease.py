@@ -19,7 +19,7 @@ def test_health():
     data = response.json()
     assert data["status"] == "ok"
     assert data["service"] == "smart-farming-ai"
-    assert "model_loaded" in data
+    assert "models" in data
 
 
 def test_disease_requires_service_token():

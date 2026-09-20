@@ -1,0 +1,43 @@
+{
+  "model_name": "random_forest_fallback",
+  "crops": [
+    "chili",
+    "onion",
+    "potato",
+    "rice",
+    "tomato",
+    "wheat"
+  ],
+  "sequence_length": 30,
+  "n_samples": 2010,
+  "scaler_bounds": {
+    "rice": {
+      "min": 43.19,
+      "max": 68.37
+    },
+    "wheat": {
+      "min": 32.41,
+      "max": 48.2
+    },
+    "potato": {
+      "min": 21.38,
+      "max": 41.15
+    },
+    "onion": {
+      "min": 28.94,
+      "max": 65.32
+    },
+    "tomato": {
+      "min": 29.02,
+      "max": 77.25
+    },
+    "chili": {
+      "min": 53.79,
+      "max": 112.5
+    }
+  },
+  "trained_at": "2026-09-21T02:38:40.229250",
+  "exported_at": "2026-09-21T02:38:40.229423",
+  "data_source": "Synthetic series from the documented generator in ai_models/market_forecasting/train.py — real DAM snapshots are a single daily observation and cannot train a time series. Replace with a model trained on accumulated history as it grows.",
+  "export": "skl2onnx RandomForestRegressor on flattened 30-day windows, rolled forward per step"
+}

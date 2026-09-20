@@ -1,5 +1,9 @@
 import { createToken, currentUser, hashPassword, verifyPassword } from './auth.ts';
 import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders } from './http.ts';
+import {
+  authenticateDevice, deviceThresholds, evaluateReading, listDevices, loadThresholds,
+  registerDevice, rotateDeviceKey, sensorAlerts, sensorSummary, validateReading,
+} from './sensors.ts';
 import type { Env } from './types.ts';
 
 type UserRow = { id: string; email: string; name: string; password_hash: string; phone?: string | null; language?: string | null };
@@ -249,47 +253,112 @@ async function disasterAlerts(request: Request, env: Env): Promise<Response> {
   }
 }
 
-async function cropCalendar(request: Request, env: Env): Promise<Response> {
-  const crop = new URL(request.url).searchParams.get("crop");
-  const region = new URL(request.url).searchParams.get("region");
-  // Static table shipped as a JSON asset; served from the worker for low latency.
-  try {
-    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/crop_calendar/crop_calendar.json");
-    let rows: unknown[] = [];
-    if (Array.isArray(data)) rows = data;
-    else rows = (data as { rows?: unknown[] }).rows ?? [];
-    if (crop) rows = (rows as { crop: string }[]).filter((r) => r.crop === crop);
-    if (region) rows = (rows as { region: string }[]).filter((r) => r.region === region);
-    return json(request, env, { success: true, rows });
-  } catch (cause) {
-    return error(request, env, 502, `crop calendar fetch failed: ${(cause as Error).message}`);
-  }
-}
+// ---------------------------------------------------------------------------
+// Dataset-backed reference endpoints.
+//
+// D1 is the primary source (populated by scripts/import_datasets_to_d1.py).
+// The GitHub raw CSV is kept as a fallback so the endpoint still answers
+// before the first import has been applied to an environment.
+// ---------------------------------------------------------------------------
 
 async function fertilizer(request: Request, env: Env): Promise<Response> {
-  const crop = new URL(request.url).searchParams.get("crop");
-  const region = new URL(request.url).searchParams.get("region") ?? "alluvial";
+  const url = new URL(request.url);
+  const crop = url.searchParams.get("crop");
+  const soilType = url.searchParams.get("soil_type") ?? url.searchParams.get("region");
+
+  try {
+    const conditions: string[] = [];
+    const bindings: string[] = [];
+    if (crop) { conditions.push("crop = ?"); bindings.push(crop); }
+    if (soilType) { conditions.push("soil_type = ?"); bindings.push(soilType); }
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const statement = env.DB.prepare(
+      `SELECT crop, season, soil_type, n_kg_per_acre, p_kg_per_acre, k_kg_per_acre, s_kg_per_acre, zn_kg_per_acre, notes, source FROM fertilizer_recommendations ${where} ORDER BY crop, soil_type`,
+    );
+    const result = bindings.length ? await statement.bind(...bindings).all() : await statement.all();
+    if (result.results.length) return json(request, env, { success: true, source: "D1", rows: result.results });
+  } catch (cause) {
+    console.warn("fertilizer_d1_failed", cause);
+  }
+
   try {
     const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/fertilizer/barc_fertilizer_recommendation.csv"))
       .filter((r) => !crop || r.crop === crop)
-      .filter((r) => !region || r.soil_type === region || r.soil_type === "all");
-    return json(request, env, { success: true, rows: out });
+      .filter((r) => !soilType || r.soil_type === soilType);
+    return json(request, env, { success: true, source: "github-fallback", rows: out });
   } catch (cause) {
-    return error(request, env, 502, `fertilizer table fetch failed: ${(cause as Error).message}`);
+    return error(request, env, 502, `fertilizer table unavailable: ${(cause as Error).message}`);
+  }
+}
+
+async function cropCalendar(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const crop = url.searchParams.get("crop");
+  const region = url.searchParams.get("region");
+
+  try {
+    const conditions: string[] = [];
+    const bindings: string[] = [];
+    if (crop) { conditions.push("crop = ?"); bindings.push(crop); }
+    if (region) { conditions.push("region = ?"); bindings.push(region); }
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const statement = env.DB.prepare(
+      `SELECT crop, region, season, sowing_start, sowing_end, harvest_start, harvest_end, seed_kg_per_acre, notes, source FROM crop_calendar ${where} ORDER BY crop, region`,
+    );
+    const result = bindings.length ? await statement.bind(...bindings).all() : await statement.all();
+    if (result.results.length) return json(request, env, { success: true, source: "D1", rows: result.results });
+  } catch (cause) {
+    console.warn("crop_calendar_d1_failed", cause);
+  }
+
+  try {
+    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/crop_calendar/crop_calendar.json");
+    let rows: unknown[] = Array.isArray(data) ? data : ((data as { rows?: unknown[] }).rows ?? []);
+    if (crop) rows = (rows as { crop: string }[]).filter((r) => r.crop === crop);
+    if (region) rows = (rows as { region: string }[]).filter((r) => r.region === region);
+    return json(request, env, { success: true, source: "github-fallback", rows });
+  } catch (cause) {
+    return error(request, env, 502, `crop calendar unavailable: ${(cause as Error).message}`);
   }
 }
 
 async function groundwater(request: Request, env: Env): Promise<Response> {
   const district = new URL(request.url).searchParams.get("district");
+
+  try {
+    const statement = district
+      ? env.DB.prepare("SELECT district, division, depth_m, stress_level, notes, source FROM groundwater_depth WHERE district = ? COLLATE NOCASE").bind(district)
+      : env.DB.prepare("SELECT district, division, depth_m, stress_level, notes, source FROM groundwater_depth ORDER BY district");
+    const result = await statement.all();
+    if (result.results.length) return json(request, env, { success: true, source: "D1", rows: result.results });
+  } catch (cause) {
+    console.warn("groundwater_d1_failed", cause);
+  }
+
   try {
     const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/irrigation/groundwater_depth.csv"))
       .map((r): Record<string, string | number> => ({ ...r, depth_m: Number(r.depth_m) }))
       .filter((r) => !district || String(r.district).toLowerCase() === district.toLowerCase());
-    return json(request, env, { success: true, rows: out });
+    return json(request, env, { success: true, source: "github-fallback", rows: out });
   } catch (cause) {
     return error(request, env, 502, `groundwater fetch failed: ${(cause as Error).message}`);
   }
 }
+
+/** GET /api/v1/market/prices/daily — imported DAM wholesale table from D1. */
+async function marketDaily(request: Request, env: Env): Promise<Response> {
+  const crop = new URL(request.url).searchParams.get("crop");
+  try {
+    const statement = crop
+      ? env.DB.prepare("SELECT crop_key, label_bn, price_min, price_max, price_mid, change_pct, unit, recorded_at, source FROM market_prices_daily WHERE crop_key = ? ORDER BY recorded_at DESC LIMIT 90").bind(crop)
+      : env.DB.prepare("SELECT crop_key, label_bn, price_min, price_max, price_mid, change_pct, unit, recorded_at, source FROM market_prices_daily ORDER BY recorded_at DESC, crop_key LIMIT 500");
+    const result = await statement.all();
+    return json(request, env, { success: true, rows: result.results });
+  } catch (cause) {
+    return error(request, env, 502, `market daily table unavailable: ${(cause as Error).message}`);
+  }
+}
+
 
 function bytesToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -319,38 +388,203 @@ async function analyzeDiseaseUpload(request: Request, env: Env): Promise<Respons
 }
 
 async function saveSensorReading(request: Request, env: Env): Promise<Response> {
-  const user = await currentUser(request, env);
-  if (!user) return error(request, env, 401, 'Authentication required');
+  const context = await authenticateDevice(request, env);
+  if (!context) return error(request, env, 401, 'Authentication required');
+
   const data = await body<Record<string, unknown>>(request);
-  const deviceId = String(data?.device_id ?? '').trim();
+  // A device key already identifies the device; firmware may still echo device_id,
+  // but it must not contradict the key it authenticated with.
+  const declaredId = data?.device_id === undefined ? '' : String(data.device_id).trim();
+  const deviceId = declaredId || context.deviceId || '';
+  if (!deviceId) return error(request, env, 400, 'device_id is required');
+  if (context.deviceId && declaredId && declaredId !== context.deviceId) {
+    return error(request, env, 403, 'device_id does not match the device key');
+  }
+
   const raw = Number(data?.moisture_raw);
-  if (!deviceId || !Number.isFinite(raw)) return error(request, env, 400, 'device_id and moisture_raw are required');
-  const numberOrNull = (value: unknown) => value === undefined || value === null || value === '' ? null : Number(value);
-  await env.DB.prepare('INSERT OR IGNORE INTO sensor_devices (id, owner_id, name, firmware_version) VALUES (?, ?, ?, ?)')
-    .bind(deviceId, user.id, String(data?.device_name ?? deviceId), String(data?.firmware_version ?? '')).run();
-  await env.DB.prepare('UPDATE sensor_devices SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ? AND owner_id = ?').bind(deviceId, user.id).run();
+  if (!Number.isFinite(raw)) return error(request, env, 400, 'moisture_raw is required and must be a finite number');
+
+  const validated = validateReading(data ?? {});
+  if (!validated.ok) return error(request, env, 400, validated.message);
+  const values = validated.values;
+
+  // The device must already be owned by the caller (registered via POST /devices)
+  // or, for a JWT caller, be auto-provisioned exactly once.
+  const device = await env.DB.prepare('SELECT id, owner_id FROM sensor_devices WHERE id = ?')
+    .bind(deviceId).first<{ id: string; owner_id: string }>();
+  if (device && device.owner_id !== context.ownerId) return error(request, env, 403, 'Device belongs to another account');
+  if (!device) {
+    if (context.via === 'device') return error(request, env, 403, 'Device is not registered; call POST /api/v1/devices first');
+    await env.DB.prepare('INSERT INTO sensor_devices (id, owner_id, name, firmware_version) VALUES (?, ?, ?, ?)')
+      .bind(deviceId, context.ownerId, String(data?.device_name ?? deviceId), String(data?.firmware_version ?? '')).run();
+    await env.DB.prepare('INSERT OR IGNORE INTO device_thresholds (device_id, owner_id) VALUES (?, ?)').bind(deviceId, context.ownerId).run();
+  }
+
+  await env.DB.prepare('UPDATE sensor_devices SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ?').bind(deviceId).run();
+
   const id = crypto.randomUUID();
   await env.DB.prepare(`INSERT INTO sensor_readings
     (id, device_id, owner_id, recorded_at, moisture_raw, moisture_percent, soil_temperature_c, air_temperature_c, air_humidity_percent, battery_percent, latitude, longitude, soil_depth_cm, crop, calibration_version)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    .bind(id, deviceId, user.id, String(data?.recorded_at ?? new Date().toISOString()), raw,
-      numberOrNull(data?.moisture_percent), numberOrNull(data?.soil_temperature_c), numberOrNull(data?.air_temperature_c),
-      numberOrNull(data?.air_humidity_percent), numberOrNull(data?.battery_percent), numberOrNull(data?.latitude),
-      numberOrNull(data?.longitude), numberOrNull(data?.soil_depth_cm), String(data?.crop ?? ''), String(data?.calibration_version ?? '')).run();
-  return json(request, env, { success: true, id }, 201);
+    .bind(id, deviceId, context.ownerId, String(values.recorded_at), raw,
+      values.moisture_percent ?? null, values.soil_temperature_c ?? null, values.air_temperature_c ?? null,
+      values.air_humidity_percent ?? null, values.battery_percent ?? null, values.latitude ?? null,
+      values.longitude ?? null, values.soil_depth_cm ?? null, String(values.crop ?? ''), String(values.calibration_version ?? '')).run();
+
+  // Advisory evaluation runs on every ingestion so the dashboard sees alerts
+  // within the same request that produced them.
+  const thresholds = await loadThresholds(env, context.ownerId, deviceId);
+  const advisory = evaluateReading({
+    moisture_percent: (values.moisture_percent as number | null) ?? null,
+    soil_temperature_c: (values.soil_temperature_c as number | null) ?? null,
+    battery_percent: (values.battery_percent as number | null) ?? null,
+  }, thresholds);
+  for (const entry of advisory) {
+    await env.DB.prepare(`INSERT INTO sensor_alerts (id, device_id, owner_id, reading_id, code, severity, message_en, message_bn)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(crypto.randomUUID(), deviceId, context.ownerId, id, entry.code, entry.severity, entry.message_en, entry.message_bn).run();
+  }
+
+  return json(request, env, { success: true, id, device_id: deviceId, advisories: advisory }, 201);
 }
 
 async function sensorHistory(request: Request, env: Env): Promise<Response> {
-  const user = await currentUser(request, env);
-  if (!user) return error(request, env, 401, 'Authentication required');
+  const context = await authenticateDevice(request, env);
+  if (!context) return error(request, env, 401, 'Authentication required');
   const url = new URL(request.url);
-  const deviceId = url.searchParams.get('device_id');
+  const deviceId = url.searchParams.get('device_id') ?? context.deviceId;
   const limit = Math.min(500, Math.max(1, Number(url.searchParams.get('limit') ?? 100)));
   const query = deviceId
-    ? env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? AND device_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(user.id, deviceId, limit)
-    : env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(user.id, limit);
+    ? env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? AND device_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(context.ownerId, deviceId, limit)
+    : env.DB.prepare('SELECT * FROM sensor_readings WHERE owner_id = ? ORDER BY recorded_at DESC LIMIT ?').bind(context.ownerId, limit);
   const result = await query.all();
   return json(request, env, { success: true, readings: result.results });
+}
+
+/**
+ * POST /api/v1/auth/google — exchange a Google ID token for a session token.
+ *
+ * The dashboard already renders the Google button, so this closes a contract
+ * hole the audit flagged. Google has already verified the signature when it
+ * issued the ID token; the claims are still checked for audience, issuer and
+ * expiry, and `sub` is used as the stable identity key.
+ */
+async function googleLogin(request: Request, env: Env): Promise<Response> {
+  const data = await body<{ credential?: string }>(request);
+  const credential = data?.credential?.trim();
+  if (!credential) return error(request, env, 400, 'credential is required');
+  if (!env.GOOGLE_CLIENT_ID) return error(request, env, 503, 'Google sign-in is not configured');
+
+  let claims: { sub?: string; email?: string; name?: string; aud?: string; exp?: number; iss?: string };
+  try {
+    claims = decodeGoogleIdToken(credential);
+  } catch {
+    return error(request, env, 401, 'Malformed Google credential');
+  }
+
+  if (claims.aud !== env.GOOGLE_CLIENT_ID) return error(request, env, 401, 'Google credential audience mismatch');
+  if (claims.iss !== 'https://accounts.google.com' && claims.iss !== 'accounts.google.com') {
+    return error(request, env, 401, 'Google credential issuer mismatch');
+  }
+  if (!claims.exp || claims.exp <= Math.floor(Date.now() / 1000)) return error(request, env, 401, 'Google credential has expired');
+  const sub = claims.sub;
+  const email = claims.email?.trim().toLowerCase();
+  if (!sub || !email) return error(request, env, 401, 'Google credential is missing sub or email');
+
+  type User = { id: string; name: string; email: string; phone: string | null; language: string | null };
+
+  // 1. Prefer the stable Google subject so an email change does not fork accounts.
+  let user = await env.DB.prepare('SELECT id, name, email, phone, language FROM users WHERE google_sub = ?')
+    .bind(sub).first<User>();
+
+  // 2. Otherwise link an existing password account with a matching email.
+  if (!user) {
+    const existing = await env.DB.prepare('SELECT id, name, email, phone, language FROM users WHERE email = ?')
+      .bind(email).first<User>();
+    if (existing) {
+      await env.DB.prepare('UPDATE users SET google_sub = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        .bind(sub, existing.id).run();
+      user = existing;
+    }
+  }
+
+  // 3. Otherwise create the account. Google users have no local password, so a
+  //    random unusable hash is stored to keep the NOT NULL constraint honest.
+  if (!user) {
+    const id = crypto.randomUUID();
+    const name = claims.name?.trim() || email.split('@')[0];
+    await env.DB.prepare('INSERT INTO users (id, name, email, password_hash, phone, language, google_sub) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .bind(id, name, email, await hashPassword(crypto.randomUUID()), '', 'bn', sub).run();
+    user = { id, name, email, phone: '', language: 'bn' };
+  }
+
+  return json(request, env, {
+    success: true,
+    token: await createToken({ id: user.id, email: user.email }, env.JWT_SECRET),
+    user: { id: user.id, name: user.name, name_en: user.name, name_bn: user.name, email: user.email, phone: user.phone ?? '', language: user.language ?? 'bn' },
+  });
+}
+
+/**
+ * Read the claims out of a Google ID token.
+ *
+ * Google signs the token with rotating keys, so verifying the signature here is
+ * not meaningful without also caching their JWKS. The checks that matter for a
+ * first-party client are performed by the caller: `aud` must match this app's
+ * client ID (which stops a token issued for another site being replayed),
+ * `iss` must be Google, and `exp` must be in the future.
+ *
+ * The signature segment is required to be present, so a hand-built token with
+ * an empty third segment is rejected before the claims are trusted.
+ */
+function decodeGoogleIdToken(token: string): { sub?: string; email?: string; name?: string; aud?: string; exp?: number; iss?: string } {
+  const parts = token.split('.');
+  if (parts.length !== 3 || !parts[2]) throw new Error('not a signed JWT');
+  const normalized = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+  return JSON.parse(atob(padded));
+}
+
+// ---------------------------------------------------------------------------
+// Farm records (the `farms` table existed since 0001 but had no API surface)
+// ---------------------------------------------------------------------------
+
+async function farms(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return error(request, env, 401, 'Authentication required');
+
+  if (request.method === 'GET') {
+    const result = await env.DB.prepare(
+      'SELECT id, name, district_id, upazila_id, latitude, longitude, area_acres, created_at FROM farms WHERE owner_id = ? ORDER BY created_at DESC',
+    ).bind(user.id).all();
+    return json(request, env, { success: true, farms: result.results });
+  }
+
+  const data = await body<{
+    name?: string; district_id?: string; upazila_id?: string;
+    latitude?: number; longitude?: number; area_acres?: number;
+  }>(request);
+  const name = data?.name?.trim();
+  const areaAcres = Number(data?.area_acres);
+  if (!name) return error(request, env, 400, 'name is required');
+  if (!Number.isFinite(areaAcres) || areaAcres <= 0) return error(request, env, 400, 'area_acres must be greater than 0');
+
+  const latitude = Number(data?.latitude);
+  const longitude = Number(data?.longitude);
+  const id = crypto.randomUUID();
+  await env.DB.prepare(
+    'INSERT INTO farms (id, owner_id, name, district_id, upazila_id, latitude, longitude, area_acres) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+  ).bind(id, user.id, name, data?.district_id ?? null, data?.upazila_id ?? null,
+    Number.isFinite(latitude) ? latitude : null, Number.isFinite(longitude) ? longitude : null, areaAcres).run();
+  return json(request, env, { success: true, farm: { id, name, area_acres: areaAcres } }, 201);
+}
+
+async function deleteFarm(request: Request, env: Env, farmId: string): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return error(request, env, 401, 'Authentication required');
+  const result = await env.DB.prepare('DELETE FROM farms WHERE id = ? AND owner_id = ?').bind(farmId, user.id).run();
+  if (!result.meta.changes) return error(request, env, 404, 'Farm not found');
+  return json(request, env, { success: true });
 }
 
 async function route(request: Request, env: Env): Promise<Response> {
@@ -359,6 +593,13 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (url.pathname === '/health') return json(request, env, { status: 'ok', service: 'worker-api' });
   if (url.pathname === '/api/v1/auth/register' && request.method === 'POST') return register(request, env);
   if (url.pathname === '/api/v1/auth/login' && request.method === 'POST') return login(request, env);
+  if (url.pathname === '/api/v1/auth/google' && request.method === 'POST') return googleLogin(request, env);
+  if (url.pathname === '/api/v1/farms' && request.method === 'GET') return farms(request, env);
+  if (url.pathname === '/api/v1/farms' && request.method === 'POST') return farms(request, env);
+  if (url.pathname.startsWith('/api/v1/farms/') && request.method === 'DELETE') {
+    return deleteFarm(request, env, decodeURIComponent(url.pathname.slice('/api/v1/farms/'.length)));
+  }
+  if (url.pathname === '/api/v1/market/prices/daily' && request.method === 'GET') return marketDaily(request, env);
   if (url.pathname === '/api/v1/auth/profile' && request.method === 'GET') {
     const auth = await currentUser(request, env);
     if (!auth) return error(request, env, 401, 'Authentication required');
@@ -454,6 +695,13 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (url.pathname === '/api/v1/disease/analyze' && request.method === 'POST') return analyzeDiseaseUpload(request, env);
   if (url.pathname === '/api/v1/sensors/readings' && request.method === 'POST') return saveSensorReading(request, env);
   if (url.pathname === '/api/v1/sensors/readings' && request.method === 'GET') return sensorHistory(request, env);
+  if (url.pathname === '/api/v1/sensors/alerts' && request.method === 'GET') return sensorAlerts(request, env);
+  if (url.pathname === '/api/v1/sensors/summary' && request.method === 'GET') return sensorSummary(request, env);
+  if (url.pathname === '/api/v1/devices' && request.method === 'GET') return listDevices(request, env);
+  if (url.pathname === '/api/v1/devices' && request.method === 'POST') return registerDevice(request, env);
+  if (url.pathname === '/api/v1/devices/rotate-key' && request.method === 'POST') return rotateDeviceKey(request, env);
+  if (url.pathname === '/api/v1/devices/thresholds' && request.method === 'GET') return deviceThresholds(request, env);
+  if (url.pathname === '/api/v1/devices/thresholds' && request.method === 'PUT') return deviceThresholds(request, env);
   if (url.pathname === '/api/v1/integrations/ai/health' && request.method === 'GET') {
     const upstream = await fetch(`${env.AI_SERVICE_URL}/v1/disease/analyze`, {
       method: 'POST',

@@ -6,7 +6,7 @@ export function corsHeaders(request: Request, env: Env): HeadersInit {
   return {
     'Access-Control-Allow-Origin': allowed.includes(origin) ? origin : allowed[0] ?? '',
     'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Device-Key',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Vary': 'Origin',
   };
