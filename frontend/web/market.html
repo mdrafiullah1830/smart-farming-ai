@@ -7,9 +7,7 @@
 <link rel="preload" href="assets/fonts/noto-sans-bengali-bn.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--primary:#16a34a;--primary-dark:#15803d;--primary-light:#22c55e;--primary-50:#f0fdf4;--primary-100:#dcfce7;--primary-glow:rgba(34,197,94,.15);--accent:#f59e0b;--accent-dark:#d97706;--accent-glow:rgba(245,158,11,.15);--error:#ef4444;--error-light:#fef2f2;--info:#3b82f6;--info-light:#eff6ff;--purple:#8b5cf6;--purple-light:#a78bfa;--bg:#f0f4f8;--surface:#ffffff;--surface-hover:#f1f5f9;--text:#0f172a;--text-secondary:#64748b;--text-hint:#94a3b8;--border:#e2e8f0;--border-light:#f1f5f9;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.08);--shadow-lg:0 12px 24px rgba(0,0,0,.1);--shadow-xl:0 20px 40px rgba(0,0,0,.12);--radius:14px;--radius-lg:18px;--radius-xl:24px;--radius-2xl:28px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -638,6 +636,7 @@ function switchMainTab(tab,el){
 
 // ==================== CHART ====================
 function initChart(){
+  if(typeof Chart === 'undefined'){setTimeout(initChart,200);return}
   if(priceChart) return;
   var ctx = document.getElementById('priceChart').getContext('2d');
   var data = generateChartData('rice_boro','7d');
@@ -849,6 +848,8 @@ function toggleAlertPanel(){switchMainTab('alerts',document.querySelectorAll('.m
   document.getElementById('lastUpdate').title = apiPrices ? 'সরকারি ডাটা (DAM/BBS/FAO) থেকে আহরিত' : 'অফলাইন ডাটা ব্যবহৃত';
 })();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script src="assets/icons.js" defer></script>
 </body>
 </html>
