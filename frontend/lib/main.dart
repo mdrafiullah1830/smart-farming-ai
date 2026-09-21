@@ -9,6 +9,7 @@ import 'providers/disease_provider.dart';
 import 'providers/market_provider.dart';
 import 'providers/farm_provider.dart';
 import 'providers/notification_provider.dart';
+import 'providers/auth_provider.dart';
 import 'features/splash/splash_screen.dart';
 
 void main() async {
@@ -34,6 +35,7 @@ class SmartFarmingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => WeatherProvider()),
         ChangeNotifierProvider(create: (_) => CropProvider()),
         ChangeNotifierProvider(create: (_) => DiseaseProvider()),

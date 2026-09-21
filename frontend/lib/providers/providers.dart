@@ -8,19 +8,23 @@ class WeatherProvider extends ChangeNotifier {
   List<WeatherData> _forecast = [];
   Map<String, dynamic>? _riskData;
   bool _isLoading = false;
+  String? _errorMessage;
 
   WeatherData? get currentWeather => _currentWeather;
   List<WeatherData> get forecast => _forecast;
   Map<String, dynamic>? get riskData => _riskData;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   Future<void> loadWeather(String districtId) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       final response = await _api.getDistrictWeather(districtId);
       _currentWeather = WeatherData.fromJson(response);
     } catch (e) {
+      _errorMessage = 'আবহাওয়া তথ্য লোড করতে ব্যর্থ: $e';
       debugPrint('Weather error: $e');
     }
     _isLoading = false;
@@ -28,23 +32,32 @@ class WeatherProvider extends ChangeNotifier {
   }
 
   Future<void> loadForecast(String districtId) async {
+    _errorMessage = null;
     try {
       final response = await _api.getWeatherForecast(districtId);
       _forecast = (response['forecasts'] as List)
           .map((f) => WeatherData.fromJson(f))
           .toList();
     } catch (e) {
+      _errorMessage = 'পূর্বাভাস লোড করতে ব্যর্থ: $e';
       debugPrint('Forecast error: $e');
     }
     notifyListeners();
   }
 
   Future<void> loadRisk(String districtId) async {
+    _errorMessage = null;
     try {
       _riskData = await _api.getWeatherRisk(districtId);
     } catch (e) {
+      _errorMessage = 'ঝুঁকি তথ্য লোড করতে ব্যর্থ: $e';
       debugPrint('Risk error: $e');
     }
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 }
@@ -54,18 +67,22 @@ class CropProvider extends ChangeNotifier {
   List<CropRecommendation> _recommendations = [];
   List<Map<String, dynamic>> _crops = [];
   bool _isLoading = false;
+  String? _errorMessage;
 
   List<CropRecommendation> get recommendations => _recommendations;
   List<Map<String, dynamic>> get crops => _crops;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   Future<void> loadCrops() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       final response = await _api.listCrops();
       _crops = List<Map<String, dynamic>>.from(response['crops'] ?? []);
     } catch (e) {
+      _errorMessage = 'ফসল তথ্য লোড করতে ব্যর্থ: $e';
       debugPrint('Crops error: $e');
     }
     _isLoading = false;
@@ -74,6 +91,7 @@ class CropProvider extends ChangeNotifier {
 
   Future<void> recommendCrops(Map<String, dynamic> data) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       final response = await _api.recommendCrops(data);
@@ -81,9 +99,15 @@ class CropProvider extends ChangeNotifier {
           .map((r) => CropRecommendation.fromJson(r))
           .toList();
     } catch (e) {
+      _errorMessage = 'সুপারিশ লোড করতে ব্যর্থ: $e';
       debugPrint('Recommend error: $e');
     }
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 }
@@ -92,18 +116,22 @@ class DiseaseProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
   DiseaseDetectionResult? _result;
   bool _isLoading = false;
+  String? _errorMessage;
 
   DiseaseDetectionResult? get result => _result;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   Future<void> detectDisease(String imagePath) async {
     _isLoading = true;
     _result = null;
+    _errorMessage = null;
     notifyListeners();
     try {
       final response = await _api.detectDisease(imagePath);
       _result = DiseaseDetectionResult.fromJson(response);
     } catch (e) {
+      _errorMessage = 'রোগ সনাক্তকরণে ব্যর্থ: $e';
       debugPrint('Disease error: $e');
     }
     _isLoading = false;
@@ -114,25 +142,39 @@ class DiseaseProvider extends ChangeNotifier {
     _result = null;
     notifyListeners();
   }
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
 }
 
 class MarketProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
   Map<String, dynamic>? _analysis;
   bool _isLoading = false;
+  String? _errorMessage;
 
   Map<String, dynamic>? get analysis => _analysis;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   Future<void> loadAnalysis(String districtId) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       _analysis = await _api.getMarketAnalysis(districtId);
     } catch (e) {
+      _errorMessage = 'বাজার তথ্য লোড করতে ব্যর্থ: $e';
       debugPrint('Market error: $e');
     }
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 }
@@ -141,12 +183,15 @@ class FarmProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
   List<Farm> _farms = [];
   bool _isLoading = false;
+  String? _errorMessage;
 
   List<Farm> get farms => _farms;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   Future<void> loadFarms() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       final response = await _api.listFarms();
@@ -154,6 +199,7 @@ class FarmProvider extends ChangeNotifier {
           .map((f) => Farm.fromJson(f))
           .toList();
     } catch (e) {
+      _errorMessage = 'খামার তথ্য লোড করতে ব্যর্থ: $e';
       debugPrint('Farms error: $e');
     }
     _isLoading = false;
@@ -162,17 +208,24 @@ class FarmProvider extends ChangeNotifier {
 
   Future<bool> createFarm(Map<String, dynamic> data) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       await _api.createFarm(data);
       await loadFarms();
       return true;
     } catch (e) {
+      _errorMessage = 'খামার তৈরি করতে ব্যর্থ: $e';
       debugPrint('Create farm error: $e');
       _isLoading = false;
       notifyListeners();
       return false;
     }
+  }
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 }
 
@@ -181,13 +234,16 @@ class NotificationProvider extends ChangeNotifier {
   List<AppNotification> _notifications = [];
   int _unreadCount = 0;
   bool _isLoading = false;
+  String? _errorMessage;
 
   List<AppNotification> get notifications => _notifications;
   int get unreadCount => _unreadCount;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   Future<void> loadNotifications() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       final response = await _api.getNotifications();
@@ -196,9 +252,15 @@ class NotificationProvider extends ChangeNotifier {
           .toList();
       _unreadCount = await _api.getUnreadCount();
     } catch (e) {
+      _errorMessage = 'বিজ্ঞপ্তি লোড করতে ব্যর্থ: $e';
       debugPrint('Notifications error: $e');
     }
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 }

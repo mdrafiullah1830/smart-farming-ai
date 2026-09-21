@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/disease_provider.dart';
 
 class DiseaseScreen extends StatefulWidget {
   const DiseaseScreen({super.key});
@@ -13,39 +15,16 @@ class DiseaseScreen extends StatefulWidget {
 
 class _DiseaseScreenState extends State<DiseaseScreen> {
   XFile? _image;
-  bool _isLoading = false;
-  Map<String, dynamic>? _result;
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage(ImageSource source) async {
     final XFile? pickedFile = await _picker.pickImage(source: source, maxWidth: 1024, maxHeight: 1024, imageQuality: 85);
     if (pickedFile != null) {
-      setState(() {
-        _image = pickedFile;
-        _result = null;
-      });
-      _detectDisease();
+      setState(() => _image = pickedFile);
+      if (mounted) {
+        context.read<DiseaseProvider>().detectDisease(pickedFile.path);
+      }
     }
-  }
-
-  Future<void> _detectDisease() async {
-    if (_image == null) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 3));
-    setState(() {
-      _isLoading = false;
-      _result = {
-        'disease_name_bn': 'ধানের ব্লাস্ট রোগ',
-        'confidence': 0.87,
-        'severity': 'high',
-        'description_bn': 'পাতায় হীরার আকৃতির দাগ সৃষ্টিকারী ছত্রাক রোগ',
-        'treatment': [
-          {'name_bn': 'ট্রাইসাইক্লাজোল', 'dosage': '75WP @ 600g/হেক্টর'},
-          {'name_bn': 'আইসোপ্রোথায়োলেন', 'dosage': '40EC @ 1.5L/হেক্টর'},
-        ],
-        'prevention_bn': ['প্রতিরোধী জাত ব্যবহার করুন', 'অতিরিক্ত নাইট্রোজেন এড়িয়ে চলুন', 'যথাযথ জল ব্যবস্থাপনা বজায় রাখুন'],
-      };
-    });
   }
 
   @override
@@ -109,79 +88,106 @@ class _DiseaseScreenState extends State<DiseaseScreen> {
                 ),
               ),
             ),
-            if (_isLoading) ...[
-              const SizedBox(height: 24),
-              const Center(child: CircularProgressIndicator()),
-              const SizedBox(height: 8),
-              Center(child: Text('রোগ বিশ্লেষণ করা হচ্ছে...', style: GoogleFonts.notoSansBengali())),
-            ],
-            if (_result != null) ...[
-              const SizedBox(height: 24),
-              _buildResult(),
-            ],
+            Consumer<DiseaseProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 24),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 8),
+                          Text('রোগ বিশ্লেষণ করা হচ্ছে...'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                if (provider.errorMessage != null) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: Card(
+                      color: Colors.red[50],
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.red),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('ত্রুটি', style: GoogleFonts.notoSansBengali(fontWeight: FontWeight.bold, color: Colors.red)),
+                                  Text(provider.errorMessage!, style: GoogleFonts.notoSansBengali()),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => provider.clearError(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                if (provider.result != null) {
+                  return _buildResult(provider.result!);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildResult() {
+  Widget _buildResult(dynamic result) {
     final severityColors = {'low': Colors.green, 'medium': Colors.orange, 'high': Colors.red, 'critical': Colors.red[900]};
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.bug_report, color: severityColors[_result!['severity']], size: 32),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(_result!['disease_name_bn'], style: GoogleFonts.notoSansBengali(fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text('আত্মবিশ্বাস: ${(_result!['confidence'] * 100).toStringAsFixed(0)}%', style: GoogleFonts.notoSansBengali()),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: severityColors[_result!['severity']]!.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _result!['severity'] == 'high' ? 'গুরুতর' : 'মাঝারি',
-                    style: TextStyle(color: severityColors[_result!['severity']], fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(),
-            Text('বিবরণ', style: GoogleFonts.notoSansBengali(fontWeight: FontWeight.bold)),
-            Text(_result!['description_bn'], style: GoogleFonts.notoSansBengali()),
-            const SizedBox(height: 16),
-            Text('চিকিৎসা', style: GoogleFonts.notoSansBengali(fontWeight: FontWeight.bold)),
-            ...(_result!['treatment'] as List).map((t) => ListTile(
-              leading: const Icon(Icons.medication, color: AppTheme.primaryColor),
-              title: Text(t['name_bn'], style: GoogleFonts.notoSansBengali()),
-              subtitle: Text(t['dosage'], style: GoogleFonts.notoSansBengali(fontSize: 12)),
-            )),
-            const SizedBox(height: 16),
-            Text('প্রতিরোধ', style: GoogleFonts.notoSansBengali(fontWeight: FontWeight.bold)),
-            ...(_result!['prevention_bn'] as List).map((p) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
+    final severity = result.severity ?? 'low';
+    final confidence = result.confidence ?? 0.0;
+    final diseaseName = result.diseaseNameBn ?? result.diseaseNameEn ?? 'অজানা রোগ';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  const Icon(Icons.check_circle, color: AppTheme.successColor, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(p, style: GoogleFonts.notoSansBengali())),
+                  Icon(Icons.bug_report, color: severityColors[severity], size: 32),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(diseaseName, style: GoogleFonts.notoSansBengali(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('আত্মবিশ্বাস: ${(confidence * 100).toStringAsFixed(0)}%', style: GoogleFonts.notoSansBengali()),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: (severityColors[severity] ?? Colors.grey)!.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      severity == 'high' ? 'গুরুতর' : severity == 'medium' ? 'মাঝারি' : 'সামান্য',
+                      style: TextStyle(color: severityColors[severity], fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
               ),
-            )),
-          ],
+            ],
+          ),
         ),
       ),
     );

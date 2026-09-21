@@ -76,7 +76,8 @@ export async function marketDailyRoute(request: Request, env: Env): Promise<Resp
     const result = await statement.all();
     return json(request, env, { success: true, rows: result.results });
   } catch (cause) {
-    return error(request, env, 502, `market daily table unavailable: ${(cause as Error).message}`);
+    console.error('market_daily_error', cause);
+    return error(request, env, 502, 'Market daily data unavailable');
   }
 }
 
@@ -95,7 +96,8 @@ export async function marketLiveRoute(request: Request, env: Env): Promise<Respo
     const rows = htmlTableRows(await fetchText("https://market.dam.gov.bd/?L=E"));
     return json(request, env, { success: true, source: "DAM", rows });
   } catch (cause) {
-    return error(request, env, 502, `DAM price fetch failed: ${(cause as Error).message}`);
+    console.error('market_live_error', cause);
+    return error(request, env, 502, 'DAM price fetch failed');
   }
 }
 
@@ -104,7 +106,8 @@ export async function marketUpazilaRoute(request: Request, env: Env): Promise<Re
     const rows = htmlTableRows(await fetchText("https://market.dam.gov.bd/subdistrict_retail_price_report"));
     return json(request, env, { success: true, source: "DAM", rows });
   } catch (cause) {
-    return error(request, env, 502, `DAM upazila price fetch failed: ${(cause as Error).message}`);
+    console.error('market_upazila_error', cause);
+    return error(request, env, 502, 'DAM upazila price fetch failed');
   }
 }
 
@@ -135,7 +138,8 @@ export async function cropCalendarRoute(request: Request, env: Env): Promise<Res
     if (region) rows = (rows as { region: string }[]).filter((r) => r.region === region);
     return json(request, env, { success: true, source: "github-fallback", rows });
   } catch (cause) {
-    return error(request, env, 502, `crop calendar unavailable: ${(cause as Error).message}`);
+    console.error('crop_calendar_error', cause);
+    return error(request, env, 502, 'Crop calendar unavailable');
   }
 }
 
@@ -165,7 +169,8 @@ export async function fertilizerRoute(request: Request, env: Env): Promise<Respo
       .filter((r) => !soilType || r.soil_type === soilType);
     return json(request, env, { success: true, source: "github-fallback", rows: out });
   } catch (cause) {
-    return error(request, env, 502, `fertilizer table unavailable: ${(cause as Error).message}`);
+    console.error('fertilizer_error', cause);
+    return error(request, env, 502, 'Fertilizer data unavailable');
   }
 }
 
@@ -188,7 +193,8 @@ export async function groundwaterRoute(request: Request, env: Env): Promise<Resp
       .filter((r) => !district || String(r.district).toLowerCase() === district.toLowerCase());
     return json(request, env, { success: true, source: "github-fallback", rows: out });
   } catch (cause) {
-    return error(request, env, 502, `groundwater fetch failed: ${(cause as Error).message}`);
+    console.error('groundwater_error', cause);
+    return error(request, env, 502, 'Groundwater data unavailable');
   }
 }
 
@@ -203,6 +209,7 @@ export async function disasterAlertsRoute(request: Request, env: Env): Promise<R
     }));
     return json(request, env, { success: true, source: "BMD CAP RSS", alerts });
   } catch (cause) {
-    return error(request, env, 502, `BMD alert fetch failed: ${(cause as Error).message}`);
+    console.error('disaster_alert_error', cause);
+    return error(request, env, 502, 'Disaster alerts unavailable');
   }
 }

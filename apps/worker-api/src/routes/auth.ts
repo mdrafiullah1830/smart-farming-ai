@@ -1,6 +1,6 @@
 import type { Env } from '../types.ts';
 import { corsHeaders, json, error } from '../http.ts';
-import { createToken, currentUser, hashPassword, verifyPassword } from '../auth.ts';
+import { createToken, createRefreshToken, verifyRefreshToken, currentUser, hashPassword, verifyPassword, validatePassword, checkBruteForce, recordFailedLogin, resetFailedLogins, revokeToken, verifyGoogleJWT } from '../auth.ts';
 
 type UserRow = { id: string; email: string; name: string; password_hash: string; phone?: string | null; language?: string | null };
 
@@ -15,17 +15,22 @@ export async function registerRoute(request: Request, env: Env): Promise<Respons
   const name = (data?.name ?? data?.name_en)?.trim();
   const email = data?.email?.trim().toLowerCase();
   const password = data?.password ?? '';
-  if (!name || !email || !EMAIL_RE.test(email) || password.length < 8) {
-    return error(request, env, 400, 'Name, valid email and an 8-character password are required');
+  if (!name || !email || !EMAIL_RE.test(email)) {
+    return error(request, env, 400, 'Name and valid email are required');
   }
+  const pwCheck = validatePassword(password);
+  if (!pwCheck.valid) return error(request, env, 400, pwCheck.error!);
   const existing = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
   if (existing) return error(request, env, 409, 'Email is already registered');
   const id = crypto.randomUUID();
   await env.DB.prepare('INSERT INTO users (id, name, email, password_hash, phone, language) VALUES (?, ?, ?, ?, ?, ?)')
     .bind(id, name, email, await hashPassword(password), data?.phone?.trim() ?? '', data?.language === 'en' ? 'en' : 'bn').run();
+  const token = await createToken({ id, email }, env.JWT_SECRET);
+  const refreshToken = await createRefreshToken(id, env.JWT_SECRET);
   return json(request, env, {
     success: true,
-    token: await createToken({ id, email }, env.JWT_SECRET),
+    token,
+    refresh_token: refreshToken,
     user: { id, name, name_en: name, name_bn: data?.name_bn?.trim() || name, email, phone: data?.phone?.trim() ?? '' },
   }, 201);
 }
@@ -34,16 +39,59 @@ export async function loginRoute(request: Request, env: Env): Promise<Response> 
   const data = await body<{ email?: string; password?: string }>(request);
   const email = data?.email?.trim().toLowerCase();
   if (!email || !data?.password) return error(request, env, 400, 'Email and password are required');
+
+  // Brute-force protection
+  const bf = await checkBruteForce(email, env);
+  if (!bf.allowed) return error(request, env, 429, 'Too many login attempts. Try again in 15 minutes.');
+
   const user = await env.DB.prepare('SELECT id, name, email, password_hash, phone, language FROM users WHERE email = ? AND is_active = 1')
     .bind(email).first<UserRow>();
   if (!user || !(await verifyPassword(data.password, user.password_hash))) {
+    await recordFailedLogin(email, env);
     return error(request, env, 401, 'Invalid email or password');
   }
+  await resetFailedLogins(email, env);
+  const token = await createToken({ id: user.id, email: user.email }, env.JWT_SECRET);
+  const refreshToken = await createRefreshToken(user.id, env.JWT_SECRET);
   return json(request, env, {
     success: true,
-    token: await createToken({ id: user.id, email: user.email }, env.JWT_SECRET),
+    token,
+    refresh_token: refreshToken,
     user: { id: user.id, name: user.name, name_en: user.name, name_bn: user.name, email: user.email, phone: user.phone ?? '', language: user.language ?? 'bn' },
   });
+}
+
+export async function refreshRoute(request: Request, env: Env): Promise<Response> {
+  const data = await body<{ refresh_token?: string }>(request);
+  if (!data?.refresh_token) return error(request, env, 400, 'refresh_token is required');
+  const payload = await verifyRefreshToken(data.refresh_token, env.JWT_SECRET);
+  if (!payload) return error(request, env, 401, 'Invalid or expired refresh token');
+
+  const user = await env.DB.prepare('SELECT id, name, email, phone, language FROM users WHERE id = ? AND is_active = 1')
+    .bind(payload.sub).first<UserRow>();
+  if (!user) return error(request, env, 401, 'User not found');
+
+  // Revoke old refresh token (rotate)
+  await revokeToken(data.refresh_token, env);
+
+  const token = await createToken({ id: user.id, email: user.email }, env.JWT_SECRET);
+  const refreshToken = await createRefreshToken(user.id, env.JWT_SECRET);
+  return json(request, env, {
+    success: true,
+    token,
+    refresh_token: refreshToken,
+  });
+}
+
+export async function logoutRoute(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return error(request, env, 401, 'Authentication required');
+  const data = await body<{ refresh_token?: string; access_token?: string }>(request);
+  if (data?.refresh_token) await revokeToken(data.refresh_token, env);
+  // Also revoke the current access token
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) await revokeToken(authHeader.slice(7), env);
+  return json(request, env, { success: true, message: 'Logged out successfully' });
 }
 
 export async function googleLoginRoute(request: Request, env: Env): Promise<Response> {
@@ -52,21 +100,12 @@ export async function googleLoginRoute(request: Request, env: Env): Promise<Resp
   if (!credential) return error(request, env, 400, 'credential is required');
   if (!env.GOOGLE_CLIENT_ID) return error(request, env, 503, 'Google sign-in is not configured');
 
-  let claims: { sub?: string; email?: string; name?: string; aud?: string; exp?: number; iss?: string };
-  try {
-    claims = decodeGoogleIdToken(credential);
-  } catch {
-    return error(request, env, 401, 'Malformed Google credential');
-  }
+  // Verify Google JWT signature properly
+  const claims = await verifyGoogleJWT(credential, env.GOOGLE_CLIENT_ID);
+  if (!claims) return error(request, env, 401, 'Invalid Google credential');
 
-  if (claims.aud !== env.GOOGLE_CLIENT_ID) return error(request, env, 401, 'Google credential audience mismatch');
-  if (claims.iss !== 'https://accounts.google.com' && claims.iss !== 'accounts.google.com') {
-    return error(request, env, 401, 'Google credential issuer mismatch');
-  }
-  if (!claims.exp || claims.exp <= Math.floor(Date.now() / 1000)) return error(request, env, 401, 'Google credential has expired');
   const sub = claims.sub;
-  const email = claims.email?.trim().toLowerCase();
-  if (!sub || !email) return error(request, env, 401, 'Google credential is missing sub or email');
+  const email = claims.email.trim().toLowerCase();
 
   type User = { id: string; name: string; email: string; phone: string | null; language: string | null };
 
@@ -91,9 +130,12 @@ export async function googleLoginRoute(request: Request, env: Env): Promise<Resp
     user = { id, name, email, phone: '', language: 'bn' };
   }
 
+  const token = await createToken({ id: user.id, email: user.email }, env.JWT_SECRET);
+  const refreshToken = await createRefreshToken(user.id, env.JWT_SECRET);
   return json(request, env, {
     success: true,
-    token: await createToken({ id: user.id, email: user.email }, env.JWT_SECRET),
+    token,
+    refresh_token: refreshToken,
     user: { id: user.id, name: user.name, name_en: user.name, name_bn: user.name, email: user.email, phone: user.phone ?? '', language: user.language ?? 'bn' },
   });
 }
@@ -104,18 +146,4 @@ export async function profileRoute(request: Request, env: Env): Promise<Response
   const user = await env.DB.prepare('SELECT id, name, email, phone, language, created_at FROM users WHERE id = ? AND is_active = 1')
     .bind(auth.id).first();
   return user ? json(request, env, { ...user, name_en: user.name, name_bn: user.name }) : error(request, env, 404, 'User not found');
-}
-
-function decodeGoogleIdToken(token: string): { sub?: string; email?: string; name?: string; aud?: string; exp?: number; iss?: string } {
-  const parts = token.split('.');
-  if (parts.length !== 3 || !parts[2]) throw new Error('not a signed JWT');
-
-  // SECURITY: This only decodes the payload without verifying the signature.
-  // In production, verify against Google's JWKS endpoint:
-  // https://www.googleapis.com/oauth2/v3/certs
-  // Use a library like `jose` for proper JWT verification.
-  // TODO: Replace with proper signature verification before production use.
-  const normalized = parts[1].replaceAll('-', '+').replaceAll('_', '/');
-  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
-  return JSON.parse(atob(padded));
 }

@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """Smart Farming AI - FastAPI Backend with SQLite database."""
 import json
+import logging
 import os
+import re
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'database', 'smart_farming.db')
 
 ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")).split(",")
+APP_ENV = os.getenv("APP_ENV", "production").lower()
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Smart Farming AI", version="1.0.0", description="AI-powered agriculture platform for Bangladesh")
 
@@ -46,6 +52,24 @@ class UserRegister(BaseModel):
     upazila: str = ""
     division: str = ""
 
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        if len(v) > 128:
+            raise ValueError('Password must be at most 128 characters')
+        if not re.search(r'[a-z]', v) or not re.search(r'[A-Z]', v) or not re.search(r'\d', v):
+            raise ValueError('Password must contain uppercase, lowercase, and a digit')
+        return v
+
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', v):
+            raise ValueError('Invalid email format')
+        return v.lower().strip()
+
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -68,9 +92,11 @@ class ChatMessage(BaseModel):
 
 # ==================== AUTH HELPERS ====================
 SECRET = os.getenv("SECRET_KEY", "")
-if not SECRET and os.getenv("APP_ENV", "production").lower() == "production":
-    raise RuntimeError("SECRET_KEY must be configured in production")
-SECRET = SECRET or "local-development-only-change-me"
+if not SECRET:
+    if APP_ENV == "production":
+        raise RuntimeError("SECRET_KEY must be configured in production")
+    SECRET = "local-development-only-change-me"
+    logger.warning("Using hardcoded SECRET_KEY - set SECRET_KEY env var for production")
 
 def hash_password(pw: str) -> str:
     return bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()
@@ -82,8 +108,11 @@ def create_token(user_id: int, email: str) -> str:
     import jwt
     return jwt.encode({"id": user_id, "email": email, "exp": datetime.now(timezone.utc) + timedelta(days=7), "iat": datetime.now(timezone.utc)}, SECRET, algorithm="HS256")
 
-def get_current_user(token: str):
+def get_current_user(authorization: str = Header(default="")):
     import jwt
+    token = authorization.replace("Bearer ", "") if authorization.startswith("Bearer ") else ""
+    if not token:
+        return None
     try:
         data = jwt.decode(token, SECRET, algorithms=["HS256"])
         return data
@@ -112,17 +141,15 @@ def register(user: UserRegister):
 def login(user: UserLogin):
     with get_db() as db:
         row = db.execute("SELECT * FROM users WHERE email = ?", (user.email,)).fetchone()
-        if not row:
-            raise HTTPException(401, "User not found")
-        if not verify_password(user.password, row["password_hash"]):
-            raise HTTPException(401, "Invalid password")
+        if not row or not verify_password(user.password, row["password_hash"]):
+            logger.info(f"Failed login attempt for email: {user.email[:3]}***")
+            raise HTTPException(401, "Invalid email or password")
         token = create_token(row["id"], row["email"])
         return {"success": True, "token": token, "user": {"id": row["id"], "name_en": row["name_en"], "email": row["email"]}}
 
 @app.get("/api/v1/auth/profile")
-def get_profile(authorization: str = Query(default="")):
-    token = authorization.replace("Bearer ", "")
-    user = get_current_user(token)
+def get_profile(authorization: str = Header(default="")):
+    user = get_current_user(authorization)
     if not user:
         raise HTTPException(401, "Unauthorized")
     with get_db() as db:
@@ -232,10 +259,9 @@ def market_price(crop: str):
 
 # ==================== DISEASE ====================
 @app.post("/api/v1/disease/detect")
-def detect_disease(report: DiseaseReport, authorization: str = Query(default="")):
+def detect_disease(report: DiseaseReport, authorization: str = Header(default="")):
     with get_db() as db:
-        token = authorization.replace("Bearer ", "")
-        user = get_current_user(token)
+        user = get_current_user(authorization)
         farmer_id = user["id"] if user else None
         try:
             db.execute(
@@ -249,7 +275,7 @@ def detect_disease(report: DiseaseReport, authorization: str = Query(default="")
 
 # ==================== CHATBOT ====================
 @app.post("/api/v1/chatbot/chat")
-def chat(msg: ChatMessage, authorization: str = Query(default="")):
+def chat(msg: ChatMessage, authorization: str = Header(default="")):
     responses = {
         "bn": {
             "ধান": "ধান বাংলাদেশের সবচেয়ে গুরুত্বপূর্ণ ফসল। BRRI Dhan 28 ও 50 জাত বেশি জনপ্রিয়।",
@@ -321,9 +347,13 @@ def get_stats():
 # ==================== HEALTH ====================
 @app.get("/api/v1/health")
 def health():
-    with get_db() as db:
-        db.execute("SELECT 1")
-    return {"status": "healthy", "database": "connected", "timestamp": datetime.now(timezone.utc).isoformat()}
+    try:
+        with get_db() as db:
+            db.execute("SELECT 1")
+        return {"status": "healthy", "database": "connected", "timestamp": datetime.now(timezone.utc).isoformat()}
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        raise HTTPException(503, "Service unavailable")
 
 if __name__ == "__main__":
     import uvicorn

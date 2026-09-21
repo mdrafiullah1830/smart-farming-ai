@@ -3,8 +3,11 @@ import type { Env } from './types.ts';
 export function corsHeaders(request: Request, env: Env): HeadersInit {
   const origin = request.headers.get('Origin') ?? '';
   const allowed = env.ALLOWED_ORIGINS.split(',').map((value) => value.trim());
+  if (!origin || !allowed.includes(origin)) {
+    return { 'Vary': 'Origin' };
+  }
   return {
-    'Access-Control-Allow-Origin': allowed.includes(origin) ? origin : '',
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Device-Key',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -28,8 +31,8 @@ export function addSecurityHeaders(response: Response): Response {
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   headers.set('Content-Security-Policy', 
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; " +
+    "script-src 'self' https://cdn.jsdelivr.net https://unpkg.com; " +
+    "style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net; " +
     "font-src 'self' https://fonts.gstatic.com; " +
     "img-src 'self' data: https:; " +
     "connect-src 'self' https://api.open-meteo.com https://market.dam.gov.bd https://cap.bmd.gov.bd https://raw.githubusercontent.com; " +
@@ -79,9 +82,9 @@ export async function checkRateLimit(request: Request, env: Env, keyPrefix: stri
     
     return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - count, resetTime: currentWindowStart + RATE_LIMIT_WINDOW_MS };
   } catch (e) {
-    // If KV fails, allow request (fail open)
-    console.warn('Rate limit check failed:', e);
-    return null;
+    // If KV fails, block request (fail closed) to prevent abuse
+    console.error('Rate limit check failed, blocking request:', e);
+    return { allowed: false, remaining: 0, resetTime: Date.now() + RATE_LIMIT_WINDOW_MS };
   }
 }
 

@@ -51,8 +51,8 @@ export function rateLimit(config: Partial<RateLimitConfig> = {}) {
       const response = await next();
       return addRateLimitHeaders(response, { allowed: true, remaining: finalConfig.maxRequests - count, resetTime: currentWindowStart + finalConfig.windowMs });
     } catch (e) {
-      console.warn('Rate limit check failed:', e);
-      return next();
+      console.error('Rate limit check failed, blocking request:', e);
+      return error(request, env, 429, 'Service temporarily unavailable');
     }
   };
 }
