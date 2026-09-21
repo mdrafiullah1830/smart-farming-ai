@@ -638,82 +638,73 @@ function initChart(){
   if(typeof Chart === 'undefined'){setTimeout(initChart,200);return}
   if(priceChart) return;
   var ctx = document.getElementById('priceChart').getContext('2d');
-  var data = generateChartData('rice_boro','7d');
-  priceChart = new Chart(ctx,{
-    type:'line',
-    data:{
-      labels:data.labels,
-      datasets:[{
-        label:'দাম (৳/কেজি)',
-        data:data.prices,
-        borderColor:'#16a34a',
-        backgroundColor:'rgba(34,197,94,.1)',
-        borderWidth:2.5,
-        fill:true,
-        tension:.4,
-        pointBackgroundColor:'#16a34a',
-        pointBorderColor:'#fff',
-        pointBorderWidth:2,
-        pointRadius:4,
-        pointHoverRadius:6
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0f172a',titleFont:{size:13,weight:'600'},bodyFont:{size:12},padding:12,cornerRadius:10,displayColors:false,callbacks:{label:function(c){return c.parsed.y+' ৳/কেজি'}}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:11},maxRotation:0}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},callback:function(v){return v+'৳'}}}},
+  generateChartData('rice_boro','7d').then(function(data){
+    priceChart = new Chart(ctx,{
+      type:'line',
+      data:{
+        labels:data.labels,
+        datasets:[{
+          label:'দাম (৳/কেজি)',
+          data:data.prices,
+          borderColor:'#16a34a',
+          backgroundColor:'rgba(34,197,94,.1)',
+          borderWidth:2.5,
+          fill:true,
+          tension:.4,
+          pointBackgroundColor:'#16a34a',
+          pointBorderColor:'#fff',
+          pointBorderWidth:2,
+          pointRadius:4,
+          pointHoverRadius:6
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#0f172a',titleFont:{size:13,weight:'600'},bodyFont:{size:12},padding:12,cornerRadius:10,displayColors:false,callbacks:{label:function(c){return c.parsed.y+' ৳/কেজি'}}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:11},maxRotation:0}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},callback:function(v){return v+'৳'}}}},
       interaction:{intersect:false,mode:'index'}
     }
   });
   updateChartStats(data.prices);
-}
+  });
 function generateChartData(crop,period){
   var days = period==='7d'?7:period==='30d'?30:90;
   var labels=[],prices=[];
   var today = new Date();
-  // Try API first
-  var apiData = null;
-  try {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', API_BASE + '/api/market/history/' + crop + '?days=' + days, false);
-    xhr.send();
-    if (xhr.status === 200) {
-      var json = JSON.parse(xhr.responseText);
-      if (json.success && json.history) apiData = json.history;
-    }
-  } catch (e) {}
-
-  if (apiData && apiData.length > 0) {
-    apiData.forEach(function(h) {
-      labels.push(h.dateBn);
-      prices.push(h.avgPrice);
+  return fetch(API_BASE + '/api/market/history/' + crop + '?days=' + days)
+    .then(function(r){return r.ok?r.json():null})
+    .then(function(json){
+      if(json&&json.success&&json.history){
+        json.history.forEach(function(h){labels.push(h.dateBn);prices.push(h.avgPrice)});
+      }
+    }).catch(function(){})
+    .then(function(){
+      if(labels.length===0){
+        var base = 55;
+        if(crop==='chili_green') base=220;else if(crop==='onion_local') base=60;else if(crop==='egg_farm') base=45;
+        else if(crop==='chicken_farm') base=160;else if(crop==='garlic_local') base=180;else if(crop==='potato') base=35;
+        else if(crop==='rice_boro_fine') base=62;else if(crop==='rice_aman_fine') base=65;
+        else if(crop==='ginger_local') base=160;else if(crop==='moong_dal') base=125;else if(crop==='chickpea') base=100;
+        for(var i=days-1;i>=0;i--){
+          var d=new Date(today);d.setDate(d.getDate()-i);
+          labels.push((d.getDate())+'/'+(d.getMonth()+1));
+          var p = base + (Math.sin(i/7 + crop.length)*5) + (Math.cos(i/3)*3);
+          prices.push(Math.round(p));
+        }
+      }
+      return{labels:labels,prices:prices};
     });
-  } else {
-    // Offline fallback
-    var base = 55;
-    if(crop==='chili_green') base=220;else if(crop==='onion_local') base=60;else if(crop==='egg_farm') base=45;
-    else if(crop==='chicken_farm') base=160;else if(crop==='garlic_local') base=180;else if(crop==='potato') base=35;
-    else if(crop==='rice_boro_fine') base=62;else if(crop==='rice_aman_fine') base=65;
-    else if(crop==='ginger_local') base=160;else if(crop==='moong_dal') base=125;else if(crop==='chickpea') base=100;
-    for(var i=days-1;i>=0;i--){
-      var d=new Date(today);
-      d.setDate(d.getDate()-i);
-      labels.push((d.getDate())+'/'+(d.getMonth()+1));
-      var p = base + (Math.sin(i/7 + crop.length)*5) + (Math.cos(i/3)*3);
-      prices.push(Math.round(p));
-    }
-  }
-  return{labels:labels,prices:prices};
 }
 function updateChart(){
   var crop = document.getElementById('chartCropSelect').value;
   var period = document.querySelector('.chart-period.active').textContent.includes('৭')?'7d':document.querySelector('.chart-period.active').textContent.includes('৩০')?'30d':'90d';
-  var data = generateChartData(crop,period);
-  priceChart.data.labels=data.labels;
-  priceChart.data.datasets[0].data=data.prices;
-  priceChart.update();
-  updateChartStats(data.prices);
+  generateChartData(crop,period).then(function(data){
+    priceChart.data.labels=data.labels;
+    priceChart.data.datasets[0].data=data.prices;
+    priceChart.update();
+    updateChartStats(data.prices);
+  });
 }
 function setChartPeriod(period,el){
   document.querySelectorAll('.chart-period').forEach(function(p){p.classList.remove('active')});
