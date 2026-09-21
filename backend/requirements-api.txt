@@ -1,0 +1,9 @@
+# Backend API only — no ML training libraries
+# The full ML stack (tensorflow, torch, xgboost) lives in ai_models/requirements.txt
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+pydantic==2.6.1
+python-multipart==0.0.9
+bcrypt==4.1.2
+PyJWT==2.8.0
+sentry-sdk[fastapi]==1.40.5

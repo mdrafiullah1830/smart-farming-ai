@@ -34,5 +34,3 @@ services:
         value: production
       - key: CORS_ORIGINS
         value: https://smart-farming-ai.onrender.com,http://localhost:3000
-      - key: DATABASE_URL
-        value: sqlite:///./database/smart_farming.db
