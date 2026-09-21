@@ -1,11 +1,38 @@
 services:
+  # ─── AI Inference Service ────────────────────────────────────────────
   - type: web
-    name: smart-farming-ai
+    name: smart-farming-ai-service
     runtime: docker
     plan: free
     dockerfilePath: apps/ai-service/Dockerfile
     healthCheckPath: /health
+    healthCheckPolicy: strict
     autoDeployTrigger: commit
     envVars:
       - key: SERVICE_TOKEN
         sync: false
+      - key: APP_ENV
+        value: production
+      - key: MODEL_PATH
+        value: /app/models/disease_model.onnx
+      - key: PORT
+        value: 10000
+
+  # ─── Python Backend API ──────────────────────────────────────────────
+  - type: web
+    name: smart-farming-ai-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    healthCheckPath: /api/v1/health
+    healthCheckPolicy: strict
+    autoDeployTrigger: commit
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: APP_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: https://smart-farming-ai.onrender.com,http://localhost:3000
+      - key: DATABASE_URL
+        value: sqlite:///./database/smart_farming.db

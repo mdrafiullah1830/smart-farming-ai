@@ -6,14 +6,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+COPY apps/ai-service/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY app ./app
+# Copy application code
+COPY apps/ai-service/app ./app
+
 # Pre-exported ONNX artifacts (scripts/export_models_to_onnx.py). The health
 # endpoint reports any missing graph as `unavailable`, so a stale build still
 # serves the domains it has.
-COPY models ./models
+COPY apps/ai-service/models ./models
 
 EXPOSE 10000
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

@@ -48,12 +48,15 @@ database/.fuse_hidden*
 *.joblib
 *.h5
 *.hdf5
-*.onnx
 *.pt
 *.pth
 *.tflite
 ai_models/trained_models/*
 !ai_models/trained_models/.gitkeep
+
+# ONNX models - ignore in ai_models (regenerable) but track in ai-service (deployable)
+ai_models/**/*.onnx
+!apps/ai-service/models/*.onnx
 
 # Datasets (large; tracked selectively only)
 soil report/

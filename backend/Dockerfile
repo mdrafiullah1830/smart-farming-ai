@@ -5,17 +5,21 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
-    libgdal-dev \
-    gdal-bin \
-    libgeos-dev \
-    libproj-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+# Install Python dependencies
+COPY backend/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY . .
+# Copy backend code
+COPY backend/ /app/backend/
+
+# Copy database setup scripts
+COPY database/ /app/database/
+COPY scripts/ /app/scripts/
+
+WORKDIR /app/backend
 
 RUN mkdir -p /app/uploads/disease /app/uploads/voice
 
