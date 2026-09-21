@@ -9,9 +9,15 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
+import sentry_sdk
 from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
+
+# Sentry initialization
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.1, environment=os.getenv("APP_ENV", "production"))
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'database', 'smart_farming.db')
 
@@ -122,8 +128,16 @@ def get_current_user(authorization: str = Header(default="")):
         return None
 
 # ==================== AUTH ENDPOINTS ====================
-@app.post("/api/v1/auth/register")
+@app.post("/api/v1/auth/register", summary="Register a new user account", response_model=None)
 def register(user: UserRegister):
+    """Register a new user with email, password, and optional profile info.
+
+    - **name_en**: Required. User's name in English.
+    - **email**: Required. Valid email address.
+    - **password**: Required. Min 8 chars, must include uppercase, lowercase, digit.
+    - **phone**: Optional. Phone number.
+    - **district/upazila/division**: Optional location info.
+    """
     with get_db() as db:
         existing = db.execute("SELECT id FROM users WHERE email = ?", (user.email,)).fetchone()
         if existing:
@@ -137,8 +151,12 @@ def register(user: UserRegister):
         token = create_token(result.lastrowid, user.email)
         return {"success": True, "token": token, "user": {"id": result.lastrowid, "name_en": user.name_en, "email": user.email}}
 
-@app.post("/api/v1/auth/login")
+@app.post("/api/v1/auth/login", summary="Authenticate user and get access token")
 def login(user: UserLogin):
+    """Login with email and password.
+
+    Returns JWT access token valid for 7 days.
+    """
     with get_db() as db:
         row = db.execute("SELECT * FROM users WHERE email = ?", (user.email,)).fetchone()
         if not row or not verify_password(user.password, row["password_hash"]):
@@ -147,8 +165,9 @@ def login(user: UserLogin):
         token = create_token(row["id"], row["email"])
         return {"success": True, "token": token, "user": {"id": row["id"], "name_en": row["name_en"], "email": row["email"]}}
 
-@app.get("/api/v1/auth/profile")
+@app.get("/api/v1/auth/profile", summary="Get current user profile")
 def get_profile(authorization: str = Header(default="")):
+    """Get authenticated user's profile. Requires Bearer token in Authorization header."""
     user = get_current_user(authorization)
     if not user:
         raise HTTPException(401, "Unauthorized")
@@ -159,14 +178,16 @@ def get_profile(authorization: str = Header(default="")):
         return dict(row)
 
 # ==================== DISTRICTS ====================
-@app.get("/api/v1/districts")
+@app.get("/api/v1/districts", summary="List all Bangladesh districts")
 def list_districts():
+    """Get all 64 districts of Bangladesh with soil and climate data."""
     with get_db() as db:
         rows = db.execute("SELECT * FROM districts ORDER BY name").fetchall()
         return {"districts": [dict(r) for r in rows], "total": len(rows)}
 
-@app.get("/api/v1/districts/{name}")
+@app.get("/api/v1/districts/{name}", summary="Get district details by name")
 def get_district(name: str):
+    """Get a single district by English or Bangla name."""
     with get_db() as db:
         row = db.execute("SELECT * FROM districts WHERE name = ? OR name_bn = ?", (name, name)).fetchone()
         if not row:
@@ -174,14 +195,16 @@ def get_district(name: str):
         return dict(row)
 
 # ==================== SOIL (FROM XLSX) ====================
-@app.get("/api/v1/soil/categories")
+@app.get("/api/v1/soil/categories", summary="List soil data categories")
 def soil_categories():
+    """Get available soil data categories from Bangladesh soil survey reports."""
     with get_db() as db:
         rows = db.execute("SELECT DISTINCT category, COUNT(*) as records FROM soil_report_data GROUP BY category").fetchall()
         return {"categories": [dict(r) for r in rows]}
 
-@app.get("/api/v1/soil/data/{category}")
+@app.get("/api/v1/soil/data/{category}", summary="Get soil data by category")
 def soil_data(category: str, limit: int = Query(default=100, le=500)):
+    """Get soil analysis records for a specific category. Max 500 records."""
     with get_db() as db:
         rows = db.execute("SELECT * FROM soil_report_data WHERE category = ? LIMIT ?", (category, limit)).fetchall()
         return {"category": "soil", "subcategory": category, "records": [dict(r) for r in rows], "total": len(rows)}
@@ -221,8 +244,9 @@ def weather_by_district(district: str):
         }
 
 # ==================== CROP RECOMMENDATION ====================
-@app.post("/api/v1/crops/recommend")
+@app.post("/api/v1/crops/recommend", summary="Get crop recommendations for a location")
 def recommend_crops(req: CropRecommendRequest):
+    """Get recommended crops based on district soil type and major crops."""
     with get_db() as db:
         dist = db.execute("SELECT * FROM districts WHERE name = ?", (req.district,)).fetchone()
         if not dist:
@@ -243,14 +267,16 @@ def recommend_crops(req: CropRecommendRequest):
         return {"district": req.district, "upazila": req.upazila, "recommended_crops": crops, "soil_type": dist["soil_type"]}
 
 # ==================== MARKET ====================
-@app.get("/api/v1/market/prices")
+@app.get("/api/v1/market/prices", summary="Get all current market prices")
 def market_prices():
+    """Get current market prices for all tracked crops in Bangladesh."""
     with get_db() as db:
         rows = db.execute("SELECT * FROM market_prices ORDER BY crop_name").fetchall()
         return {"items": [dict(r) for r in rows], "total": len(rows)}
 
-@app.get("/api/v1/market/price/{crop}")
+@app.get("/api/v1/market/price/{crop}", summary="Get market price for a specific crop")
 def market_price(crop: str):
+    """Get current price for a specific crop by English or Bangla name."""
     with get_db() as db:
         row = db.execute("SELECT * FROM market_prices WHERE crop_name = ? OR crop_name_bn = ?", (crop, crop)).fetchone()
         if not row:
@@ -258,8 +284,9 @@ def market_price(crop: str):
         return dict(row)
 
 # ==================== DISEASE ====================
-@app.post("/api/v1/disease/detect")
+@app.post("/api/v1/disease/detect", summary="Report a detected plant disease")
 def detect_disease(report: DiseaseReport, authorization: str = Header(default="")):
+    """Log a disease detection result. Optionally attach to authenticated user."""
     with get_db() as db:
         user = get_current_user(authorization)
         farmer_id = user["id"] if user else None
@@ -274,8 +301,9 @@ def detect_disease(report: DiseaseReport, authorization: str = Header(default=""
         return {"success": True, "disease": report.disease_name, "confidence": report.confidence}
 
 # ==================== CHATBOT ====================
-@app.post("/api/v1/chatbot/chat")
+@app.post("/api/v1/chatbot/chat", summary="Chat with AI agriculture assistant")
 def chat(msg: ChatMessage, authorization: str = Header(default="")):
+    """Send a message to the agriculture chatbot. Supports Bangla and English."""
     responses = {
         "bn": {
             "ধান": "ধান বাংলাদেশের সবচেয়ে গুরুত্বপূর্ণ ফসল। BRRI Dhan 28 ও 50 জাত বেশি জনপ্রিয়।",
@@ -345,8 +373,9 @@ def get_stats():
         return stats
 
 # ==================== HEALTH ====================
-@app.get("/api/v1/health")
+@app.get("/api/v1/health", summary="Health check endpoint")
 def health():
+    """Verify API and database are healthy. Returns 503 if DB unreachable."""
     try:
         with get_db() as db:
             db.execute("SELECT 1")

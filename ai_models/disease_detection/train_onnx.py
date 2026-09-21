@@ -153,10 +153,29 @@ def build_model(num_classes=10):
 
 
 def train_model():
-    """Main training pipeline."""
+    """Main training pipeline with optional k-fold cross-validation."""
     df = load_dataset()
 
-    # Split data
+    # Cross-validation on full dataset
+    print("\n=== 3-Fold Cross-Validation ===")
+    from sklearn.model_selection import StratifiedKFold
+    skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+    cv_scores = []
+    for fold, (train_idx, val_idx) in enumerate(skf.split(df['image_path'], df['class_idx'])):
+        print(f"\nFold {fold + 1}/3")
+        train_cv = df.iloc[train_idx]
+        val_cv = df.iloc[val_idx]
+        train_ds_cv = create_tf_dataset(train_cv, BATCH_SIZE, shuffle=True, augment=True)
+        val_ds_cv = create_tf_dataset(val_cv, BATCH_SIZE, shuffle=False)
+        model_cv = build_model(len(CLASS_NAMES))
+        model_cv.fit(train_ds_cv, validation_data=val_ds_cv, epochs=10, verbose=0)
+        loss, acc = model_cv.evaluate(val_ds_cv, verbose=0)
+        cv_scores.append(acc)
+        print(f"  Fold {fold + 1} accuracy: {acc:.4f}")
+        del model_cv
+    print(f"\nCV Accuracy: {np.mean(cv_scores):.4f} ± {np.std(cv_scores):.4f}")
+
+    # Split data for final model
     train_df, temp_df = train_test_split(
         df, test_size=VALIDATION_SPLIT + TEST_SPLIT,
         stratify=df['class_idx'], random_state=42
@@ -188,6 +207,12 @@ def train_model():
         ),
     ]
 
+    # Compute class weights for imbalanced datasets
+    from sklearn.utils.class_weight import compute_class_weight
+    class_weights = compute_class_weight('balanced', classes=np.arange(len(CLASS_NAMES)), y=train_df['class_idx'].values)
+    class_weight_dict = dict(enumerate(class_weights))
+    print(f"Class weights: {class_weight_dict}")
+
     # Train
     print("\nStarting training...")
     history = model.fit(
@@ -195,6 +220,7 @@ def train_model():
         validation_data=val_ds,
         epochs=EPOCHS,
         callbacks=callbacks,
+        class_weight=class_weight_dict,
         verbose=1,
     )
 
@@ -214,6 +240,14 @@ def train_model():
 
     print("\nClassification Report:")
     print(classification_report(y_true, y_pred, target_names=CLASS_NAMES))
+
+    # Confusion matrix
+    from sklearn.metrics import confusion_matrix
+    cm = confusion_matrix(y_true, y_pred)
+    cm_path = OUTPUT_DIR / 'confusion_matrix.csv'
+    import pandas as pd
+    pd.DataFrame(cm, index=CLASS_NAMES, columns=CLASS_NAMES).to_csv(cm_path)
+    print(f"Confusion matrix saved to {cm_path}")
 
     # Save model info
     model_info = {

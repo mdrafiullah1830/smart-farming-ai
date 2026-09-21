@@ -4,7 +4,7 @@ import type { Env } from './types.ts';
 import { currentUser } from './auth.ts';
 
 // Import all route modules
-import { registerRoute, loginRoute, googleLoginRoute, profileRoute } from './routes/auth.ts';
+import { registerRoute, loginRoute, refreshRoute, logoutRoute, googleLoginRoute, profileRoute } from './routes/auth.ts';
 import { devicesRoute, deviceRotateKeyRoute, deviceThresholdsRoute } from './routes/devices.ts';
 import { sensorsReadingsRoute, sensorsAlertsRoute, sensorsSummaryRoute } from './routes/sensors.ts';
 import { weatherRoute, weatherLocationRoute } from './routes/weather.ts';
@@ -40,6 +40,8 @@ async function route(request: Request, env: Env): Promise<Response> {
   // Auth routes
   if (path === '/api/v1/auth/register' && method === 'POST') return registerRoute(request, env);
   if (path === '/api/v1/auth/login' && method === 'POST') return loginRoute(request, env);
+  if (path === '/api/v1/auth/refresh' && method === 'POST') return refreshRoute(request, env);
+  if (path === '/api/v1/auth/logout' && method === 'POST') return logoutRoute(request, env);
   if (path === '/api/v1/auth/google' && method === 'POST') return googleLoginRoute(request, env);
   if (path === '/api/v1/auth/profile' && method === 'GET') return profileRoute(request, env);
 

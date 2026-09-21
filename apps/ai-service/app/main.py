@@ -148,8 +148,8 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="Smart Farming AI Inference",
     version="0.1.0",
-    docs_url=None,
-    redoc_url=None,
+    docs_url="/docs",
+    redoc_url="/redoc",
     lifespan=lifespan,
 )
 
