@@ -1,9 +1,15 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   late Dio _dio;
 
-  static const String baseUrl = 'http://localhost:8000/api/v1';
+  static String get baseUrl {
+    if (kDebugMode) {
+      return 'http://localhost:8000/api/v1';
+    }
+    return 'https://api.smartfarmingbd.com/api/v1';
+  }
 
   ApiService() {
     _dio = Dio(BaseOptions(
@@ -17,32 +23,26 @@ class ApiService {
     ));
   }
 
+  void setAuthToken(String token) {
+    _dio.options.headers['Authorization'] = 'Bearer $token';
+  }
+
   // ─── Weather Endpoints ──────────────────────────────────────────────
 
   Future<Map<String, dynamic>> getDistrictWeather(String districtId) async {
-    final response = await _dio.get('/weather/district/$districtId');
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> getWeatherForecast(String districtId) async {
-    final response = await _dio.get('/weather/district/$districtId/forecast');
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> getWeatherRisk(String districtId) async {
-    final response = await _dio.get('/weather/district/$districtId/risk');
+    final response = await _dio.get('/weather/$districtId');
     return response.data;
   }
 
   // ─── Soil Endpoints ─────────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> analyzeSoil(Map<String, dynamic> data) async {
-    final response = await _dio.post('/soil/analyze', data: data);
+  Future<Map<String, dynamic>> getSoilCategories() async {
+    final response = await _dio.get('/soil/categories');
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getSoilReports() async {
-    final response = await _dio.get('/soil/reports');
+  Future<Map<String, dynamic>> getSoilData(String category, {int limit = 100}) async {
+    final response = await _dio.get('/soil/data/$category', queryParameters: {'limit': limit});
     return response.data;
   }
 
@@ -53,28 +53,15 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> listCrops() async {
-    final response = await _dio.get('/crops/');
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> getCropDetail(String cropId) async {
-    final response = await _dio.get('/crops/$cropId');
-    return response.data;
-  }
-
-  // ─── Yield Endpoints ────────────────────────────────────────────────
-
-  Future<Map<String, dynamic>> predictYield(Map<String, dynamic> data) async {
-    final response = await _dio.post('/yield/predict', data: data);
-    return response.data;
-  }
-
   // ─── Disease Endpoints ──────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> detectDisease(String imagePath) async {
+  Future<Map<String, dynamic>> detectDisease(String imagePath, {String? description}) async {
     final formData = FormData.fromMap({
       'image': await MultipartFile.fromFile(imagePath),
+      'disease_name': '',
+      'confidence': 0.0,
+      'description': description ?? '',
+      'treatments': [],
     });
     final response = await _dio.post('/disease/detect', data: formData);
     return response.data;
@@ -82,60 +69,56 @@ class ApiService {
 
   // ─── Market Endpoints ───────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> getMarketPrices(String cropId) async {
-    final response = await _dio.get('/market/prices/$cropId');
+  Future<Map<String, dynamic>> getMarketPrices() async {
+    final response = await _dio.get('/market/prices');
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getMarketAnalysis(String districtId) async {
-    final response = await _dio.get('/market/analysis/$districtId');
+  Future<Map<String, dynamic>> getMarketPrice(String crop) async {
+    final response = await _dio.get('/market/price/$crop');
     return response.data;
   }
 
   // ─── Chatbot Endpoints ──────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> chat(String message, String sessionId) async {
+  Future<Map<String, dynamic>> chat(String message, {String lang = 'bn'}) async {
     final response = await _dio.post('/chatbot/chat', data: {
       'message': message,
-      'session_id': sessionId,
-      'language': 'bn',
+      'lang': lang,
     });
     return response.data;
   }
 
-  // ─── Farm Endpoints ─────────────────────────────────────────────────
+  // ─── District Endpoints ─────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> createFarm(Map<String, dynamic> data) async {
-    final response = await _dio.post('/farms/', data: data);
+  Future<Map<String, dynamic>> listDistricts() async {
+    final response = await _dio.get('/districts');
     return response.data;
   }
 
-  Future<Map<String, dynamic>> listFarms() async {
-    final response = await _dio.get('/farms/');
+  Future<Map<String, dynamic>> getDistrict(String name) async {
+    final response = await _dio.get('/districts/$name');
     return response.data;
   }
 
   // ─── Notification Endpoints ─────────────────────────────────────────
 
   Future<Map<String, dynamic>> getNotifications() async {
-    final response = await _dio.get('/notifications/');
+    final response = await _dio.get('/notifications');
     return response.data;
   }
 
-  Future<int> getUnreadCount() async {
-    final response = await _dio.get('/notifications/unread-count');
-    return response.data['unread_count'];
-  }
+  // ─── Stats ──────────────────────────────────────────────────────────
 
-  // ─── Government Endpoints ───────────────────────────────────────────
-
-  Future<Map<String, dynamic>> getGovernmentDashboard() async {
-    final response = await _dio.get('/government/dashboard');
+  Future<Map<String, dynamic>> getStats() async {
+    final response = await _dio.get('/stats');
     return response.data;
   }
 
-  Future<Map<String, dynamic>> listDistricts() async {
-    final response = await _dio.get('/government/districts');
+  // ─── Health ─────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> healthCheck() async {
+    final response = await _dio.get('/health');
     return response.data;
   }
 }

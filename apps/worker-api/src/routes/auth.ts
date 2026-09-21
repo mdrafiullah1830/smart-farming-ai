@@ -107,6 +107,12 @@ export async function profileRoute(request: Request, env: Env): Promise<Response
 function decodeGoogleIdToken(token: string): { sub?: string; email?: string; name?: string; aud?: string; exp?: number; iss?: string } {
   const parts = token.split('.');
   if (parts.length !== 3 || !parts[2]) throw new Error('not a signed JWT');
+
+  // SECURITY: This only decodes the payload without verifying the signature.
+  // In production, verify against Google's JWKS endpoint:
+  // https://www.googleapis.com/oauth2/v3/certs
+  // Use a library like `jose` for proper JWT verification.
+  // TODO: Replace with proper signature verification before production use.
   const normalized = parts[1].replaceAll('-', '+').replaceAll('_', '/');
   const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
   return JSON.parse(atob(padded));

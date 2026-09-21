@@ -4,7 +4,7 @@ export function corsHeaders(request: Request, env: Env): HeadersInit {
   const origin = request.headers.get('Origin') ?? '';
   const allowed = env.ALLOWED_ORIGINS.split(',').map((value) => value.trim());
   return {
-    'Access-Control-Allow-Origin': allowed.includes(origin) ? origin : allowed[0] ?? '',
+    'Access-Control-Allow-Origin': allowed.includes(origin) ? origin : '',
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Device-Key',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -50,7 +50,7 @@ export async function checkRateLimit(request: Request, env: Env, keyPrefix: stri
     return null;
   }
   
-  const ip = request.headers.get('CF-Connecting-IP') ?? request.headers.get('X-Forwarded-For') ?? 'unknown';
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   const key = `ratelimit:${keyPrefix}:${ip}`;
   const now = Date.now();
   const windowStart = now - RATE_LIMIT_WINDOW_MS;

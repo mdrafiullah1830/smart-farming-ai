@@ -3,8 +3,7 @@ services:
     name: smart-farming-ai
     runtime: docker
     plan: free
-    rootDir: apps/ai-service
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: apps/ai-service/Dockerfile
     healthCheckPath: /health
     autoDeployTrigger: commit
     envVars:

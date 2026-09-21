@@ -2,7 +2,6 @@ import type { Env } from '../types.ts';
 import { corsHeaders, json, error } from '../http.ts';
 import { verifyToken } from '../auth.ts';
 
-// Auth context attached to request
 export interface AuthContext {
   id: string;
   email: string;
@@ -11,8 +10,12 @@ export interface AuthContext {
   deviceId?: string;
 }
 
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function authenticateRequest(request: Request, env: Env): Promise<AuthContext | null> {
-  // Try JWT authentication first
   const authHeader = request.headers.get('Authorization');
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7);
@@ -22,12 +25,14 @@ export async function authenticateRequest(request: Request, env: Env): Promise<A
     }
   }
 
-  // Try device authentication
   const deviceKey = request.headers.get('X-Device-Key');
   if (deviceKey) {
-    const device = await env.DB.prepare('SELECT id, owner_id FROM sensor_devices WHERE api_key = ?').bind(deviceKey).first<{ id: string; owner_id: string }>();
-    if (device) {
-      return { id: device.id, email: '', via: 'device', ownerId: device.owner_id, deviceId: device.id };
+    const keyHash = await sha256Hex(deviceKey);
+    const deviceKeyRow = await env.DB.prepare(
+      'SELECT device_id, owner_id FROM device_keys WHERE key_hash = ? AND revoked_at IS NULL'
+    ).bind(keyHash).first<{ device_id: string; owner_id: string }>();
+    if (deviceKeyRow) {
+      return { id: deviceKeyRow.device_id, email: '', via: 'device', ownerId: deviceKeyRow.owner_id, deviceId: deviceKeyRow.device_id };
     }
   }
 

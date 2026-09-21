@@ -267,7 +267,7 @@ def train_model():
             print(f"  -> Best model saved (val_acc: {val_acc:.2f}%)")
 
     # Load best model for testing
-    model.load_state_dict(torch.load(OUTPUT_DIR / 'best_model.pth'))
+    model.load_state_dict(torch.load(OUTPUT_DIR / 'best_model.pth', weights_only=True))
 
     # Evaluate on test set
     print("\nEvaluating on test set...")

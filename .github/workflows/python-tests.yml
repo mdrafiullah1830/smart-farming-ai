@@ -99,7 +99,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt pytest pytest-asyncio
       - name: Run pytest
-        run: pytest tests/ -v --tb=short || echo "No tests found"
+        run: |
+          if [ -d tests ] && [ "$(ls -A tests/ 2>/dev/null)" ]; then
+            pytest tests/ -v --tb=short
+          else
+            echo "No tests found, skipping"
+          fi
 
   test-training:
     name: Training Scripts Syntax Check

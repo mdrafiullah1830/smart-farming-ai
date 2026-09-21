@@ -9,11 +9,16 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import xgboost as xgb
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+try:
+    import xgboost as xgb
+    HAS_XGBOOST = True
+except ImportError:
+    HAS_XGBOOST = False
 
 
 class YieldPredictionModel:
@@ -144,17 +149,19 @@ class YieldPredictionModel:
         X = df[self.feature_names].values
         y = df['yield_per_acre'].values
 
-        X_scaled = self.scaler.fit_transform(X)
-
         X_train, X_test, y_train, y_test = train_test_split(
-            X_scaled, y, test_size=0.2, random_state=42
+            X, y, test_size=0.2, random_state=42
         )
+
+        X_train = self.scaler.fit_transform(X_train)
+        X_test = self.scaler.transform(X_test)
 
         models = {
             'random_forest': RandomForestRegressor(n_estimators=200, max_depth=15, random_state=42),
-            'xgboost': xgb.XGBRegressor(n_estimators=200, max_depth=8, learning_rate=0.1, random_state=42),
             'gradient_boosting': GradientBoostingRegressor(n_estimators=150, max_depth=8, random_state=42),
         }
+        if HAS_XGBOOST:
+            models['xgboost'] = xgb.XGBRegressor(n_estimators=200, max_depth=8, learning_rate=0.1, random_state=42)
 
         best_model = None
         best_score = -1

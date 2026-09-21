@@ -226,7 +226,7 @@ export async function deviceThresholds(request: Request, env: Env): Promise<Resp
   await env.DB.prepare(`
     INSERT INTO device_thresholds (device_id, owner_id, moisture_min_percent, moisture_max_percent, soil_temp_min_c, soil_temp_max_c, battery_min_percent, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(device_id) DO UPDATE SET
+    ON CONFLICT(device_id, owner_id) DO UPDATE SET
       moisture_min_percent = excluded.moisture_min_percent,
       moisture_max_percent = excluded.moisture_max_percent,
       soil_temp_min_c = excluded.soil_temp_min_c,

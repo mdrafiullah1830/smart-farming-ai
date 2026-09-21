@@ -4,13 +4,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  static const String _baseUrl = 'http://localhost:8000/api/v1/weather';
+  static String _getBaseUrl() {
+    const env = String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8000/api/v1');
+    return '$env/weather';
+  }
 
   /// Get current weather for coordinates
   static Future<Map<String, dynamic>> getCurrentWeather(double lat, double lon) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/current?lat=$lat&lon=$lon'),
+        Uri.parse('${_getBaseUrl()}/current?lat=$lat&lon=$lon'),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -76,7 +79,7 @@ class WeatherService {
   static Future<Map<String, dynamic>> getHourlyForecast(double lat, double lon, {int hours = 24}) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/hourly?lat=$lat&lon=$lon&hours=$hours'),
+        Uri.parse('${_getBaseUrl()}/hourly?lat=$lat&lon=$lon&hours=$hours'),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -147,7 +150,7 @@ class WeatherService {
   static Future<Map<String, dynamic>> getWeeklyForecast(double lat, double lon) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/weekly?lat=$lat&lon=$lon'),
+        Uri.parse('${_getBaseUrl()}/weekly?lat=$lat&lon=$lon'),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -224,7 +227,7 @@ class WeatherService {
   static Future<Map<String, dynamic>> getWeatherAlerts(double lat, double lon) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/alerts?lat=$lat&lon=$lon'),
+        Uri.parse('${_getBaseUrl()}/alerts?lat=$lat&lon=$lon'),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -250,7 +253,7 @@ class WeatherService {
   static Future<Map<String, dynamic>> getFarmingRecommendations(double lat, double lon) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/recommendations?lat=$lat&lon=$lon'),
+        Uri.parse('${_getBaseUrl()}/recommendations?lat=$lat&lon=$lon'),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -271,7 +274,7 @@ class WeatherService {
   static Future<List<Map<String, dynamic>>> searchLocations(String query) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/search?name=$query'),
+        Uri.parse('${_getBaseUrl()}/search?name=$query'),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {

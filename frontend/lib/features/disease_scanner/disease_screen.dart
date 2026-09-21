@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,7 +65,7 @@ class _DiseaseScreenState extends State<DiseaseScreen> {
                     if (_image != null)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.network(_image!.path, height: 200, width: double.infinity, fit: BoxFit.cover),
+                        child: Image.file(File(_image!.path), height: 200, width: double.infinity, fit: BoxFit.cover),
                       )
                     else
                       Container(

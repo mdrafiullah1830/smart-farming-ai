@@ -3,9 +3,14 @@ AI Model Inference Pipeline
 Smart Farming AI Platform Bangladesh
 """
 import os
+import sys
 from typing import Any
 
 import numpy as np
+
+_ai_models_dir = os.path.dirname(os.path.abspath(__file__))
+if _ai_models_dir not in sys.path:
+    sys.path.insert(0, _ai_models_dir)
 
 
 class AIInferencePipeline:
@@ -19,35 +24,35 @@ class AIInferencePipeline:
 
     def load_crop_model(self, path: str = "trained_models/crop_recommendation.pkl"):
         if os.path.exists(path) and "crop" not in self._loaded_models:
-            from crop_prediction.train import CropRecommendationModel
+            from ai_models.crop_prediction.train import CropRecommendationModel
             self.crop_model = CropRecommendationModel.load(path)
             self._loaded_models.add("crop")
             print("Crop model loaded")
 
     def load_yield_model(self, path: str = "trained_models/yield_prediction.pkl"):
         if os.path.exists(path) and "yield" not in self._loaded_models:
-            from yield_prediction.train import YieldPredictionModel
+            from ai_models.yield_prediction.train import YieldPredictionModel
             self.yield_model = YieldPredictionModel.load(path)
             self._loaded_models.add("yield")
             print("Yield model loaded")
 
     def load_market_model(self, path: str = "trained_models/market_forecasting.pkl"):
         if os.path.exists(path) and "market" not in self._loaded_models:
-            from market_forecasting.train import MarketForecastingModel
+            from ai_models.market_forecasting.train import MarketForecastingModel
             self.market_model = MarketForecastingModel.load(path)
             self._loaded_models.add("market")
             print("Market model loaded")
 
     def load_disease_model(self, path: str = "trained_models/disease_detection.h5"):
         if os.path.exists(path) and "disease" not in self._loaded_models:
-            from disease_detection.train import DiseaseDetectionModel
+            from ai_models.disease_detection.train import DiseaseDetectionModel
             self.disease_model = DiseaseDetectionModel.load(path)
             self._loaded_models.add("disease")
             print("Disease model loaded")
 
     def load_chatbot(self, path: str = "trained_models/chatbot.pkl"):
         if os.path.exists(path) and "chatbot" not in self._loaded_models:
-            from chatbot.train import AgriculturalChatbot
+            from ai_models.chatbot.train_enhanced import EnhancedAgriculturalChatbot as AgriculturalChatbot
             self.chatbot = AgriculturalChatbot.load(path)
             self._loaded_models.add("chatbot")
             print("Chatbot loaded")

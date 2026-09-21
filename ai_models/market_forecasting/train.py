@@ -17,7 +17,7 @@ from sklearn.preprocessing import MinMaxScaler
 class MarketForecastingModel:
     def __init__(self):
         self.model = None
-        self.scaler = MinMaxScaler(feature_range=(0, 1))
+        self.scalers = {}
         self.sequence_length = 30
         self.model_info = {}
 
@@ -46,7 +46,7 @@ class MarketForecastingModel:
                 trend = params['trend'] * day
 
                 price = params['base_price'] + seasonal + noise + trend
-                price = max(price * 0.5, min(price * 2, price))
+                price = max(1.0, min(price, 500.0))
 
                 data.append({
                     'date': date,
@@ -70,9 +70,12 @@ class MarketForecastingModel:
             df = self.generate_training_data()
 
         crop_models = {}
+        crop_scalers = {}
         for crop_name in df['crop'].unique():
             crop_data = df[df['crop'] == crop_name][['price']].values
-            scaled_data = self.scaler.fit_transform(crop_data)
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            scaled_data = scaler.fit_transform(crop_data)
+            crop_scalers[crop_name] = scaler
 
             X, y = self.create_sequences(scaled_data)
 
@@ -115,6 +118,7 @@ class MarketForecastingModel:
                 crop_models[crop_name] = model
 
         self.model = crop_models
+        self.scalers = crop_scalers
         self.model_info = {
             'crops': list(crop_models.keys()),
             'sequence_length': self.sequence_length,
@@ -131,8 +135,12 @@ class MarketForecastingModel:
         if crop_name not in self.model:
             return {'error': f'No model for {crop_name}'}
 
+        scaler = self.scalers.get(crop_name)
+        if scaler is None:
+            return {'error': f'No scaler for {crop_name}'}
+
         prices = np.array(historical_prices[-self.sequence_length:]).reshape(-1, 1)
-        scaled = self.scaler.transform(prices)
+        scaled = scaler.transform(prices)
 
         predictions = []
         current_sequence = scaled.copy()
@@ -143,29 +151,31 @@ class MarketForecastingModel:
             try:
                 input_seq = current_sequence.reshape(1, self.sequence_length, 1)
                 pred = model.predict(input_seq, verbose=0)
-                predictions.append(float(self.scaler.inverse_transform(pred)[0, 0]))
+                predictions.append(float(scaler.inverse_transform(pred)[0, 0]))
                 current_sequence = np.roll(current_sequence, -1, axis=0)
                 current_sequence[-1] = pred
             except Exception:
-                predictions.append(float(self.scaler.inverse_transform(current_sequence[-1:])[0, 0]))
+                predictions.append(float(scaler.inverse_transform(current_sequence[-1:])[0, 0]))
 
         current_price = historical_prices[-1] if historical_prices else 0
         avg_predicted = np.mean(predictions) if predictions else current_price
         trend = "up" if avg_predicted > current_price else "down" if avg_predicted < current_price else "stable"
+
+        confidence = max(0.1, min(0.95, 1.0 - abs(avg_predicted - current_price) / max(current_price, 1)))
 
         return {
             'current_price': current_price,
             'predicted_prices': predictions,
             'avg_predicted': round(avg_predicted, 2),
             'trend': trend,
-            'confidence': 0.72,
+            'confidence': round(confidence, 2),
         }
 
     def save(self, path: str):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
         model_data = {
             'model': self.model,
-            'scaler': self.scaler,
+            'scalers': self.scalers,
             'model_info': self.model_info,
         }
         with open(path, 'wb') as f:
@@ -178,8 +188,10 @@ class MarketForecastingModel:
             model_data = pickle.load(f)
         instance = cls()
         instance.model = model_data['model']
-        instance.scaler = model_data['scaler']
+        instance.scalers = model_data.get('scalers', {})
         instance.model_info = model_data['model_info']
+        if not instance.scalers and 'scaler' in model_data:
+            instance.scalers = {crop: model_data['scaler'] for crop in instance.model.keys()}
         return instance
 
 

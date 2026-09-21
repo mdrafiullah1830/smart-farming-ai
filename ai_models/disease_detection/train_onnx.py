@@ -27,11 +27,11 @@ except ImportError:
     ONNX_AVAILABLE = False
     print("tf2onnx not available - install with: pip install tf2onnx")
 
-# Configuration
-DATA_DIR = Path("/Users/mdrafiullah/smart_farming_ai/datasets/crop_disease_images/rice")
+# Configuration (overridden by CLI args or environment variables)
+DATA_DIR = Path(os.getenv("DATA_DIR", "datasets/crop_disease_images/rice"))
 TRAIN_CSV = DATA_DIR / "train.csv"
 TRAIN_IMG_DIR = DATA_DIR / "train_images"
-OUTPUT_DIR = Path("/Users/mdrafiullah/smart_farming_ai/ai_models/trained_models")
+OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "ai_models/trained_models"))
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 IMAGE_SIZE = (224, 224)
@@ -43,23 +43,20 @@ TEST_SPLIT = 0.15
 
 # Label mapping from dataset to our standard classes
 LABEL_MAPPING = {
-    'bacterial_leaf_blight': 0,  # Bacterial Leaf Blight
-    'bacterial_leaf_streak': 1,  # Blast (closest)
-    'bacterial_panicle_blight': 2,  # Brown Spot (closest)
-    'blast': 3,  # Blast
-    'brown_spot': 4,  # Brown Spot
-    'dead_heart': 5,  # Tungro (closest - viral)
-    'downy_mildew': 6,  # Powdery Mildew (closest)
-    'hispa': 7,  # Leaf Rust (closest)
-    'normal': 8,  # Healthy
-    'tungro': 9,  # Tungro
+    'bacterial_leaf_blight': 0, 'bacterial_leaf_streak': 1,
+    'bacterial_panicle_blight': 2, 'blast': 3, 'brown_spot': 4,
+    'dead_heart': 5, 'downy_mildew': 6, 'hispa': 7, 'normal': 8, 'tungro': 9,
 }
 
 # Our standard class names (matching AI service)
 CLASS_NAMES = [
-    "Bacterial Leaf Blight", "Blast", "Brown Spot", "Tungro",
-    "Leaf Rust", "Powdery Mildew", "Late Blight", "Early Blight",
-    "Anthracnose", "Healthy"
+    "Bacterial Leaf Blight", "Bacterial Leaf Streak", "Bacterial Panicle Blight",
+    "Blast", "Brown Spot", "Dead Heart", "Downy Mildew", "Hispa", "Healthy", "Tungro"
+]
+
+CLASS_NAMES_BN = [
+    "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্যাকটেরিয়াল লিফ স্ট্রিক", "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
+    "ব্লাস্ট", "ব্রাউন স্পট", "ডেড হার্ট", "ডাউনি মিলডিউ", "হিসপা", "সুস্থ", "তুঙ্গরো"
 ]
 
 CLASS_NAMES_BN = [

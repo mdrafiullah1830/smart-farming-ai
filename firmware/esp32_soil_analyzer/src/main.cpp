@@ -295,6 +295,3 @@ void loop() {
   // Unused: setup() always ends in deep sleep.
 }
 
-
-
-}  // namespace

@@ -40,7 +40,7 @@ check_prerequisites() {
 setup_backend() {
     echo -e "\n${YELLOW}Setting up backend...${NC}"
 
-    cd backend
+    pushd backend > /dev/null
 
     # Create virtual environment
     python3 -m venv venv
@@ -56,7 +56,7 @@ setup_backend() {
         echo -e "${YELLOW}Created .env file. Please edit with your API keys.${NC}"
     fi
 
-    cd ..
+    popd > /dev/null
     echo -e "${GREEN}Backend setup complete!${NC}"
 }
 
@@ -83,23 +83,21 @@ setup_database() {
 train_models() {
     echo -e "\n${YELLOW}Training AI models...${NC}"
 
-    cd ai_models
-
-    mkdir -p trained_models
+    ROOT_DIR="$(pwd)"
+    mkdir -p ai_models/trained_models
 
     echo "Training crop recommendation model..."
-    python3 crop_prediction/train.py
+    python3 ai_models/crop_prediction/train.py
 
     echo "Training yield prediction model..."
-    python3 yield_prediction/train.py
+    python3 ai_models/yield_prediction/train.py
 
     echo "Training market forecasting model..."
-    python3 market_forecasting/train.py
+    python3 ai_models/market_forecasting/train.py
 
     echo "Training disease detection model..."
-    python3 disease_detection/train.py
+    python3 ai_models/disease_detection/train.py
 
-    cd ..
     echo -e "${GREEN}AI models trained!${NC}"
 }
 
@@ -107,9 +105,9 @@ train_models() {
 setup_flutter() {
     echo -e "\n${YELLOW}Setting up Flutter app...${NC}"
 
-    cd frontend
+    pushd frontend > /dev/null
     flutter pub get
-    cd ..
+    popd > /dev/null
 
     echo -e "${GREEN}Flutter app setup complete!${NC}"
 }
@@ -131,13 +129,17 @@ start_services() {
 run_tests() {
     echo -e "\n${YELLOW}Running tests...${NC}"
 
-    cd tests/backend
-    python3 -m pytest -v
-    cd ../..
+    if [ -d tests/backend ]; then
+        pushd tests/backend > /dev/null
+        python3 -m pytest -v
+        popd > /dev/null
+    fi
 
-    cd tests/ai_models
-    python3 -m pytest -v
-    cd ../..
+    if [ -d tests/ai_models ]; then
+        pushd tests/ai_models > /dev/null
+        python3 -m pytest -v
+        popd > /dev/null
+    fi
 
     echo -e "${GREEN}Tests complete!${NC}"
 }

@@ -65,23 +65,22 @@ class DiseaseDetectionModel:
             return RandomForestClassifier(n_estimators=100, random_state=42)
 
     def generate_synthetic_dataset(self, n_samples: int = 1000) -> tuple:
-        np.random.seed(42)
+        rng = np.random.RandomState(42)
 
-        X = np.random.rand(n_samples, *self.image_size, 3).astype(np.float32)
-        y = np.random.randint(0, len(self.class_names), n_samples)
+        X = rng.rand(n_samples, *self.image_size, 3).astype(np.float32)
+        y = rng.randint(0, len(self.class_names), n_samples)
 
         for i in range(n_samples):
             class_idx = y[i]
             if class_idx < len(self.class_names):
                 if 'Blight' in self.class_names[class_idx] or 'Blast' in self.class_names[class_idx]:
-                    X[i, 50:150, 50:150, 0] = np.random.uniform(0.1, 0.3)
+                    X[i, 50:150, 50:150, 0] = rng.uniform(0.1, 0.3)
                 elif 'Rust' in self.class_names[class_idx]:
-                    X[i, 30:100, 30:100, :] = np.random.uniform(0.6, 0.8, (70, 70, 3))
+                    X[i, 30:100, 30:100, :] = rng.uniform(0.6, 0.8, (70, 70, 3))
                 elif 'Healthy' in self.class_names[class_idx]:
-                    X[i, :, :, 1] = np.random.uniform(0.4, 0.7, self.image_size)
+                    X[i, :, :, 1] = rng.uniform(0.4, 0.7, self.image_size)
 
-        from tensorflow.keras.utils import to_categorical
-        y_categorical = to_categorical(y, num_classes=len(self.class_names))
+        y_categorical = np.eye(len(self.class_names), dtype=np.float32)[y]
 
         return X, y_categorical, y
 
@@ -100,7 +99,7 @@ class DiseaseDetectionModel:
                 X_train, y_train,
                 batch_size=batch_size,
                 epochs=epochs,
-                validation_split=0.1,
+                validation_data=(X_test, y_test),
                 verbose=1,
             )
 
@@ -163,7 +162,8 @@ class DiseaseDetectionModel:
             if len(image.shape) == 3:
                 image = np.expand_dims(image, axis=0)
             image = tf.image.resize(image, self.image_size)
-            image = image / 255.0 if image.max() > 1 else image
+            if image.dtype == tf.uint8 or image.numpy().max() > 1.0:
+                image = image / 255.0
 
             predictions = self.model.predict(image, verbose=0)
             class_idx = np.argmax(predictions[0])
@@ -200,23 +200,26 @@ class DiseaseDetectionModel:
         }
 
     def save(self, path: str):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+        saved_path = path
         try:
             self.model.save(path)
         except Exception:
+            pkl_path = path if path.endswith('.pkl') else path + '.pkl'
             model_data = {
                 'model': self.model,
                 'model_info': self.model_info,
             }
-            with open(path + '.pkl', 'wb') as f:
+            with open(pkl_path, 'wb') as f:
                 pickle.dump(model_data, f)
+            saved_path = pkl_path
 
         info_path = path.replace('.h5', '_info.json').replace('.keras', '_info.json')
         if info_path == path:
             info_path = path + '_info.json'
         with open(info_path, 'w') as f:
             json.dump(self.model_info, f, indent=2)
-        print(f"Model saved to {path}")
+        print(f"Model saved to {saved_path}")
 
     @classmethod
     def load(cls, path: str):

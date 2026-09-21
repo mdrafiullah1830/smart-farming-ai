@@ -9,11 +9,16 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import xgboost as xgb
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+try:
+    import xgboost as xgb
+    HAS_XGBOOST = True
+except ImportError:
+    HAS_XGBOOST = False
 
 
 class CropRecommendationModel:
@@ -119,17 +124,20 @@ class CropRecommendationModel:
         y = df['crop'].values
 
         y_encoded = self.label_encoder.fit_transform(y)
-        X_scaled = self.scaler.fit_transform(X)
 
         X_train, X_test, y_train, y_test = train_test_split(
-            X_scaled, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded
+            X, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded
         )
+
+        X_train = self.scaler.fit_transform(X_train)
+        X_test = self.scaler.transform(X_test)
 
         models = {
             'random_forest': RandomForestClassifier(n_estimators=200, max_depth=15, random_state=42),
-            'xgboost': xgb.XGBClassifier(n_estimators=200, max_depth=8, learning_rate=0.1, random_state=42),
             'gradient_boosting': GradientBoostingClassifier(n_estimators=150, max_depth=8, random_state=42),
         }
+        if HAS_XGBOOST:
+            models['xgboost'] = xgb.XGBClassifier(n_estimators=200, max_depth=8, learning_rate=0.1, random_state=42)
 
         best_model = None
         best_score = 0
@@ -139,9 +147,8 @@ class CropRecommendationModel:
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred)
-            cv_scores = cross_val_score(model, X_scaled, y_encoded, cv=5, scoring='accuracy')
 
-            print(f"{name}: Accuracy={accuracy:.4f}, CV Mean={cv_scores.mean():.4f}")
+            print(f"{name}: Accuracy={accuracy:.4f}")
 
             if accuracy > best_score:
                 best_score = accuracy
