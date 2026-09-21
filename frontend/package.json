@@ -1,27 +1,23 @@
 {
-  "name": "frontend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  },
+  "name": "smart-farming-frontend",
+  "version": "2.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js",
+    "format": "prettier --write ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
-    "cheerio": "^1.2.0",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "google-auth-library": "^10.7.0",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0"
+    "chart.js": "^4.4.2",
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0",
+    "vite-plugin-static-copy": "^1.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "globals": "^15.0.0"
   }
 }

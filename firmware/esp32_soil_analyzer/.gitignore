@@ -1,0 +1,12 @@
+# PlatformIO build output
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Device credentials — never commit these
+include/secrets.h
+
+# Editor and OS noise
+.vscode/
+.DS_Store
+*.log
