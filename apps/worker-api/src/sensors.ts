@@ -226,7 +226,7 @@ export async function deviceThresholds(request: Request, env: Env): Promise<Resp
   await env.DB.prepare(`
     INSERT INTO device_thresholds (device_id, owner_id, moisture_min_percent, moisture_max_percent, soil_temp_min_c, soil_temp_max_c, battery_min_percent, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(device_id, owner_id) DO UPDATE SET
+    ON CONFLICT(device_id) DO UPDATE SET
       moisture_min_percent = excluded.moisture_min_percent,
       moisture_max_percent = excluded.moisture_max_percent,
       soil_temp_min_c = excluded.soil_temp_min_c,
@@ -306,6 +306,10 @@ export async function saveSensorReading(request: Request, env: Env): Promise<Res
   if (device && device.owner_id !== context.ownerId) return error(request, env, 403, 'Device belongs to another account');
   if (!device) {
     if (context.via === 'device') return error(request, env, 403, 'Device is not registered; call POST /api/v1/devices first');
+    // Limit auto-provisioned devices to prevent abuse (max 10 per user)
+    const deviceCount = await env.DB.prepare('SELECT COUNT(*) as cnt FROM sensor_devices WHERE owner_id = ?')
+      .bind(context.ownerId).first<{ cnt: number }>();
+    if ((deviceCount?.cnt ?? 0) >= 10) return error(request, env, 429, 'Device limit reached. Register devices via POST /api/v1/devices first.');
     await env.DB.prepare('INSERT INTO sensor_devices (id, owner_id, name, firmware_version) VALUES (?, ?, ?, ?)')
       .bind(deviceId, context.ownerId, String(data?.device_name ?? deviceId), String(data?.firmware_version ?? '')).run();
     await env.DB.prepare('INSERT OR IGNORE INTO device_thresholds (device_id, owner_id) VALUES (?, ?)').bind(deviceId, context.ownerId).run();

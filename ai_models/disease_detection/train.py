@@ -15,14 +15,12 @@ class DiseaseDetectionModel:
     def __init__(self):
         self.model = None
         self.class_names = [
-            'Bacterial Leaf Blight', 'Blast', 'Brown Spot', 'Tungro',
-            'Leaf Rust', 'Powdery Mildew', 'Late Blight', 'Early Blight',
-            'Anthracnose', 'Healthy'
+            'Bacterial Leaf Blight', 'Bacterial Leaf Streak', 'Bacterial Panicle Blight',
+            'Blast', 'Brown Spot', 'Dead Heart', 'Downy Mildew', 'Hispa', 'Healthy', 'Tungro'
         ]
         self.class_names_bn = [
-            'ব্যাকটেরিয়াল পাতা জ্বালা', 'ব্লাস্ট', 'ব্রাউন স্পট', 'টাংরো',
-            'পাতার মরিচা', 'পাউডারি মিল্ডিউ', 'লেট ব্লাইট', 'আর্লি ব্লাইট',
-            'অ্যান্থ্রাকনোজ', 'সুস্থ'
+            'ব্যাক্টেরিযাল লিফ ব্লাইট', 'ব্যাক্টেরিযাল লিফ স্ট্রিক', 'ব্যাক্টেরিযাল প্যানিকল ব্লাইট',
+            'ব্লাস্ট', 'ব্রাউন স্পট', 'ডেড হার্ট', 'ডাউনি মিল্ডিউ', 'হিসপা', 'সুস্থ', 'তুঙ্গরো'
         ]
         self.image_size = (224, 224)
         self.model_info = {}
@@ -65,6 +63,12 @@ class DiseaseDetectionModel:
             return RandomForestClassifier(n_estimators=100, random_state=42)
 
     def generate_synthetic_dataset(self, n_samples: int = 1000) -> tuple:
+        """Generate synthetic dataset for development/testing only.
+        
+        WARNING: This produces random pixel patterns with trivial features.
+        Models trained on this data have ZERO real-world accuracy.
+        Use train_onnx.py with actual crop disease images for production models.
+        """
         rng = np.random.RandomState(42)
 
         X = rng.rand(n_samples, *self.image_size, 3).astype(np.float32)

@@ -7,26 +7,22 @@ async function body<T>(request: Request): Promise<T | null> {
 }
 
 export async function aiHealthRoute(request: Request, env: Env): Promise<Response> {
-  const upstream = await fetch(`${env.AI_SERVICE_URL}/v1/disease/analyze`, {
-    method: 'POST',
+  const healthCheckUrl = `${env.AI_SERVICE_URL}/health`;
+  const upstream = await fetch(healthCheckUrl, {
+    method: 'GET',
     headers: {
       'Authorization': `Bearer ${env.AI_SERVICE_TOKEN}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      job_id: `health-${crypto.randomUUID()}`,
-      image_url: 'https://example.com/health-check.jpg',
-    }),
   });
   if (!upstream.ok) {
     console.error('ai_health_failed', { status: upstream.status });
-    return error(request, env, 503, 'AI service authentication failed');
+    return error(request, env, 503, 'AI service unavailable');
   }
-  const result = await upstream.json<{ status?: string }>();
+  const result = await upstream.json<{ status?: string; models?: Record<string, string> }>();
   return json(request, env, {
     status: 'ok',
     service: 'ai-service',
-    model_status: result.status ?? 'unknown',
+    models: result.models ?? {},
   });
 }
 

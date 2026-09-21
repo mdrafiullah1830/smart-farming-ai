@@ -1,9 +1,11 @@
 import base64
 import logging
 import os
+import re
 import time
 from contextlib import asynccontextmanager
 from typing import Annotated, Optional
+from urllib.parse import urlparse
 
 import numpy as np
 from fastapi import FastAPI, Header, HTTPException, Request, Response
@@ -103,6 +105,32 @@ DISEASE_CLASSES_BN = [
     "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্যাকটেরিয়াল লিফ স্ট্রিক", "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
     "ব্লাস্ট", "ব্রাউন স্পট", "ডেড হার্ট", "ডাউনি মিলডিউ", "হিসপা", "সুস্থ", "তুঙ্গরো",
 ]
+
+
+BLOCKED_HOSTS = {"169.254.169.254", "metadata.google.internal", "localhost", "127.0.0.1", "0.0.0.0"}
+BLOCKED_SCHEMES = {"file", "ftp", "gopher", "dict"}
+
+
+def _is_safe_url(url: str) -> bool:
+    """Reject private / internal URLs to prevent SSRF."""
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return False
+    if parsed.scheme not in ("https", "http"):
+        return False
+    if parsed.scheme in BLOCKED_SCHEMES:
+        return False
+    hostname = parsed.hostname or ""
+    if hostname in BLOCKED_HOSTS:
+        return False
+    if hostname.startswith("10.") or hostname.startswith("172.") or hostname.startswith("192.168."):
+        return False
+    if hostname == "169.254.":
+        return False
+    if re.match(r"^(0|\.)+$", hostname):
+        return False
+    return True
 
 
 
@@ -244,8 +272,10 @@ async def analyze_disease(
         if request.image_base64:
             image_bytes = base64.b64decode(request.image_base64.split(',', 1)[-1], validate=True)
         elif request.image_url:
+            if not _is_safe_url(request.image_url):
+                raise ValueError("image_url must be a public HTTPS URL (internal/private URLs are blocked)")
             import httpx
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=False) as client:
                 response = await client.get(request.image_url)
                 response.raise_for_status()
                 image_bytes = response.content

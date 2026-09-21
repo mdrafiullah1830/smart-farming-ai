@@ -8,8 +8,8 @@ async function body<T>(request: Request): Promise<T | null> {
 
 function stripMarkup(value: string): string {
   return value.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/&/gi, '&')
-    .replace(/</gi, '<').replace(/>/gi, '>').replace(/\s+/g, ' ').trim();
+    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '"').replace(/&#39;/gi, "'").replace(/\s+/g, ' ').trim();
 }
 
 function htmlTableRows(html: string): string[][] {

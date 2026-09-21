@@ -99,6 +99,8 @@ class CropRecommendationModel:
                 data.append([temp, hum, rain, ph, n, p, k, crop_name])
 
         # Augment with real soil data if available
+        # WARNING: Currently assigns random crop labels to real soil data, injecting label noise.
+        # Production training should use actual soil-to-crop mapping records.
         if real_data:
             for soil_vals in real_data[:min(len(real_data), n_samples // 3)]:
                 crop_name = np.random.choice(list(crops.keys()))

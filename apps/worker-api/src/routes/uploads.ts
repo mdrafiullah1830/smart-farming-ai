@@ -30,6 +30,8 @@ export async function uploadsRoute(request: Request, env: Env): Promise<Response
 }
 
 export async function diseaseAnalyzeRoute(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return error(request, env, 401, 'Authentication required');
   const form = await request.formData();
   const image = form.get('image');
   if (!(image instanceof File)) return error(request, env, 400, 'image is required');

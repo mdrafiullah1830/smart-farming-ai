@@ -8,12 +8,14 @@ async function body<T>(request: Request): Promise<T | null> {
   try { return await request.json<T>(); } catch { return null; }
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function registerRoute(request: Request, env: Env): Promise<Response> {
   const data = await body<{ name?: string; name_en?: string; name_bn?: string; email?: string; password?: string; phone?: string; language?: string }>(request);
   const name = (data?.name ?? data?.name_en)?.trim();
   const email = data?.email?.trim().toLowerCase();
   const password = data?.password ?? '';
-  if (!name || !email || password.length < 8) {
+  if (!name || !email || !EMAIL_RE.test(email) || password.length < 8) {
     return error(request, env, 400, 'Name, valid email and an 8-character password are required');
   }
   const existing = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();

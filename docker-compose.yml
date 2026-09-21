@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile
     container_name: smart_farming_backend
     environment:
-      - DATABASE_URL=postgresql+asyncpg://smartfarming:password@postgres:5432/smart_farming_db
+      - DATABASE_URL=sqlite+aiosqlite:///./database/smart_farming.db
       - REDIS_URL=redis://redis:6379/0
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
@@ -54,12 +54,11 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_started
     volumes:
       - ./backend:/app
+      - ./database:/app/database
       - uploads_data:/app/uploads
     restart: unless-stopped
 
