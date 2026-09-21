@@ -26,9 +26,9 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         { src: 'web/assets/*', dest: 'assets' },
+        { src: 'web/assets/fonts/*', dest: 'assets/fonts' },
         { src: 'web/bangladesh-map.png', dest: '.' },
         { src: 'web/bd_districts.js', dest: '.' },
-
       ],
     }),
   ],
