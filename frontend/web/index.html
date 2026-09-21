@@ -592,37 +592,41 @@ function toggleMobileMenu(){
   document.getElementById('mobileMenu').classList.toggle('active');
 }
 
-// Navbar scroll
+// Navbar scroll (passive)
 window.addEventListener('scroll',function(){
   document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
-});
+},{passive:true});
 
-// Counter animation
+// Counter animation with rAF + IntersectionObserver
 function animateCounters(){
   document.querySelectorAll('[data-count]').forEach(function(el){
     var target=parseInt(el.getAttribute('data-count'));
-    var current=0;
-    var increment=target/60;
-    var timer=setInterval(function(){
-      current+=increment;
-      if(current>=target){current=target;clearInterval(timer)}
-      el.textContent=current>=1000?(current/1000).toFixed(1)+'K+':Math.floor(current)+'+';
-    },30);
+    var start=0;
+    var startTime=null;
+    var duration=1200;
+    function step(ts){
+      if(!startTime)startTime=ts;
+      var progress=Math.min((ts-startTime)/duration,1);
+      var eased=1-Math.pow(1-progress,3);
+      var val=Math.floor(eased*target);
+      el.textContent=val>=1000?(val/1000).toFixed(1)+'K+':val+'+';
+      if(progress<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   });
 }
 
-// Scroll reveal
-function revealOnScroll(){
-  document.querySelectorAll('.reveal').forEach(function(el){
-    var rect=el.getBoundingClientRect();
-    if(rect.top<window.innerHeight-100){el.classList.add('active')}
-  });
-}
+// Scroll reveal with IntersectionObserver
+var revealObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('active');revealObs.unobserve(e.target)}});
+},{threshold:0.15,rootMargin:'0px 0px -50px 0px'});
 
-// Particles
+// Particles (reduced count, CSS-only sizing)
 function createParticles(){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
   var container=document.getElementById('particles');
-  for(var i=0;i<50;i++){
+  var count=window.innerWidth<768?8:15;
+  for(var i=0;i<count;i++){
     var p=document.createElement('div');
     p.className='particle';
     p.style.left=Math.random()*100+'%';
@@ -636,9 +640,16 @@ function createParticles(){
 // Init
 applyTranslations();
 createParticles();
-setTimeout(animateCounters,500);
-window.addEventListener('scroll',revealOnScroll);
-revealOnScroll();
+// Start counters when stats section is visible
+var statsEl=document.querySelector('[data-count]');
+if(statsEl){
+  var counterObs=new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting){animateCounters();counterObs.disconnect()}
+  },{threshold:0.3});
+  counterObs.observe(statsEl.closest('.section')||statsEl);
+}
+// Reveal elements on scroll
+document.querySelectorAll('.reveal').forEach(function(el){revealObs.observe(el)});
 </script>
 <script src="assets/icons.js" defer></script>
 </body>
