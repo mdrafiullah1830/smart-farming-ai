@@ -28,7 +28,7 @@ export default defineConfig({
         { src: 'web/assets/*', dest: 'assets' },
         { src: 'web/bangladesh-map.png', dest: '.' },
         { src: 'web/bd_districts.js', dest: '.' },
-        { src: 'web/bd_location_data.js', dest: '.' },
+
       ],
     }),
   ],
