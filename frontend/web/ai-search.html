@@ -97,13 +97,13 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 </style>
 <link rel="stylesheet" href="design-system.css">
 </head>
-<body>
+<body class="page-ai-search">
 <div class="bg-map"></div>
 <div class="ai-lang"><button id="aiLangBn" onclick="setAiLang('bn')">বাং</button><button id="aiLangEn" onclick="setAiLang('en')">EN</button></div>
 
 <!-- Landing Page -->
 <div class="landing" id="landing">
-  <div class="landing-icon">🌾</div>
+  <div class="landing-icon"><span class="material-icons-round">spark</span></div>
   <h1>AI Search</h1>
   <p data-bn="কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন — নির্ভরযোগ্য উৎসসহ উত্তর পান।" data-en="Ask any agriculture question and get an answer with reliable sources.">কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন — নির্ভরযোগ্য উৎসসহ উত্তর পান।</p>
   <div class="search-box">
@@ -131,8 +131,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 <!-- Results Page -->
 <div class="results-page" id="resultsPage">
   <div class="top-bar">
-    <button class="back-btn" onclick="window.location.href='dashboard.html'" title="Dashboard e ফিরে যান">←</button>
-    <div class="logo">🌾</div>
+    <button class="back-btn" onclick="window.location.href='dashboard.html'" title="Dashboard e ফিরে যান" aria-label="Dashboard"><span class="material-icons-round">arrow_back</span></button>
+    <div class="logo"><span class="material-icons-round">spark</span></div>
     <input type="text" class="search-input" id="resultSearchInput" data-placeholder-bn="আবার খুঁজুন..." data-placeholder-en="Search again..." placeholder="আবার খুঁজুন...">
     <button class="search-btn" onclick="doSearchFromResult()" style="position:static;transform:none">
       <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>

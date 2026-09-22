@@ -164,17 +164,17 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
 </style>
 <link rel="stylesheet" href="design-system.css">
 </head>
-<body>
+<body class="page-market">
 <div class="bg-map"></div>
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="screen active" id="marketScreen">
   <header class="app-header">
-    <button class="header-back" onclick="window.location.href='dashboard.html'"><span class="material-icons-round">arrow_back</span></button>
+    <button class="header-back" onclick="window.location.href='dashboard.html'" aria-label="Dashboard"><span class="material-icons-round">arrow_back</span></button>
     <h1 data-bn="বাজার বিশ্লেষণ" data-en="Market Intelligence">বাজার বিশ্লেষণ</h1>
     <div class="lang-toggle"><button class="lang-btn" id="marketLangBn" onclick="setMarketLang('bn')">বাং</button><button class="lang-btn" id="marketLangEn" onclick="setMarketLang('en')">EN</button></div>
-    <button class="header-action" onclick="refreshPrices()"><span class="material-icons-round">refresh</span></button>
-    <button class="header-action" onclick="toggleAlertPanel()"><span class="material-icons-round">notifications_active</span></button>
+    <button class="header-action" onclick="refreshPrices()" aria-label="Refresh prices"><span class="material-icons-round">refresh</span></button>
+    <button class="header-action" onclick="toggleAlertPanel()" aria-label="Market alerts"><span class="material-icons-round">notifications_active</span></button>
   </header>
 
   <div class="app-content">
@@ -668,6 +668,7 @@ function initChart(){
   });
   updateChartStats(data.prices);
   });
+}
 function generateChartData(crop,period){
   var days = period==='7d'?7:period==='30d'?30:90;
   var labels=[],prices=[];

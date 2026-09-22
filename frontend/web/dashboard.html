@@ -235,20 +235,20 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 </style>
 <link rel="stylesheet" href="design-system.css">
 </head>
-<body>
+<body class="page-dashboard">
 <div class="bg-map"></div>
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="screen active" id="dashboardScreen">
   <header class="app-header">
-    <button class="header-back" onclick="window.location.href='/'"><span class="material-icons-round">arrow_back</span></button>
+    <button class="header-back" onclick="window.location.href='/'" aria-label="Landing page"><span class="material-icons-round">arrow_back</span></button>
     <h1 data-i18n="appTitle">স্মার্ট ফার্মিং AI</h1>
     <div class="lang-toggle" style="margin-right:4px">
       <button class="lang-btn active" onclick="setLang('bn')" id="langBtnBnApp">বাং</button>
       <button class="lang-btn" onclick="setLang('en')" id="langBtnEnApp">EN</button>
     </div>
-    <button class="header-action" onclick="navigateTo('notifications')"><span class="material-icons-round">notifications_none</span><span class="badge"></span></button>
-    <button class="header-action" onclick="navigateTo('profile')"><span class="material-icons-round">account_circle</span></button>
+    <button class="header-action" onclick="navigateTo('notifications')" aria-label="Notifications"><span class="material-icons-round">notifications_none</span><span class="badge"></span></button>
+    <button class="header-action" onclick="navigateTo('profile')" aria-label="Profile"><span class="material-icons-round">account_circle</span></button>
   </header>
 
   <div class="app-content" id="mainContent">
@@ -279,25 +279,25 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
     <div class="section" style="padding:0;margin-bottom:28px">
       <div class="section-header"><div class="section-title" data-i18n="quickActions">দ্রুত পদক্ষেপ</div></div>
       <div class="quick-actions">
-        <button class="quick-action" onclick="navigateTo('weather')"><div class="icon-circle" style="background:#eff6ff;color:#3b82f6">&#127780;&#65039;</div><span class="label" data-i18n="weather">আবহাওয়া</span></button>
-        <button class="quick-action" onclick="navigateTo('soil')"><div class="icon-circle" style="background:var(--primary-100);color:var(--primary)">&#127793;</div><span class="label" data-i18n="soilAnalysis">মাটি বিশ্লেষণ</span></button>
-        <button class="quick-action" onclick="navigateTo('crop')"><div class="icon-circle" style="background:#fef3c7;color:var(--accent-dark)">&#127806;</div><span class="label" data-i18n="cropRec">ফসল সুপারিশ</span></button>
-        <button class="quick-action" onclick="navigateTo('disease')"><div class="icon-circle" style="background:var(--error-light);color:var(--error)">&#128300;</div><span class="label" data-i18n="diseaseDetect">রোগ সনাক্ত</span></button>
+        <button class="quick-action" onclick="navigateTo('weather')"><div class="icon-circle tone-blue"><span class="material-icons-round">weather</span></div><span class="label" data-i18n="weather">আবহাওয়া</span></button>
+        <button class="quick-action" onclick="navigateTo('soil')"><div class="icon-circle tone-green"><span class="material-icons-round">soil</span></div><span class="label" data-i18n="soilAnalysis">মাটি বিশ্লেষণ</span></button>
+        <button class="quick-action" onclick="navigateTo('crop')"><div class="icon-circle tone-amber"><span class="material-icons-round">sprout</span></div><span class="label" data-i18n="cropRec">ফসল সুপারিশ</span></button>
+        <button class="quick-action" onclick="navigateTo('disease')"><div class="icon-circle tone-red"><span class="material-icons-round">scan</span></div><span class="label" data-i18n="diseaseDetect">রোগ সনাক্ত</span></button>
       </div>
     </div>
 
     <div class="section" style="padding:0;margin-bottom:28px">
       <div class="section-header"><div class="section-title" data-i18n="allFeatures">বৈশিষ্ট্যসমূহ</div></div>
       <div class="feature-grid">
-        <button class="feature-card" onclick="navigateTo('disease')"><div class="feature-icon" style="background:var(--error-light);color:var(--error)">&#128300;</div><div class="feature-title" data-i18n="diseaseTitle">রোগ সনাক্তকরণ</div><div class="feature-desc" data-i18n="diseaseDesc">ছবি আপলোড করে ফসলের রোগ শনাক্ত করুন</div></button>
-        <button class="feature-card" onclick="navigateTo('market')"><div class="feature-icon" style="background:#fef3c7;color:var(--accent-dark)">&#128200;</div><div class="feature-title" data-i18n="marketTitle">বাজার বিশ্লেষণ</div><div class="feature-desc" data-i18n="marketDesc">সর্বশেষ ফসলের দাম ও ট্রেন্ড</div></button>
-        <button class="feature-card" onclick="navigateTo('chatbot')"><div class="feature-icon" style="background:#f3e8ff;color:#9333ea">&#129302;</div><div class="feature-title" data-i18n="chatbotTitle">AI চ্যাটবট</div><div class="feature-desc" data-i18n="chatbotDesc">কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন</div></button>
-        <button class="feature-card" onclick="navigateTo('maps')"><div class="feature-icon" style="background:var(--primary-100);color:var(--primary)">&#128506;</div><div class="feature-title" data-i18n="mapTitle">মানচিত্র</div><div class="feature-desc" data-i18n="mapDesc">বাংলাদেশের জেলা মানচিত্র</div></button>
+        <button class="feature-card" onclick="navigateTo('disease')"><div class="feature-icon tone-red"><span class="material-icons-round">scan</span></div><div class="feature-title" data-i18n="diseaseTitle">রোগ সনাক্তকরণ</div><div class="feature-desc" data-i18n="diseaseDesc">ছবি আপলোড করে ফসলের রোগ শনাক্ত করুন</div></button>
+        <button class="feature-card" onclick="navigateTo('market')"><div class="feature-icon tone-amber"><span class="material-icons-round">show_chart</span></div><div class="feature-title" data-i18n="marketTitle">বাজার বিশ্লেষণ</div><div class="feature-desc" data-i18n="marketDesc">সর্বশেষ ফসলের দাম ও ট্রেন্ড</div></button>
+        <button class="feature-card" onclick="navigateTo('chatbot')"><div class="feature-icon tone-purple"><span class="material-icons-round">chat</span></div><div class="feature-title" data-i18n="chatbotTitle">AI চ্যাটবট</div><div class="feature-desc" data-i18n="chatbotDesc">কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন</div></button>
+        <button class="feature-card" onclick="navigateTo('maps')"><div class="feature-icon tone-green"><span class="material-icons-round">map</span></div><div class="feature-title" data-i18n="mapTitle">মানচিত্র</div><div class="feature-desc" data-i18n="mapDesc">বাংলাদেশের জেলা মানচিত্র</div></button>
       </div>
     </div>
 
     <div class="section" style="padding:0;margin-bottom:28px">
-      <div class="cta-banner" onclick="navigateTo('chatbot')"><span class="cta-icon">&#128172;</span><div class="cta-text"><h3 data-i18n="ctaTitle">AI চ্যাটবটে কথা বলুন</h3><p data-i18n="ctaDesc">বাংলায় কৃষি পরামর্শ পান</p></div></div>
+      <div class="cta-banner" onclick="navigateTo('chatbot')" role="button" tabindex="0"><span class="cta-icon"><span class="material-icons-round">chat</span></span><div class="cta-text"><h3 data-i18n="ctaTitle">AI চ্যাটবটে কথা বলুন</h3><p data-i18n="ctaDesc">বাংলায় কৃষি পরামর্শ পান</p></div></div>
     </div>
 
     <div class="section" style="padding:0;margin-bottom:28px">
@@ -763,7 +763,7 @@ function setLang(l){currentLang=l;localStorage.setItem('sfLang',l);applyTranslat
 function showToast(m,ty){var c=document.getElementById('toastContainer');var e=document.createElement('div');e.className='toast '+(ty||'info');e.textContent=m;c.appendChild(e);setTimeout(function(){e.style.opacity='0';e.style.transition='opacity .3s';setTimeout(function(){if(e.parentNode)c.removeChild(e)},300)},2500)}
 function setLoading(id,ld){var b=document.getElementById(id);if(b){if(ld){b.classList.add('loading');b.disabled=true}else{b.classList.remove('loading');b.disabled=false}}}
 
-function navigateTo(p){if(p==='soil'){window.location.href='/soil.html';return}if(p==='market'){window.location.href='/market.html';return}document.querySelectorAll('.app-page').forEach(function(e){e.classList.remove('active')});document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active')});var el=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));if(el)el.classList.add('active');var ni=document.querySelector('.nav-item[data-page="'+p+'"]');if(ni)ni.classList.add('active');document.getElementById('bottomNav').style.display=(p==='chatbot'||p==='profile')?'none':'flex';var mc=document.getElementById('mainContent');if(mc)mc.style.display=(p==='home')?'block':'none';window.scrollTo(0,0);if(p==='weather')initWeatherFilter();if(p==='maps'){setTimeout(function(){if(leafletMap)leafletMap.invalidateSize()},100);initMapPage()}}
+function navigateTo(p){if(p==='soil'){window.location.href='/soil.html';return}if(p==='market'){window.location.href='/market.html';return}document.querySelectorAll('.app-page').forEach(function(e){e.classList.remove('active')});document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active')});var el=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));if(el)el.classList.add('active');var ni=document.querySelector('.nav-item[data-page="'+p+'"]');if(ni)ni.classList.add('active');document.getElementById('bottomNav').style.display=(p==='chatbot'||p==='profile')?'none':'flex';var mc=document.getElementById('mainContent');if(mc)mc.style.display=(p==='home')?'':'none';try{history.replaceState(null,'',p==='home'?location.pathname:'#'+p)}catch(e){}window.scrollTo(0,0);if(p==='weather')initWeatherFilter();if(p==='maps'){setTimeout(function(){if(leafletMap)leafletMap.invalidateSize()},100);initMapPage()}}
 function updateUserProfile(){var n=currentLang==='en'?(currentUser.nameEn||'Farmer'):(currentUser.nameBn||'কৃষক');var e=document.getElementById('userName');if(e)e.textContent=n;var p=document.getElementById('profileName');if(p)p.textContent=n;var authBtn=document.getElementById('authBtn');var logoutBtn=document.getElementById('logoutBtn');if(authBtn&&logoutBtn){if(authToken){authBtn.style.display='none';logoutBtn.style.display='flex'}else{authBtn.style.display='flex';logoutBtn.style.display='none'}}var pe=document.getElementById('profileEmail');if(pe&&currentUser.email)pe.textContent=currentUser.email}
 
 function handleDiseaseUpload(ev){
@@ -1730,6 +1730,8 @@ applyTranslations();updateUserProfile();loadDashboardData();
 // Handle hash parameter for auth modal
 var hash=window.location.hash.replace('#','');
 if(hash==='login'||hash==='register') setTimeout(function(){openAuthModal(hash)},300);
+if(['home','weather','crop','disease','chatbot','maps','notifications','profile'].indexOf(hash)>-1){setTimeout(function(){navigateTo(hash)},0)}
+window.addEventListener('hashchange',function(){var next=window.location.hash.replace('#','');if(['home','weather','crop','disease','chatbot','maps','notifications','profile'].indexOf(next)>-1)navigateTo(next)});
 
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
