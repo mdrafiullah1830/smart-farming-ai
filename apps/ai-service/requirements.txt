@@ -6,3 +6,6 @@ Pillow==10.4.0
 numpy
 httpx==0.28.1
 prometheus_client==0.21.1
+sentence-transformers==3.4.1
+faiss-cpu==1.15.1
+langchain-text-splitters==0.3.4

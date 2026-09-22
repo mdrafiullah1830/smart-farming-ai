@@ -12,7 +12,7 @@ from fastapi import FastAPI, Header, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
-from app.routers import advisory, crop, market, yield_
+from app.routers import advisory, crop, market, travel, yield_
 
 SERVICE_TOKEN = os.getenv("SERVICE_TOKEN", "")
 MODEL_PATH = os.getenv("MODEL_PATH", "/app/models/disease_model.onnx")
@@ -142,6 +142,7 @@ async def lifespan(_: FastAPI):
     crop.load()
     yield_.load()
     market.load()
+    travel.load()
     yield
 
 
@@ -193,6 +194,8 @@ async def model_version_header(request: Request, call_next):
     elif path.startswith("/v1/disease/"):
         if model_loaded:
             response.headers["X-Model-Version"] = "1.0.0"  # Disease model version from metadata
+    elif path.startswith("/v1/travel/"):
+        response.headers["X-Model-Version"] = "1.0.0"  # Travel service version
     
     return response
 
@@ -209,6 +212,7 @@ app.include_router(crop.router)
 app.include_router(yield_.router)
 app.include_router(market.router)
 app.include_router(advisory.router)
+app.include_router(travel.router)
 
 
 class DiseaseRequest(BaseModel):
@@ -239,6 +243,10 @@ async def health() -> dict[str, object]:
     `unavailable` otherwise, so an operator can see exactly what this deployment
     can serve without probing every endpoint.
     """
+    from app.travel.rag import TravelEmbedder
+    embedder = TravelEmbedder()
+    travel_ready = embedder.is_ready()
+    
     return {
         "status": "ok",
         "service": "smart-farming-ai",
@@ -249,6 +257,7 @@ async def health() -> dict[str, object]:
             "market": "ok" if market.MODEL is not None else "unavailable",
             # Advisory is rule-based; it never has an artifact to load.
             "advisory": "ok",
+            "travel": "ok" if travel_ready else "unavailable",
         },
     }
 

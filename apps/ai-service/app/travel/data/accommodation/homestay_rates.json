@@ -1,0 +1,35 @@
+{
+  "budget": {
+    "sylhet": 800,
+    "coxs_bazar": 1200,
+    "khulna": 800,
+    "barisal": 700,
+    "rangpur": 600,
+    "mymensingh": 600,
+    "sundarbans": 1500,
+    "st_martins": 1000,
+    "default": 800
+  },
+  "mid": {
+    "sylhet": 2000,
+    "coxs_bazar": 3500,
+    "khulna": 2200,
+    "barisal": 1800,
+    "rangpur": 1500,
+    "mymensingh": 1500,
+    "sundarbans": 4000,
+    "st_martins": 2500,
+    "default": 2000
+  },
+  "luxury": {
+    "sylhet": 5000,
+    "coxs_bazar": 10000,
+    "khulna": 6000,
+    "barisal": 4000,
+    "rangpur": 3000,
+    "mymensingh": 3000,
+    "sundarbans": 12000,
+    "st_martins": 6000,
+    "default": 5000
+  }
+}

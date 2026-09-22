@@ -1,0 +1,38 @@
+{
+  "budget": {
+    "dhaka": 1200,
+    "sylhet": 1000,
+    "coxs_bazar": 1500,
+    "chittagong": 1100,
+    "rajshahi": 800,
+    "khulna": 1000,
+    "barisal": 800,
+    "rangpur": 700,
+    "mymensingh": 700,
+    "default": 1000
+  },
+  "mid": {
+    "dhaka": 3500,
+    "sylhet": 2500,
+    "coxs_bazar": 4500,
+    "chittagong": 3000,
+    "rajshahi": 2000,
+    "khulna": 2800,
+    "barisal": 2200,
+    "rangpur": 1800,
+    "mymensingh": 1800,
+    "default": 2500
+  },
+  "luxury": {
+    "dhaka": 10000,
+    "sylhet": 7000,
+    "coxs_bazar": 15000,
+    "chittagong": 8000,
+    "rajshahi": 5000,
+    "khulna": 8000,
+    "barisal": 6000,
+    "rangpur": 4000,
+    "mymensingh": 4000,
+    "default": 7000
+  }
+}

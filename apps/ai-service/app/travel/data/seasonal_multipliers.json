@@ -1,0 +1,36 @@
+{
+  "monthly_multipliers": {
+    "1": 1.0,
+    "2": 1.0,
+    "3": 1.1,
+    "4": 1.15,
+    "5": 1.15,
+    "6": 1.1,
+    "7": 1.05,
+    "8": 1.05,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.15
+  },
+  "event_multipliers": {
+    "eid_ul_fitr": 1.3,
+    "eid_ul_adha": 1.25,
+    "durga_puja": 1.2,
+    "pohela_boishakh": 1.15,
+    "victory_day": 1.1,
+    "independence_day": 1.1,
+    "christmas": 1.1,
+    "new_year": 1.2
+  },
+  "event_months": {
+    "eid_ul_fitr": [4, 5, 6],
+    "eid_ul_adha": [6, 7, 8],
+    "durga_puja": [10],
+    "pohela_boishakh": [4],
+    "victory_day": [12],
+    "independence_day": [3],
+    "christmas": [12],
+    "new_year": [1]
+  }
+}

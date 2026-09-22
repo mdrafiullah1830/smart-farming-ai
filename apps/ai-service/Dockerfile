@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 # Copy application code
 COPY apps/ai-service/app/ /app/app/
 
+# Build travel RAG index
+RUN python -m app.travel.rag.index_builder
+
 # Pre-exported ONNX artifacts
 COPY apps/ai-service/models/ /app/models/
 

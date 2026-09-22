@@ -1,0 +1,23 @@
+{
+  "budget": {
+    "breakfast": 80,
+    "lunch": 150,
+    "dinner": 150,
+    "snacks_drinks": 100,
+    "daily_total": 480
+  },
+  "mid": {
+    "breakfast": 200,
+    "lunch": 400,
+    "dinner": 450,
+    "snacks_drinks": 250,
+    "daily_total": 1300
+  },
+  "luxury": {
+    "breakfast": 500,
+    "lunch": 1000,
+    "dinner": 1200,
+    "snacks_drinks": 500,
+    "daily_total": 3200
+  }
+}

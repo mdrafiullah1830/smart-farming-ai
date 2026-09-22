@@ -1,0 +1,30 @@
+{
+  "train_shovan": {
+    "base_fare_per_km": 0.8,
+    "class_multiplier": 0.5
+  },
+  "train_ac_chair": {
+    "base_fare_per_km": 1.5,
+    "class_multiplier": 0.7
+  },
+  "train_ac_berth": {
+    "base_fare_per_km": 2.0,
+    "class_multiplier": 0.9
+  },
+  "distances_km": {
+    "dhaka_sylhet": 240,
+    "dhaka_chittagong": 260,
+    "dhaka_coxs_bazar": 390,
+    "dhaka_rajshahi": 250,
+    "dhaka_khulna": 330,
+    "dhaka_barisal": 170,
+    "dhaka_rangpur": 320,
+    "dhaka_mymensingh": 120,
+    "sylhet_chittagong": 380,
+    "sylhet_coxs_bazar": 520,
+    "chittagong_coxs_bazar": 150,
+    "rajshahi_rangpur": 120,
+    "khulna_barisal": 180,
+    "barisal_coxs_bazar": 320
+  }
+}
