@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M25 0H0V25" fill="none" stroke="#163b5b" stroke-width="0.6"/></pattern>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M8 4L0 0v8z" fill="#8fdcff"/></marker>
+    <style>
+      .o{fill:none;stroke:#d8f4ff;stroke-width:2}.h{fill:none;stroke:#8fdcff;stroke-width:1.4}.c{fill:none;stroke:#5bb6dd;stroke-width:1;stroke-dasharray:8 6}.d{fill:none;stroke:#8fdcff;stroke-width:1.2;marker-start:url(#arrow);marker-end:url(#arrow)}
+      .t{fill:#d8f4ff;font:16px Arial,sans-serif}.s{fill:#8fdcff;font:13px Arial,sans-serif}.n{fill:#fff;font:bold 22px Arial,sans-serif}.title{fill:#fff;font:bold 34px Arial,sans-serif;letter-spacing:2px}.sub{fill:#8fdcff;font:15px Arial,sans-serif;letter-spacing:1px}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#061d31"/><rect width="1600" height="1000" fill="url(#grid)"/><rect x="18" y="18" width="1564" height="964" class="h"/>
+  <text x="55" y="68" fill="#ffffff" font-family="Arial,sans-serif" font-size="34" font-weight="700" letter-spacing="2">SMART SOIL ANALYZER</text>
+  <text x="55" y="96" fill="#8fdcff" font-family="Arial,sans-serif" font-size="15" letter-spacing="1">CURRENT CAD SPECIFICATION • GENERAL ARRANGEMENT • ALL DIMENSIONS IN mm</text>
+
+  <!-- Front view, 62 x 130 -->
+  <g transform="translate(120 165)">
+    <text x="0" y="-42" class="n">FRONT VIEW</text>
+    <rect x="0" y="0" width="248" height="520" rx="20" class="o"/>
+    <line x1="0" y1="280" x2="248" y2="280" class="h"/><line x1="124" y1="-15" x2="124" y2="540" class="c"/>
+    <circle cx="124" cy="112" r="24" class="o"/><text x="105" y="117" class="s">SCAN</text>
+    <circle cx="92" cy="200" r="6" class="o"/><circle cx="124" cy="200" r="6" class="o"/><circle cx="156" cy="200" r="6" class="o"/>
+    <rect x="96" y="520" width="56" height="80" rx="8" class="o"/><path d="M110 600v22q14 15 28 0v-22" class="o"/>
+    <line x1="0" y1="-20" x2="0" y2="-5" class="h"/><line x1="248" y1="-20" x2="248" y2="-5" class="h"/><line x1="4" y1="-12" x2="244" y2="-12" class="d"/><text x="113" y="-18" class="t">62</text>
+    <line x1="-36" y1="0" x2="-8" y2="0" class="h"/><line x1="-36" y1="520" x2="-8" y2="520" class="h"/><line x1="-28" y1="4" x2="-28" y2="516" class="d"/><text x="-56" y="270" class="t" transform="rotate(-90 -56 270)">130</text>
+    <line x1="262" y1="0" x2="292" y2="0" class="h"/><line x1="262" y1="280" x2="292" y2="280" class="h"/><line x1="282" y1="4" x2="282" y2="276" class="d"/><text x="300" y="146" class="s">UPPER 70</text>
+    <line x1="262" y1="280" x2="292" y2="280" class="h"/><line x1="262" y1="520" x2="292" y2="520" class="h"/><line x1="282" y1="284" x2="282" y2="516" class="d"/><text x="300" y="406" class="s">LOWER 60</text>
+    <text x="72" y="665" class="s">Ø28 × 20 ADAPTER</text>
+  </g>
+
+  <!-- Side view -->
+  <g transform="translate(520 165)">
+    <text x="0" y="-42" class="n">RIGHT SIDE</text>
+    <rect x="0" y="0" width="144" height="520" rx="18" class="o"/><line x1="0" y1="280" x2="144" y2="280" class="h"/>
+    <rect x="122" y="105" width="22" height="60" rx="3" class="o"/><text x="165" y="137" class="s">15 × 6 POWER SWITCH</text>
+    <rect x="54" y="505" width="36" height="15" rx="3" class="o"/><text x="165" y="513" class="s">9 × 4 USB CHARGE PORT (REAR)</text>
+    <rect x="44" y="520" width="56" height="80" rx="8" class="o"/>
+    <line x1="0" y1="-20" x2="0" y2="-5" class="h"/><line x1="144" y1="-20" x2="144" y2="-5" class="h"/><line x1="4" y1="-12" x2="140" y2="-12" class="d"/><text x="62" y="-18" class="t">36</text>
+    <text x="0" y="638" class="s">WALL 2.5 • CORNER R5 • MATING LIP 3</text>
+  </g>
+
+  <!-- Probe view -->
+  <g transform="translate(855 165)">
+    <text x="0" y="-28" class="n">7-IN-1 RS485 PROBE</text>
+    <line x1="95" y1="0" x2="95" y2="695" class="c"/>
+    <path d="M79 0h32v48H79z M70 48h50v42H70z" class="o"/><path d="M75 90h40v420H75z" class="o"/>
+    <path d="M75 510h40v45L95 695 75 555z" class="o"/>
+    <line x1="58" y1="90" x2="38" y2="90" class="h"/><line x1="58" y1="510" x2="38" y2="510" class="h"/><line x1="46" y1="94" x2="46" y2="506" class="d"/><text x="22" y="315" class="t" transform="rotate(-90 22 315)">300 BODY</text>
+    <line x1="58" y1="510" x2="38" y2="510" class="h"/><line x1="58" y1="695" x2="38" y2="695" class="h"/><line x1="46" y1="514" x2="46" y2="691" class="d"/><text x="22" y="630" class="t" transform="rotate(-90 22 630)">100 TIP</text>
+    <line x1="75" y1="535" x2="115" y2="535" class="d"/><text x="130" y="542" class="t">Ø25</text>
+    <text x="145" y="40" class="s">Ø8 CABLE</text><line x1="112" y1="24" x2="142" y2="36" class="h"/>
+    <text x="145" y="106" class="s">RS485 / MODBUS RTU</text><text x="145" y="132" class="s">7-IN-1 SENSING</text><text x="145" y="154" class="s">MOISTURE • TEMP • EC • pH • NPK</text>
+  </g>
+
+  <!-- Exploded layout -->
+  <g transform="translate(1260 145) scale(.68)">
+    <text x="0" y="-18" class="n">ASSEMBLY STACK</text>
+    <rect x="60" y="0" width="220" height="150" rx="18" class="o"/><text x="92" y="80" class="t">MAIN HOUSING</text>
+    <line x1="170" y1="155" x2="170" y2="195" class="c"/>
+    <rect x="60" y="200" width="220" height="128" rx="18" class="o"/><text x="92" y="270" class="t">BASE HOUSING</text>
+    <line x1="170" y1="332" x2="170" y2="372" class="c"/>
+    <rect x="115" y="378" width="110" height="52" rx="8" class="o"/><text x="119" y="410" class="s">BATTERY COVER</text>
+    <line x1="170" y1="435" x2="170" y2="475" class="c"/>
+    <rect x="140" y="480" width="60" height="72" rx="7" class="o"/><text x="218" y="520" class="s">PROBE ADAPTER</text>
+    <line x1="170" y1="556" x2="170" y2="604" class="c"/><path d="M150 608h40v220h-40z M150 828h40l-20 110z" class="o"/><text x="218" y="720" class="s">PROBE ASSEMBLY</text>
+  </g>
+
+  <!-- Notes and title block -->
+  <g transform="translate(55 862)">
+    <text x="0" y="0" class="n">KEY COMPONENTS</text>
+    <text x="0" y="30" class="s">ESP32 DEVKIT V1 • MAX485 • 2×18650 HOLDER • TP4056 • DC-DC 3.7→5 V</text>
+    <text x="0" y="54" class="s">PERFBOARD PCB • M3 FASTENERS • 1.5 × 1.5 GASKET CHANNEL</text>
+    <text x="0" y="78" class="s">ENCLOSURE: UV-RESISTANT ABS/PC • PROBE: COMMERCIAL 7-IN-1 STAINLESS STEEL</text>
+  </g>
+  <g transform="translate(1125 850)"><rect width="420" height="110" class="h"/><line x1="0" y1="48" x2="420" y2="48" class="h"/><line x1="250" y1="48" x2="250" y2="110" class="h"/>
+    <text x="18" y="34" class="n">SFA–SSA–001</text><text x="18" y="74" class="s">GENERAL ARRANGEMENT</text><text x="18" y="98" class="s">REV A • 2026-09-23</text><text x="268" y="74" class="s">SCALE: NTS</text><text x="268" y="98" class="s">SHEET 1/1</text>
+  </g>
+</svg>

@@ -9,211 +9,458 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      --primary:#16332A; --primary-dark:#0E241D; --primary-light:#2F5A48;
+      --primary-50:#E4EEE3; --primary-100:#CFE2CC;
+      --accent:#E3A23B; --accent-dark:#C9822B;
+      --error:#C15A3F; --info:#3E7C93;
+      --bg:#F6F1E4; --surface:#ffffff; --surface-hover:#faf7ef;
+      --text:#1B211D; --text-secondary:#8C8578; --text-hint:#8C8578;
+      --border:rgba(27,33,29,0.10); --border-light:rgba(27,33,29,0.06);
+      --shadow:0 1px 2px rgba(27,33,29,.04);
+      --shadow-md:0 1px 2px rgba(27,33,29,.04);
+      --shadow-lg:0 8px 24px rgba(27,33,29,.08);
+      --radius:10px; --radius-lg:16px; --radius-xl:18px;
+      --header-h:64px; --nav-h:68px;
+      --ease:cubic-bezier(.4,0,.2,1);
+      --green-deep:#0E241D; --green-mid:#2F5A48; --green-bright:#4C7A56;
+    }
+
+    /* ===== DARK MODE ===== */
+    html[data-theme="dark"] {
+      --bg:#0F1714; --surface:#15201B; --surface-hover:#1f2937;
+      --text:#E8E4D9; --text-secondary:#9A9588; --text-hint:#64748b;
+      --border:rgba(246,241,228,0.10); --border-light:rgba(246,241,228,0.06);
+      --primary-50:#1a2620; --primary-100:#243029;
+      --shadow:0 1px 3px rgba(0,0,0,.5); --shadow-md:0 4px 12px rgba(0,0,0,.5);
+      --shadow-lg:0 12px 24px rgba(0,0,0,.55);
+    }
+    html[data-theme="dark"] body { background:#0F1714; color:#E8E4D9; }
+    html[data-theme="dark"] .bg-map { opacity:.04; }
+    html[data-theme="dark"] .app-header { background:rgba(11,18,32,.88); border-bottom-color:rgba(255,255,255,.06); }
+    html[data-theme="dark"] .card, html[data-theme="dark"] .location-section,
+    html[data-theme="dark"] .filter-section, html[data-theme="dark"] .soil-report { background:#111827; border-color:#1f2937; }
+    html[data-theme="dark"] .feature-card { background:#111827; border-color:#1f2937; }
+    html[data-theme="dark"] .feature-card .feature-name { color:#4ade80; }
+    html[data-theme="dark"] .feature-values .value-name { color:#94a3b8; }
+    html[data-theme="dark"] .feature-values .value-area { color:#4ade80; }
+    html[data-theme="dark"] .feature-values li { border-bottom-color:#1e293b; }
+    html[data-theme="dark"] .stat-box { background:linear-gradient(135deg,#052e16,#0a1f10); }
+    html[data-theme="dark"] .stat-box .stat-num { color:#4ade80; }
+    html[data-theme="dark"] .stat-box .stat-label { color:#94a3b8; }
+    html[data-theme="dark"] .location-result { background:#0a1f10; }
+    html[data-theme="dark"] .location-result .location-name { color:#4ade80; }
+    html[data-theme="dark"] .filter-group label { color:#94a3b8; }
+    html[data-theme="dark"] .filter-group select { background:#111827; color:#f1f5f9; border-color:#374151; }
+    html[data-theme="dark"] .topbar-search { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.1); }
+    html[data-theme="dark"] .topbar-search input { color:#f1f5f9; }
+    html[data-theme="dark"] .topbar-search input::placeholder { color:#64748b; }
+    html[data-theme="dark"] .bottom-nav { background:rgba(11,18,32,.95); border-top-color:rgba(255,255,255,.06); }
+    html[data-theme="dark"] .nav-item.active { background:rgba(246,241,228,.10); color:#E3A23B; }
+    html[data-theme="dark"] .lang-toggle { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.1); }
+    html[data-theme="dark"] .lang-toggle .lang-btn { color:#94a3b8; }
+    html[data-theme="dark"] .lang-toggle .lang-btn.active { background:var(--primary); color:#fff; }
+    html[data-theme="dark"] .skeleton { background:linear-gradient(90deg,#1f2937 25%,#374151 50%,#1f2937 75%); background-size:200% 100%; }
+    html[data-theme="dark"] .section-title, html[data-theme="dark"] .location-section h2,
+    html[data-theme="dark"] .filter-section h2, html[data-theme="dark"] .soil-report h2 { color:#4ade80; }
+    html[data-theme="dark"] .feature-card:hover { border-color:rgba(34,197,94,.4); }
+    html[data-theme="dark"] p[style*="color:#666"], html[data-theme="dark"] .subtitle { color:#94a3b8 !important; }
+    html[data-theme="dark"] .back-btn { border-color:#E3A23B; color:#E3A23B; }
+    html[data-theme="dark"] .back-btn:hover { background:#E3A23B; color:#0E241D; }
+    html[data-theme="dark"] .no-data { color:#9A9588; }
+
     .bg-map{position:fixed;top:0;left:0;width:100%;height:100%;background:url('bangladesh-map.webp') center center no-repeat;background-size:50% auto;opacity:0.10;filter:brightness(2);pointer-events:none;z-index:1}
-    body { font-family: 'Noto Sans Bengali', 'Inter', system-ui, sans-serif; background: #f0f4f0; color: #333; }
-    html[lang="en"] body { font-family: 'Inter', 'Noto Sans Bengali', system-ui, sans-serif; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Helvetica", "Noto Sans Bengali", "Inter", system-ui, sans-serif; background: var(--bg); color: var(--text); min-height:100vh; overflow-x:hidden;
+      background-image:none;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    html[lang="en"] body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Helvetica", "Inter", system-ui, sans-serif; }
+    a { color: inherit; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
 
-    .header {
-      background: linear-gradient(135deg, #2d5016 0%, #4a7c23 50%, #6ba33d 100%);
-      color: white; padding: 20px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    /* ===== STICKY APP HEADER (matches dashboard) ===== */
+    .app-header {
+      position:sticky; top:0; z-index:100;
+      background:rgba(255,255,255,.78); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%);
+      border-bottom:1px solid rgba(0,0,0,.06);
+      padding:0 16px; height:var(--header-h);
+      display:flex; align-items:center; gap:12px;
     }
-    .header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-    .header h1 { font-size: 26px; margin-bottom: 5px; }
-    .header p { opacity: 0.9; font-size: 14px; }
-    .header nav { margin-top: 10px; }
-    .header nav a { color: #c8e6a0; text-decoration: none; margin-right: 20px; font-size: 14px; }
-    .header nav a:hover { color: white; }
+    .header-back { width:40px; height:40px; border-radius:14px; display:flex; align-items:center; justify-content:center; border:none; background:rgba(0,0,0,.04); color:var(--text); cursor:pointer; font-size:22px; transition:all .2s; text-decoration:none; flex-shrink:0; }
+    .header-back:hover { background:rgba(0,0,0,.08); transform:scale(1.05); }
+    .app-header h1 { font-size:17px; font-weight:800; flex:1; color:var(--text); letter-spacing:-.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .header-sub { font-size:11px; font-weight:500; color:var(--text-hint); display:block; margin-top:1px; letter-spacing:0; }
 
-    .lang-toggle { display: inline-flex; align-items: center; background: rgba(255,255,255,.15); border-radius: 20px; padding: 3px; gap: 0; border: 1px solid rgba(255,255,255,.2); }
-    .lang-toggle .lang-btn { padding: 5px 14px; border-radius: 18px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all .2s; font-family: inherit; background: transparent; color: rgba(255,255,255,.6); }
-    .lang-toggle .lang-btn.active { background: rgba(255,255,255,.25); color: #fff; }
+    .topbar-search { display:flex; align-items:center; gap:8px; background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.06); border-radius:100px; padding:8px 16px; min-width:0; flex:1; max-width:320px; transition:border-color .2s,box-shadow .2s; }
+    .topbar-search:focus-within { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-100); }
+    .topbar-search .material-icons-round { font-size:18px; color:var(--text-hint); flex-shrink:0; }
+    .topbar-search input { border:none; outline:none; background:transparent; font-size:14px; font-family:inherit; color:var(--text); width:100%; min-width:0; }
+    .topbar-search input::placeholder { color:var(--text-hint); }
+    @media(max-width:767px){ .topbar-search{display:none} }
 
-    .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+    .topbar-actions { display:flex; align-items:center; gap:6px; }
+    .header-action { width:40px; height:40px; border-radius:14px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--text-secondary); cursor:pointer; font-size:22px; transition:all .2s; position:relative; padding:0; }
+    .header-action:hover { background:rgba(0,0,0,.04); color:var(--text); }
 
+    .lang-toggle { display: inline-flex; align-items: center; background: rgba(0,0,0,.04); border-radius: 100px; padding: 3px; border: 1px solid rgba(0,0,0,.06); }
+    .lang-toggle .lang-btn { padding: 5px 12px; border-radius: 100px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; transition: all .2s; font-family: inherit; background: transparent; color: var(--text-hint); }
+    .lang-toggle .lang-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(22,51,42,.3); }
+
+    /* ===== CONTAINER ===== */
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 20px; position:relative; z-index:2; }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title { font-size:18px; font-weight:800; color:var(--green-deep); margin-bottom:4px; letter-spacing:-.3px; display:flex; align-items:center; gap:8px; }
+    .section-subtitle { font-size:13px; color:var(--text-secondary); margin-bottom:16px; line-height:1.6; }
+
+    /* ===== CARDS (consistent elevation) ===== */
     .location-section, .filter-section, .soil-report {
-      background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      background: var(--surface); border-radius: var(--radius-xl); padding: 28px; margin-bottom: 20px;
+      box-shadow: var(--shadow); border:1px solid rgba(0,0,0,.04);
+      transition: box-shadow .3s var(--ease);
+      position:relative; overflow:hidden;
     }
-    .location-section h2, .filter-section h2 { color: #2d5016; margin-bottom: 15px; font-size: 20px; }
+    .location-section::before, .filter-section::before, .soil-report::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:3px;
+      background:linear-gradient(90deg,var(--green-mid),var(--green-bright),var(--accent));
+      opacity:0; transition:opacity .3s;
+    }
+    .location-section:hover, .filter-section:hover, .soil-report:hover { box-shadow: var(--shadow-md); }
+    .location-section::before, .filter-section::before { opacity:1; }
+    .location-section h2, .filter-section h2 { color: var(--green-deep); margin-bottom: 6px; font-size: 18px; font-weight: 800; letter-spacing:-.3px; display:flex; align-items:center; gap:6px; }
+    .location-section h2 .icon-emoji, .filter-section h2 .icon-emoji { font-size:20px; }
 
+    /* ===== BUTTONS ===== */
     .location-btn {
-      background: linear-gradient(135deg, #4a7c23, #6ba33d);
-      color: white; border: none; padding: 14px 28px; border-radius: 8px;
-      font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 10px;
-      transition: all 0.3s;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
+      color: white; border: none; padding: 14px 28px; border-radius: var(--radius);
+      font-size: 15px; font-weight:700; cursor: pointer; display: flex; align-items: center; gap: 10px;
+      transition: all .3s var(--ease); font-family:inherit;
+      box-shadow:0 4px 16px rgba(74,124,35,.3);
     }
-    .location-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74,124,35,0.4); }
-    .location-btn:disabled { background: #999; cursor: not-allowed; transform: none; }
+    .location-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,124,35,.4); }
+    .location-btn:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow:none; }
     .location-btn .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
     .location-btn.loading .spinner { display: inline-block; }
     .location-btn.loading .btn-text { display: none; }
-    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .location-result { margin-top: 15px; padding: 15px; background: #f8fdf5; border-radius: 8px; border-left: 4px solid #4a7c23; display: none; }
+    .location-result { margin-top: 16px; padding: 16px; background: var(--primary-50); border-radius: var(--radius); border-left: 4px solid var(--primary); display: none; animation:fadeUp .3s var(--ease); }
     .location-result.show { display: block; }
-    .location-result .location-name { font-size: 18px; font-weight: 600; color: #2d5016; }
-    .location-result .location-detail { color: #666; margin-top: 5px; font-size: 14px; }
-    .location-error { color: #d32f2f; margin-top: 10px; display: none; }
+    .location-result .location-name { font-size: 17px; font-weight: 700; color: var(--primary-dark); display:flex; align-items:center; gap:6px; }
+    .location-result .location-detail { color: var(--text-secondary); margin-top: 5px; font-size: 13px; }
+    .location-error { color: var(--error); margin-top: 10px; display: none; font-size:13px; font-weight:600; }
     .location-error.show { display: block; }
 
-    .filter-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
-    .filter-group { flex: 1; min-width: 200px; }
-    .filter-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #555; font-size: 13px; }
+    /* ===== FILTERS ===== */
+    .filter-row { display: grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap: 14px; margin-bottom: 16px; }
+    .filter-group label { display: block; font-weight: 700; margin-bottom: 6px; color: var(--text-secondary); font-size: 12px; text-transform:uppercase; letter-spacing:.5px; }
     .filter-group select {
-      width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;
-      font-size: 14px; background: white; cursor: pointer; transition: border-color 0.3s;
+      width: 100%; padding: 13px 14px 13px 40px; border: 2px solid var(--border); border-radius: var(--radius);
+      font-size: 14px; font-family:inherit; background: var(--surface); cursor: pointer; transition: border-color .2s, box-shadow .2s;
+      color:var(--text); appearance:none; -webkit-appearance:none; outline:none;
     }
-    .filter-group select:focus { border-color: #4a7c23; outline: none; }
+    .filter-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-100); }
+    .filter-group select:disabled { opacity:.55; cursor:not-allowed; }
     .select-wrapper { position: relative; }
-    .select-wrapper .material-icons-round { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 18px; pointer-events: none; }
-    .select-wrapper select { padding-left: 38px; }
+    .select-wrapper .material-icons-round { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-hint); font-size: 18px; pointer-events: none; }
     .filter-btn {
-      background: #2d5016; color: white; border: none; padding: 12px 30px;
-      border-radius: 8px; font-size: 15px; cursor: pointer; transition: all 0.3s;
+      background: linear-gradient(135deg,var(--green-deep),var(--green-mid)); color: white; border: none; padding: 14px 32px;
+      border-radius: var(--radius); font-size: 15px; font-weight:700; cursor: pointer; transition: all .3s var(--ease); font-family:inherit;
+      box-shadow:0 4px 14px rgba(45,80,22,.25);
     }
-    .filter-btn:hover { background: #3d6b1e; }
-    .filter-btn:disabled { background: #999; cursor: not-allowed; }
+    .filter-btn:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(45,80,22,.35); }
+    .filter-btn:disabled { background: #94a3b8; cursor: not-allowed; transform:none; box-shadow:none; }
 
-    .soil-report { display: none; }
+    /* ===== SOIL REPORT ===== */
+    .soil-report { display: none; animation: fadeUp .4s var(--ease); }
     .soil-report.show { display: block; }
-    .soil-report h2 { color: #2d5016; margin-bottom: 5px; font-size: 22px; }
-    .soil-report .subtitle { color: #888; margin-bottom: 20px; font-size: 14px; }
+    .soil-report h2 { color: var(--green-deep); margin-bottom: 4px; font-size: 21px; font-weight: 800; letter-spacing:-.3px; }
+    .soil-report .subtitle { color: var(--text-hint); margin-bottom: 20px; font-size: 13px; }
 
-    .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 15px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
     .feature-card {
-      border: 1px solid #e8e8e8; border-radius: 10px; padding: 18px;
-      transition: all 0.3s; background: #fafafa;
+      border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;
+      transition: all .3s var(--ease); background: var(--surface); box-shadow:var(--shadow);
     }
-    .feature-card:hover { border-color: #4a7c23; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .feature-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform:translateY(-2px); }
     .feature-card .feature-name {
-      font-weight: 700; color: #2d5016; margin-bottom: 10px; font-size: 15px;
-      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; color: var(--green-deep); margin-bottom: 12px; font-size: 14px;
+      display: flex; align-items: center; gap: 8px; letter-spacing:-.2px;
     }
-    .feature-card .feature-name .icon { font-size: 18px; }
+    .feature-card .feature-name .icon { font-size: 18px; width:32px; height:32px; background:var(--primary-50); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .feature-values { list-style: none; }
     .feature-values li {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center; gap:12px;
+      padding: 8px 0; border-bottom: 1px solid var(--border-light); font-size: 13px;
     }
     .feature-values li:last-child { border-bottom: none; }
-    .feature-values .value-name { color: #555; }
-    .feature-values .value-area { font-weight: 600; color: #2d5016; }
-    .feature-values .value-bar { height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 4px; }
-    .feature-values .value-bar-fill { height: 100%; background: linear-gradient(90deg, #4a7c23, #6ba33d); border-radius: 2px; transition: width 0.5s; }
+    .feature-values .value-name { color: var(--text-secondary); }
+    .feature-values .value-area { font-weight: 700; color: var(--green-deep); font-size:13px; }
+    .feature-values .value-bar { height: 5px; background: var(--border); border-radius: 3px; margin-top: 5px; overflow:hidden; }
+    .feature-values .value-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green-mid), var(--green-bright)); border-radius: 3px; transition: width 0.6s var(--ease); }
 
-    .summary-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-box { background: linear-gradient(135deg, #f8fdf5, #e8f5e0); border-radius: 8px; padding: 15px; text-align: center; }
-    .stat-box .stat-num { font-size: 24px; font-weight: 700; color: #2d5016; }
-    .stat-box .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+    .summary-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 22px; }
+    .stat-box { background: linear-gradient(135deg, var(--primary-50), #E4EEE3); border-radius: var(--radius-lg); padding: 18px 14px; text-align: center; border:1px solid rgba(76,122,86,.1); }
+    .stat-box .stat-num { font-size: 22px; font-weight: 800; color: var(--green-deep); letter-spacing:-.5px; line-height:1.2; word-break:break-word; }
+    .stat-box .stat-label { font-size: 11px; color: var(--text-hint); margin-top: 5px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
 
     .back-btn {
-      background: none; border: 2px solid #4a7c23; color: #4a7c23;
-      padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px;
-      margin-bottom: 20px; transition: all 0.3s;
+      background: none; border: 2px solid var(--primary); color: var(--primary);
+      padding: 10px 20px; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight:700;
+      margin-bottom: 18px; transition: all .25s var(--ease); font-family:inherit;
+      display:inline-flex; align-items:center; gap:6px;
     }
-    .back-btn:hover { background: #4a7c23; color: white; }
-    .no-data { text-align: center; padding: 40px; color: #999; }
+    .back-btn:hover { background: var(--primary); color: white; transform:translateX(-3px); }
+    .no-data { text-align: center; padding: 40px; color: var(--text-hint); grid-column:1/-1; font-weight:600; }
 
-    @media (max-width: 768px) {
-      .filter-row { flex-direction: column; }
-      .feature-grid { grid-template-columns: 1fr; }
-      .header h1 { font-size: 22px; }
+    /* ===== SKELETON / SHIMMER ===== */
+    .skeleton { border-radius:8px; background:linear-gradient(90deg,rgba(0,0,0,.06) 25%,rgba(0,0,0,.11) 50%,rgba(0,0,0,.06) 75%); background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite; }
+    .skeleton-line { height:14px; margin-bottom:10px; }
+    .skeleton-line.w40{width:40%} .skeleton-line.w60{width:60%} .skeleton-line.w80{width:80%}
+    .skeleton-stat { height:36px; width:50%; margin-bottom:8px; }
+    .report-skeleton { display:none; padding:8px 0; }
+    .report-skeleton.show { display:block; }
+    .report-skeleton .skel-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; }
+    .report-skeleton .skel-card { background:var(--surface); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; }
+
+    /* ===== BOTTOM NAV (matches dashboard) ===== */
+    .bottom-nav {
+      position: fixed; bottom:0; left:0; right:0; height: var(--nav-h);
+      background: rgba(255,255,255,.85); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+      display:flex; align-items:center; justify-content:space-around;
+      box-shadow: 0 -4px 20px rgba(0,0,0,.06); z-index:200;
+      border-top:1px solid rgba(0,0,0,.04); padding-bottom:env(safe-area-inset-bottom,0);
     }
-</style>
-<link rel="stylesheet" href="design-system.css">
+    .nav-item {
+      display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 14px; border-radius:var(--radius);
+      cursor:pointer; transition:all .2s; color:var(--text-hint); border:none; background:none;
+      font-family:inherit; min-width:60px; text-decoration:none; position:relative;
+    }
+    .nav-item .material-icons-round { font-size:23px; transition:all .3s; }
+    .nav-item span:not(.material-icons-round) { font-size:10px; font-weight:700; transition:all .2s; }
+    .nav-item:hover { color:var(--text-secondary); }
+    .nav-item.active { color:var(--primary); }
+    .nav-item.active .material-icons-round {
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      width:44px; height:30px; display:flex; align-items:center; justify-content:center;
+      border-radius:15px; font-size:20px; color:#fff; box-shadow:0 4px 12px rgba(22,51,42,.3);
+    }
+    .nav-item.active::before { content:''; position:absolute; top:2px; left:50%; transform:translateX(-50%); width:16px; height:3px; border-radius:0 0 3px 3px; background:var(--primary); }
+    @media(min-width:1100px){
+      .bottom-nav { top:var(--header-h); bottom:0; left:0; right:auto; width:72px; height:auto; flex-direction:column; justify-content:flex-start; align-items:center; padding:24px 8px; border-top:0; border-right:1px solid rgba(27,33,29,.08); box-shadow:8px 0 30px rgba(27,33,29,.05); gap:6px; }
+      .nav-item { padding:10px 0; min-width:0; width:56px; }
+      .nav-item span:not(.material-icons-round) { display:none; }
+      .nav-item.active::before { display:none; }
+      .container { margin-left: calc(72px + 24px); max-width:1100px; }
+      .app-header { padding-left:88px; }
+    }
+
+    /* ===== TOAST ===== */
+    .toast-container { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; width:90%; max-width:400px; }
+    .toast { padding:14px 20px; border-radius:var(--radius); color:#fff; font-size:14px; font-weight:700; font-family:inherit; box-shadow:var(--shadow-lg); animation:fadeUp .3s ease; pointer-events:auto; }
+    .toast.success{background:var(--primary)} .toast.error{background:var(--error)} .toast.warning{background:var(--accent)} .toast.info{background:var(--info)}
+
+    /* ===== CROP RECOMMENDATION BLOCKS (inline styles cleaned via classes) ===== */
+    .rec-block { background:var(--surface); border-radius:var(--radius-lg); padding:20px; margin-bottom:16px; border:1px solid var(--border-light); box-shadow:var(--shadow); }
+    .rec-block h4 { font-size:16px; font-weight:800; color:var(--green-deep); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+    .rec-season { background:linear-gradient(135deg,var(--primary-50),var(--primary-100)); border-radius:var(--radius-lg); padding:20px; margin-bottom:16px; border:1px solid rgba(76,122,86,.2); }
+    .rec-season h4 { font-size:17px; font-weight:800; color:var(--primary); margin-bottom:6px; }
+    .rec-season p { font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.6; }
+    .rec-chips { display:flex; gap:8px; flex-wrap:wrap; }
+    .rec-chip { padding:6px 14px; background:#fff; border-radius:100px; font-size:12px; font-weight:700; color:var(--primary); border:1px solid rgba(76,122,86,.25); }
+    .rec-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+    .rec-item { background:var(--primary-50); border-radius:var(--radius); padding:16px; border:1px solid var(--primary-100); transition:transform .2s; }
+    .rec-item:hover { transform:translateY(-2px); }
+    .rec-item .rec-name { font-size:15px; font-weight:800; color:var(--green-deep); margin-bottom:5px; }
+    .rec-item .rec-reason { font-size:12px; color:var(--text-secondary); margin-bottom:8px; line-height:1.5; }
+    .rec-item .rec-conf { background:var(--primary-100); border-radius:8px; padding:4px 10px; font-size:11px; font-weight:700; color:var(--green-deep); display:inline-block; }
+    .rec-tip { padding:11px 14px; background:var(--primary-50); border-radius:var(--radius); margin-bottom:8px; font-size:13px; color:var(--text-secondary); border-left:3px solid var(--primary); line-height:1.6; }
+    .rec-fert { padding:11px 14px; background:#fffbeb; border-radius:var(--radius); margin-bottom:8px; font-size:13px; color:var(--text-secondary); border-left:3px solid var(--accent); line-height:1.6; }
+    .rec-summary { background:linear-gradient(135deg,#eff6ff,#dbeafe); border-radius:var(--radius-lg); padding:20px; border:1px solid rgba(59,130,246,.2); }
+    .rec-summary h4 { font-size:16px; font-weight:800; color:#1e40af; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+    .rec-summary-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
+    .rec-summary-item { padding:11px; background:#fff; border-radius:var(--radius); border:1px solid rgba(59,130,246,.1); }
+    .rec-summary-item .rs-label { font-size:11px; color:var(--text-hint); font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+    .rec-summary-item .rs-value { font-size:14px; font-weight:700; color:#1e40af; margin-top:3px; }
+    html[data-theme="dark"] .rec-item { background:rgba(76,122,86,.12); border-color:rgba(76,122,86,.25); }
+    html[data-theme="dark"] .rec-chip { background:#111827; }
+    html[data-theme="dark"] .rec-summary { background:linear-gradient(135deg,#0c1a3a,#0a1228); }
+    html[data-theme="dark"] .rec-summary-item { background:#111827; border-color:#1f2937; }
+    html[data-theme="dark"] .rec-season { background:linear-gradient(135deg,#052e16,#0a1f10); }
+    html[data-theme="dark"] .rec-season p { color:#94a3b8; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .app-header h1 { font-size:15px; }
+      .location-section, .filter-section, .soil-report { padding:20px; border-radius:var(--radius-lg); }
+      .container { padding:0 14px; margin-top:16px; }
+      .filter-row { grid-template-columns:1fr; }
+      body { padding-bottom:calc(var(--nav-h) + 16px); }
+      .report-skeleton .skel-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:480px){
+      .summary-stats { grid-template-columns:1fr 1fr; }
+      .stat-box .stat-num { font-size:18px; }
+      .feature-grid { grid-template-columns:1fr; }
+      .rec-grid { grid-template-columns:1fr; }
+      .rec-summary-grid { grid-template-columns:1fr 1fr; }
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  </style>
+  <link rel="stylesheet" href="design-system.css">
 </head>
 <body class="page-soil">
   <div class="bg-map"></div>
-  <div class="header">
-    <div class="header-top">
-      <div>
-        <h1 data-i18n="soilTitle">মাটি বিশ্লেষণ</h1>
-        <p data-i18n="soilSubtitle">বাংলাদেশ কৃষি গবেষণা কাউন্সিল (BARC) তথ্য</p>
-      </div>
+  <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
+
+  <!-- TOP BAR (matches dashboard) -->
+  <header class="app-header" role="banner">
+    <a class="header-back" href="/" aria-label="Back to home"><span class="material-icons-round">arrow_back</span></a>
+    <h1>
+      <span data-i18n="soilTitle">মাটি বিশ্লেষণ</span>
+      <span class="header-sub" data-i18n="soilSubtitle">বাংলাদেশ কৃষি গবেষণা কাউন্সিল (BARC) তথ্য</span>
+    </h1>
+    <div class="topbar-search" role="search">
+      <span class="material-icons-round" aria-hidden="true">search</span>
+      <input type="search" id="topbarSearchInput" placeholder="খুঁজুন..." aria-label="Search" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q)window.location.href='ai-search.html?q='+encodeURIComponent(q)}">
+    </div>
+    <div class="topbar-actions">
+      <button class="header-action" id="darkModeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Dark mode"><span class="material-icons-round" id="darkModeIcon">dark_mode</span></button>
       <div class="lang-toggle">
-        <button class="lang-btn active" onclick="setLang('bn')" id="langBtnBn">বাং</button>
-        <button class="lang-btn" onclick="setLang('en')" id="langBtnEn">EN</button>
+        <button class="lang-btn active" onclick="setLang('bn')" id="langBtnBn" aria-label="বাংলা">বাং</button>
+        <button class="lang-btn" onclick="setLang('en')" id="langBtnEn" aria-label="English">EN</button>
       </div>
     </div>
-    <nav>
-      <a href="/" data-i18n="navHome">🏠 হোম</a>
-      <a href="/dashboard.html" data-i18n="navDashboard">📊 ড্যাশবোর্ড</a>
-      <a href="/soil.html" data-i18n="navSoil">🌱 মাটি বিশ্লেষণ</a>
-    </nav>
-  </div>
+  </header>
 
-  <div class="container">
+  <main class="container" id="mainContent">
     <!-- Auto Location Section -->
-    <div class="location-section" id="locationSection">
-      <h2 data-i18n="autoDetectTitle">📍 স্বয়ংক্রিয় অবস্থান সনাক্তকরণ</h2>
-      <p style="color:#666; margin-bottom:15px;" data-i18n="autoDetectDesc">বোতামে ক্লিক করে আপনার বর্তমান অবস্থান সনাক্ত করুন এবং মাটির তথ্য স্বয়ংক্রিয়ভাবে দেখুন।</p>
-      <button class="location-btn" id="locationBtn" onclick="detectLocation()">
+    <section class="location-section" id="locationSection" aria-labelledby="autoDetectTitle">
+      <h2 id="autoDetectTitle" data-i18n="autoDetectTitle"><span class="icon-emoji" aria-hidden="true">📍</span> স্বয়ংক্রিয় অবস্থান সনাক্তকরণ</h2>
+      <p class="section-subtitle" data-i18n="autoDetectDesc">বোতামে ক্লিক করে আপনার বর্তমান অবস্থান সনাক্ত করুন এবং মাটির তথ্য স্বয়ংক্রিয়ভাবে দেখুন।</p>
+      <button class="location-btn" id="locationBtn" onclick="detectLocation()" aria-label="Detect my location">
         <span class="btn-text" data-i18n="detectBtn">📍 আমার অবস্থান সনাক্ত করুন</span>
-        <span class="spinner"></span>
+        <span class="spinner" aria-hidden="true"></span>
       </button>
-      <div class="location-result" id="locationResult">
+      <div class="location-result" id="locationResult" role="status">
         <div class="location-name" id="locationName"></div>
         <div class="location-detail" id="locationDetail"></div>
       </div>
-      <div class="location-error" id="locationError"></div>
-    </div>
+      <div class="location-error" id="locationError" role="alert"></div>
+    </section>
 
     <!-- Manual Filter Section -->
-    <div class="filter-section" id="filterSection">
-      <h2 data-i18n="manualFilterTitle">🔍 ম্যানুয়াল অবস্থান ফিল্টার</h2>
-      <p style="color:#666; margin-bottom:15px;" data-i18n="manualFilterDesc">আপনার বিভাগ → জেলা → উপজেলা নির্বাচন করে মাটি রিপোর্ট দেখুন।</p>
+    <section class="filter-section" id="filterSection" aria-labelledby="manualFilterTitle">
+      <h2 id="manualFilterTitle" data-i18n="manualFilterTitle"><span class="icon-emoji" aria-hidden="true">🔍</span> ম্যানুয়াল অবস্থান ফিল্টার</h2>
+      <p class="section-subtitle" data-i18n="manualFilterDesc">আপনার বিভাগ → জেলা → উপজেলা নির্বাচন করে মাটি রিপোর্ট দেখুন।</p>
       <div class="filter-row">
         <div class="filter-group">
-          <label data-i18n="labelDivision">বিভাগ</label>
+          <label for="divisionSelect" data-i18n="labelDivision">বিভাগ</label>
           <div class="select-wrapper">
-            <select id="divisionSelect" onchange="onDivisionChange()">
+            <select id="divisionSelect" onchange="onDivisionChange()" aria-label="Select division">
               <option value="" data-i18n="selectDivision">-- বিভাগ নির্বাচন করুন --</option>
             </select>
-            <span class="material-icons-round">account_balance</span>
+            <span class="material-icons-round" aria-hidden="true">account_balance</span>
           </div>
         </div>
         <div class="filter-group">
-          <label data-i18n="labelDistrict">জেলা</label>
+          <label for="districtSelect" data-i18n="labelDistrict">জেলা</label>
           <div class="select-wrapper">
-            <select id="districtSelect" onchange="onDistrictChange()" disabled>
+            <select id="districtSelect" onchange="onDistrictChange()" disabled aria-label="Select district">
               <option value="" data-i18n="selectDistrict">-- জেলা নির্বাচন করুন --</option>
             </select>
-            <span class="material-icons-round">location_on</span>
+            <span class="material-icons-round" aria-hidden="true">location_on</span>
           </div>
         </div>
         <div class="filter-group">
-          <label data-i18n="labelUpazila">উপজেলা</label>
+          <label for="upazilaSelect" data-i18n="labelUpazila">উপজেলা</label>
           <div class="select-wrapper">
-            <select id="upazilaSelect" disabled>
+            <select id="upazilaSelect" disabled aria-label="Select upazila">
               <option value="" data-i18n="selectUpazila">-- উপজেলা নির্বাচন করুন --</option>
             </select>
-            <span class="material-icons-round">place</span>
+            <span class="material-icons-round" aria-hidden="true">place</span>
           </div>
         </div>
       </div>
-      <button class="filter-btn" id="filterBtn" onclick="loadFilteredData()" disabled>
+      <button class="filter-btn" id="filterBtn" onclick="loadFilteredData()" disabled aria-label="View soil report">
         <span data-i18n="viewReportBtn">🔍 মাটি রিপোর্ট দেখুন</span>
       </button>
-    </div>
+    </section>
 
     <!-- Soil Report Display -->
-    <div class="soil-report" id="soilReport">
+    <section class="soil-report" id="soilReport" aria-live="polite">
       <button class="back-btn" onclick="hideReport()" data-i18n="backBtn">← ফিল্টারে ফিরুন</button>
       <h2 id="reportTitle"></h2>
       <div class="subtitle" id="reportSubtitle"></div>
+
+      <!-- Skeleton while report content renders -->
+      <div class="report-skeleton" id="reportSkeleton" aria-hidden="true">
+        <div class="skeleton skeleton-stat"></div>
+        <div class="skeleton skeleton-line w60" style="margin-bottom:18px"></div>
+        <div class="skel-grid">
+          <div class="skel-card"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w40"></div></div>
+          <div class="skel-card"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w40"></div></div>
+          <div class="skel-card"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w40"></div></div>
+        </div>
+      </div>
+
       <div class="summary-stats" id="summaryStats"></div>
 
       <!-- Crop Recommendations Section -->
       <div id="cropRecommendations" style="display:none;margin-bottom:20px"></div>
 
       <!-- Soil Features -->
-      <h3 style="font-size:18px;font-weight:700;color:#2d5016;margin-bottom:15px">📊 মাটির বৈশিষ্ট্য</h3>
+      <h3 class="section-title" style="margin-bottom:14px">📊 <span data-i18n="soilFeatures">মাটির বৈশিষ্ট্য</span></h3>
       <div class="feature-grid" id="featureGrid"></div>
-    </div>
-  </div>
+    </section>
+  </main>
+
+  <!-- BOTTOM NAV (matches dashboard) -->
+  <nav class="bottom-nav" aria-label="Primary navigation">
+    <a class="nav-item" href="/" aria-label="Home"><span class="material-icons-round">home</span><span>হোম</span></a>
+    <a class="nav-item" href="/dashboard.html" aria-label="Dashboard"><span class="material-icons-round">dashboard</span><span>ড্যাশবোর্ড</span></a>
+    <a class="nav-item active" href="/soil.html" aria-label="Soil analysis" aria-current="page"><span class="material-icons-round">soil</span><span>মাটি</span></a>
+    <a class="nav-item" href="/market.html" aria-label="Market"><span class="material-icons-round">show_chart</span><span>বাজার</span></a>
+    <a class="nav-item" href="/ai-search.html" aria-label="AI Search"><span class="material-icons-round">search</span><span>AI সার্চ</span></a>
+  </nav>
 
   <script>
     var currentLang = localStorage.getItem('sfLang') || 'bn';
+
+    // ===== DARK MODE =====
+    (function(){
+      var saved = localStorage.getItem('sfTheme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateDarkModeIcon(saved);
+    })();
+    function toggleDarkMode(){
+      var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', current);
+      localStorage.setItem('sfTheme', current);
+      updateDarkModeIcon(current);
+    }
+    function updateDarkModeIcon(theme){
+      var icon = document.getElementById('darkModeIcon');
+      if (icon) icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+      var btn = document.getElementById('darkModeToggle');
+      if (btn) btn.setAttribute('title', theme === 'dark' ? 'Light mode' : 'Dark mode');
+    }
+
+    // ===== TOAST =====
+    function showToast(msg, type){
+      var c = document.getElementById('toastContainer');
+      if(!c) return;
+      var e = document.createElement('div');
+      e.className = 'toast ' + (type || 'info');
+      e.textContent = msg;
+      c.appendChild(e);
+      setTimeout(function(){ e.style.opacity='0'; e.style.transition='opacity .3s'; setTimeout(function(){ if(e.parentNode) c.removeChild(e); },300); }, 2500);
+    }
 
     // ===== TRANSLATIONS =====
     var T = {
@@ -392,10 +639,15 @@
     let allUpazilas = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
+      document.documentElement.lang = currentLang;
+      document.getElementById('langBtnBn').classList.toggle('active', currentLang === 'bn');
+      document.getElementById('langBtnEn').classList.toggle('active', currentLang === 'en');
       applyTranslations();
-      const res = await fetch('/api/soil/districts');
-      const data = await res.json();
-      allDistricts = data.districts;
+      try {
+        const res = await fetch('/api/soil/districts');
+        const data = await res.json();
+        allDistricts = data.districts;
+      } catch (e) { allDistricts = []; }
       const divSel = document.getElementById('divisionSelect');
       Object.keys(DIVISIONS).forEach(div => {
         const opt = document.createElement('option');
@@ -526,10 +778,13 @@
       const report = document.getElementById('soilReport');
       const grid = document.getElementById('featureGrid');
       const stats = document.getElementById('summaryStats');
+      const skel = document.getElementById('reportSkeleton');
 
       document.getElementById('reportTitle').textContent = t('reportTitle') + ' ' + data.upazila + ', ' + data.district;
       document.getElementById('reportSubtitle').textContent =
         t('reportSource') + (data.coords ? ' | ' + (currentLang === 'bn' ? 'স্থানাঙ্ক' : 'Lat') + ': ' + data.coords[0] + ', ' + (currentLang === 'bn' ? 'দ্রাঘিমাংশ' : 'Lng') + ': ' + data.coords[1] : '');
+
+      if (skel) { stats.innerHTML = ''; grid.innerHTML = ''; skel.classList.add('show'); }
 
       const features = data.features;
       const featureCount = Object.keys(features).length;
@@ -560,7 +815,7 @@
           '<ul class="feature-values">' +
           values.sort((a, b) => (b.area_ha || 0) - (a.area_ha || 0)).map(function(v) {
             var pct = totalFeatArea > 0 ? ((v.area_ha / totalFeatArea) * 100).toFixed(1) : 0;
-            return '<li><div style="flex:1"><div class="value-name">' + v.value + '</div><div class="value-bar"><div class="value-bar-fill" style="width:' + pct + '%"></div></div></div><div style="text-align:right;min-width:100px"><span class="value-area">' + (v.area_ha || 0).toLocaleString() + ' Ha</span><div style="font-size:11px;color:#888">' + pct + '%</div></div></li>';
+            return '<li><div style="flex:1"><div class="value-name">' + v.value + '</div><div class="value-bar"><div class="value-bar-fill" style="width:' + pct + '%"></div></div></div><div style="text-align:right;min-width:100px"><span class="value-area">' + (v.area_ha || 0).toLocaleString() + ' Ha</span><div style="font-size:11px;color:var(--text-hint)">' + pct + '%</div></div></li>';
           }).join('') +
           '</ul>';
         grid.appendChild(card);
@@ -571,6 +826,7 @@
       }
 
       report.classList.add('show');
+      requestAnimationFrame(function(){ if (skel) skel.classList.remove('show'); });
       report.scrollIntoView({ behavior: 'smooth' });
 
       // Load crop recommendations
@@ -579,37 +835,39 @@
 
     async function loadCropRecommendations(district, upazila) {
       try {
+        const recSection = document.getElementById('cropRecommendations');
+        if (recSection) {
+          recSection.style.display = 'block';
+          recSection.innerHTML = '<div class="rec-block"><div class="skeleton skeleton-line w40"></div><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div></div>';
+        }
         const res = await fetch('/api/soil/crop-recommendation/' + encodeURIComponent(district) + '/' + encodeURIComponent(upazila));
         const data = await res.json();
-        if (data.error) return;
-
-        const recSection = document.getElementById('cropRecommendations');
-        if (!recSection) return;
+        if (data.error) { if (recSection) { recSection.innerHTML = ''; recSection.style.display = 'none'; } return; }
 
         let html = '';
 
         // Season advice
         if (data.seasonAdvice) {
-          html += '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(34,197,94,.2)">';
-          html += '<div style="font-size:18px;font-weight:700;color:#16a34a;margin-bottom:8px">🌾 ' + data.seasonAdvice.season + '</div>';
+          html += '<div style="background:linear-gradient(135deg,#E4EEE3,#F6F1E4);border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(76,122,86,.2)">';
+          html += '<div style="font-size:18px;font-weight:700;color:#16332A;margin-bottom:8px">🌾 ' + data.seasonAdvice.season + '</div>';
           html += '<div style="font-size:14px;color:#555;margin-bottom:10px">' + data.seasonAdvice.advice + '</div>';
           html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
           data.seasonAdvice.crops.forEach(function(crop) {
-            html += '<span style="padding:6px 14px;background:#fff;border-radius:20px;font-size:13px;font-weight:600;color:#16a34a;border:1px solid rgba(34,197,94,.2)">' + crop + '</span>';
+            html += '<span style="padding:6px 14px;background:#fff;border-radius:20px;font-size:13px;font-weight:600;color:#16332A;border:1px solid rgba(27,33,29,.10)">' + crop + '</span>';
           });
           html += '</div></div>';
         }
 
         // Crop recommendations
         if (data.recommendations && data.recommendations.length > 0) {
-          html += '<div style="background:white;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e8e8e8;box-shadow:0 2px 8px rgba(0,0,0,.05)">';
-          html += '<div style="font-size:18px;font-weight:700;color:#2d5016;margin-bottom:15px">🌱 ফসল সুপারিশ</div>';
+          html += '<div style="background:white;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(27,33,29,.10);box-shadow:0 1px 2px rgba(27,33,29,.04)">';
+          html += '<div style="font-size:18px;font-weight:700;color:#0E241D;margin-bottom:15px">🌱 ফসল সুপারিশ</div>';
           html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">';
           data.recommendations.forEach(function(rec) {
-            html += '<div style="background:#f8fdf5;border-radius:10px;padding:14px;border:1px solid #e8f5e0">';
-            html += '<div style="font-size:16px;font-weight:700;color:#2d5016;margin-bottom:6px">' + rec.name + '</div>';
+            html += '<div style="background:#E4EEE3;border-radius:10px;padding:14px;border:1px solid rgba(76,122,86,.15)">';
+            html += '<div style="font-size:16px;font-weight:700;color:#0E241D;margin-bottom:6px">' + rec.name + '</div>';
             html += '<div style="font-size:12px;color:#666;margin-bottom:8px">' + rec.reason + '</div>';
-            html += '<div style="background:#e8f5e0;border-radius:6px;padding:4px 10px;font-size:11px;color:#2d5016;display:inline-block">সম্ভাবনা: ' + rec.confidence + '%</div>';
+            html += '<div style="background:#CFE2CC;border-radius:6px;padding:4px 10px;font-size:11px;color:#0E241D;display:inline-block">সম্ভাবনা: ' + rec.confidence + '%</div>';
             html += '</div>';
           });
           html += '</div></div>';
@@ -617,20 +875,20 @@
 
         // Soil tips
         if (data.soilTips && data.soilTips.length > 0) {
-          html += '<div style="background:white;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e8e8e8;box-shadow:0 2px 8px rgba(0,0,0,.05)">';
-          html += '<div style="font-size:18px;font-weight:700;color:#2d5016;margin-bottom:15px">💡 মাটির পরামর্শ</div>';
+          html += '<div style="background:white;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(27,33,29,.10);box-shadow:0 1px 2px rgba(27,33,29,.04)">';
+          html += '<div style="font-size:18px;font-weight:700;color:#0E241D;margin-bottom:15px">💡 মাটির পরামর্শ</div>';
           data.soilTips.forEach(function(tip) {
-            html += '<div style="padding:10px 14px;background:#f8fdf5;border-radius:8px;margin-bottom:8px;font-size:14px;color:#555;border-left:3px solid #4a7c23">' + tip + '</div>';
+            html += '<div style="padding:10px 14px;background:#E4EEE3;border-radius:8px;margin-bottom:8px;font-size:14px;color:#555;border-left:3px solid #4C7A56">' + tip + '</div>';
           });
           html += '</div>';
         }
 
         // Fertilizer recommendations
         if (data.fertilizerTips && data.fertilizerTips.length > 0) {
-          html += '<div style="background:white;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e8e8e8;box-shadow:0 2px 8px rgba(0,0,0,.05)">';
-          html += '<div style="font-size:18px;font-weight:700;color:#2d5016;margin-bottom:15px">🧪 সার সুপারিশ</div>';
+          html += '<div style="background:white;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(27,33,29,.10);box-shadow:0 1px 2px rgba(27,33,29,.04)">';
+          html += '<div style="font-size:18px;font-weight:700;color:#0E241D;margin-bottom:15px">🧪 সার সুপারিশ</div>';
           data.fertilizerTips.forEach(function(tip) {
-            html += '<div style="padding:10px 14px;background:#fff8e1;border-radius:8px;margin-bottom:8px;font-size:14px;color:#555;border-left:3px solid #f59e0b">' + tip + '</div>';
+            html += '<div style="padding:10px 14px;background:#FDF0DA;border-radius:8px;margin-bottom:8px;font-size:14px;color:#555;border-left:3px solid #E3A23B">' + tip + '</div>';
           });
           html += '</div>';
         }

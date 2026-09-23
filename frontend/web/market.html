@@ -8,10 +8,10 @@
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 
 <style>
-:root{--primary:#16a34a;--primary-dark:#15803d;--primary-light:#22c55e;--primary-50:#f0fdf4;--primary-100:#dcfce7;--primary-glow:rgba(34,197,94,.15);--accent:#f59e0b;--accent-dark:#d97706;--accent-glow:rgba(245,158,11,.15);--error:#ef4444;--error-light:#fef2f2;--info:#3b82f6;--info-light:#eff6ff;--purple:#8b5cf6;--purple-light:#a78bfa;--bg:#f0f4f8;--surface:#ffffff;--surface-hover:#f1f5f9;--text:#0f172a;--text-secondary:#64748b;--text-hint:#94a3b8;--border:#e2e8f0;--border-light:#f1f5f9;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.08);--shadow-lg:0 12px 24px rgba(0,0,0,.1);--shadow-xl:0 20px 40px rgba(0,0,0,.12);--radius:14px;--radius-lg:18px;--radius-xl:24px;--radius-2xl:28px}
+:root{--primary:#16332A;--primary-dark:#0E241D;--primary-light:#2F5A48;--primary-50:#E4EEE3;--primary-100:#CFE2CC;--primary-glow:rgba(22,51,42,.15);--accent:#E3A23B;--accent-dark:#C9822B;--accent-glow:rgba(227,162,59,.18);--error:#C15A3F;--error-light:#FBE8E4;--info:#3E7C93;--info-light:#E1EEF3;--purple:#8b5cf6;--purple-light:#a78bfa;--bg:#F6F1E4;--surface:#ffffff;--surface-hover:#faf7ef;--text:#1B211D;--text-secondary:#8C8578;--text-hint:#8C8578;--border:rgba(27,33,29,0.10);--border-light:rgba(27,33,29,0.06);--shadow:0 1px 2px rgba(27,33,29,.04);--shadow-md:0 1px 2px rgba(27,33,29,.04);--shadow-lg:0 8px 24px rgba(27,33,29,.08);--shadow-xl:0 16px 40px rgba(27,33,29,.12);--radius:10px;--radius-lg:16px;--radius-xl:18px;--radius-2xl:20px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 .bg-map{position:fixed;top:0;left:0;width:100%;height:100%;background:url('bangladesh-map.webp') center center no-repeat;background-size:50% auto;opacity:0.10;filter:brightness(2);pointer-events:none;z-index:1}
-body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","Helvetica","Noto Sans Bengali","Inter",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 .screen{display:none;min-height:100vh}.screen.active{display:block;animation:fadeUp .4s cubic-bezier(.4,0,.2,1)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
@@ -31,7 +31,7 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
 .app-content{padding:20px 16px;padding-bottom:100px}
 
 /* ===== HERO MARKET CARD ===== */
-.market-hero{background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);border-radius:var(--radius-2xl);padding:28px 24px;color:#fff;position:relative;overflow:hidden;margin-bottom:24px}
+.market-hero{background:linear-gradient(135deg,#16332A 0%,#0E241D 50%,#16332A 100%);border-radius:var(--radius-2xl);padding:28px 24px;color:#fff;position:relative;overflow:hidden;margin-bottom:24px}
 .market-hero::before{content:'';position:absolute;top:-50%;right:-30%;width:300px;height:300px;background:radial-gradient(circle,rgba(34,197,94,.3) 0%,transparent 70%);border-radius:50%}
 .market-hero::after{content:'';position:absolute;bottom:-40%;left:-20%;width:200px;height:200px;background:radial-gradient(circle,rgba(245,158,11,.2) 0%,transparent 70%);border-radius:50%}
 .market-hero .hero-content{position:relative;z-index:1}
@@ -41,7 +41,7 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
 .market-hero .hero-subtitle{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:20px;line-height:1.6}
 .market-hero .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .market-hero .hero-stat{text-align:center;padding:14px 8px;background:rgba(255,255,255,.08);border-radius:var(--radius-lg);border:1px solid rgba(255,255,255,.1)}
-.market-hero .hero-stat .stat-value{font-size:22px;font-weight:800;color:#22c55e}
+.market-hero .hero-stat .stat-value{font-size:22px;font-weight:800;color:#E3A23B}
 .market-hero .hero-stat .stat-label{font-size:11px;color:rgba(255,255,255,.6);margin-top:4px}
 
 /* ===== TABS ===== */
@@ -75,8 +75,8 @@ body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var
 .price-value-box{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .price-range{font-size:15px;font-weight:800;color:var(--text)}
 .price-change{font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;display:inline-flex;align-items:center;gap:2px}
-.price-change.up{color:#16a34a;background:rgba(22,163,74,.1)}
-.price-change.down{color:#ef4444;background:rgba(239,68,68,.1)}
+.price-change.up{color:#16332A;background:rgba(22,51,42,.1)}
+.price-change.down{color:#C15A3F;background:rgba(193,90,63,.1)}
 .price-change.stable{color:#64748b;background:rgba(100,116,139,.1)}
 
 /* ===== CHART CARD ===== */
@@ -646,12 +646,12 @@ function initChart(){
         datasets:[{
           label:'দাম (৳/কেজি)',
           data:data.prices,
-          borderColor:'#16a34a',
+          borderColor:'#16332A',
           backgroundColor:'rgba(34,197,94,.1)',
           borderWidth:2.5,
           fill:true,
           tension:.4,
-          pointBackgroundColor:'#16a34a',
+          pointBackgroundColor:'#16332A',
           pointBorderColor:'#fff',
           pointBorderWidth:2,
           pointRadius:4,

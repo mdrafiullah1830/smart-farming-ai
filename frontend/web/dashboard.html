@@ -9,11 +9,11 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-:root{--primary:#16a34a;--primary-dark:#15803d;--primary-light:#22c55e;--primary-50:#f0fdf4;--primary-100:#dcfce7;--primary-glow:rgba(34,197,94,.15);--accent:#f59e0b;--accent-dark:#d97706;--accent-glow:rgba(245,158,11,.15);--error:#ef4444;--error-light:#fef2f2;--info:#3b82f6;--info-light:#eff6ff;--purple:#8b5cf6;--bg:#f0f4f8;--surface:#ffffff;--surface-hover:#f1f5f9;--text:#0f172a;--text-secondary:#64748b;--text-hint:#94a3b8;--border:#e2e8f0;--border-light:#f1f5f9;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);--shadow-lg:0 12px 24px rgba(0,0,0,.1),0 4px 8px rgba(0,0,0,.05);--shadow-xl:0 20px 40px rgba(0,0,0,.12);--radius:14px;--radius-lg:18px;--radius-xl:24px;--radius-2xl:28px;--nav-height:72px;--header-height:60px}
+:root{--primary:#16332A;--primary-dark:#0E241D;--primary-light:#2F5A48;--primary-50:#E4EEE3;--primary-100:#CFE2CC;--primary-glow:rgba(22,51,42,.15);--accent:#E3A23B;--accent-dark:#C9822B;--accent-glow:rgba(227,162,59,.18);--error:#C15A3F;--error-light:#FBE8E4;--info:#3E7C93;--info-light:#E1EEF3;--purple:#8b5cf6;--bg:#F6F1E4;--surface:#ffffff;--surface-hover:#faf7ef;--text:#1B211D;--text-secondary:#8C8578;--text-hint:#8C8578;--border:rgba(27,33,29,0.10);--border-light:rgba(27,33,29,0.06);--shadow:0 1px 2px rgba(27,33,29,.04),0 1px 2px rgba(27,33,29,.04);--shadow-md:0 1px 2px rgba(27,33,29,.04);--shadow-lg:0 8px 24px rgba(27,33,29,.08);--shadow-xl:0 16px 40px rgba(27,33,29,.12);--radius:10px;--radius-lg:16px;--radius-xl:18px;--radius-2xl:20px;--nav-height:72px;--header-height:64px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 .bg-map{position:fixed;top:0;left:0;width:100%;height:100%;background:url('bangladesh-map.webp') center center no-repeat;background-size:50% auto;opacity:0.10;filter:brightness(2);pointer-events:none;z-index:1}
-body{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;background-image:radial-gradient(at 100% 0%,rgba(34,197,94,.05) 0%,transparent 50%),radial-gradient(at 0% 100%,rgba(59,130,246,.03) 0%,transparent 50%)}
-html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-serif}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","Helvetica","Noto Sans Bengali","Inter",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background-image:none}
+html[lang="en"] body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","Helvetica","Inter",system-ui,sans-serif}
 .screen{display:none;min-height:100vh}.screen.active{display:block;animation:fadeUp .4s cubic-bezier(.4,0,.2,1)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
@@ -31,11 +31,11 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}}
 .lang-toggle{display:inline-flex;align-items:center;background:rgba(0,0,0,.04);border-radius:20px;padding:3px;border:1px solid rgba(0,0,0,.06)}
 .lang-toggle .lang-btn{padding:5px 12px;border-radius:18px;font-size:11px;font-weight:700;border:none;cursor:pointer;transition:all .2s;font-family:inherit;background:transparent;color:var(--text-hint)}
-.lang-toggle .lang-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(22,163,74,.3)}
+.lang-toggle .lang-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(22,51,42,.3)}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);letter-spacing:-.2px}
-.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.3)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(22,163,74,.4)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 4px 16px rgba(22,51,42,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(22,51,42,.4)}
 .btn-block{width:100%}
 .btn .spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:none}
 .btn.loading .spinner{display:block}.btn.loading span{opacity:0}
@@ -59,7 +59,7 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 .card-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .card-icon{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;transition:all .3s}
 .card:hover .card-icon{transform:scale(1.08)}
-.card-icon.green{background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(34,197,94,.05));color:var(--primary)}.card-icon.orange{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.05));color:var(--accent-dark)}.card-icon.blue{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(59,130,246,.05));color:var(--info)}.card-icon.red{background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(239,68,68,.05));color:var(--error)}
+.card-icon.green{background:linear-gradient(135deg,rgba(76,122,86,.1),rgba(76,122,86,.05));color:var(--primary)}.card-icon.orange{background:linear-gradient(135deg,rgba(227,162,59,.1),rgba(227,162,59,.05));color:var(--accent-dark)}.card-icon.blue{background:linear-gradient(135deg,rgba(62,124,147,.1),rgba(62,124,147,.05));color:var(--info)}.card-icon.red{background:linear-gradient(135deg,rgba(193,90,63,.1),rgba(193,90,63,.05));color:var(--error)}
 .card-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.3px}.card-subtitle{font-size:13px;color:var(--text-secondary);margin-top:2px}
 
 .section{padding:0 16px;margin-bottom:28px}.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.section-title{font-size:18px;font-weight:700;color:var(--text)}
@@ -68,7 +68,7 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-height);background:rgba(255,255,255,.8);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);display:flex;align-items:center;justify-content:space-around;box-shadow:0 -4px 20px rgba(0,0,0,.06);z-index:200;border-top:1px solid rgba(0,0,0,.04);padding-bottom:env(safe-area-inset-bottom,0)}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 16px;border-radius:var(--radius);cursor:pointer;transition:all .2s;color:var(--text-hint);border:none;background:none;font-family:inherit;min-width:64px}
 .nav-item .material-icons-round{font-size:24px;transition:all .3s}.nav-item span{font-size:11px;font-weight:600;transition:all .2s}
-.nav-item.active{color:var(--primary)}.nav-item.active .material-icons-round{background:linear-gradient(135deg,var(--primary),var(--primary-light));width:44px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:22px;color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.3)}
+.nav-item.active{color:var(--primary)}.nav-item.active .material-icons-round{background:linear-gradient(135deg,var(--primary),var(--primary-light));width:44px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:22px;color:#fff;box-shadow:0 4px 12px rgba(22,51,42,.3)}
 
 .quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .quick-action{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 8px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);border:1px solid rgba(0,0,0,.04);font-family:inherit;position:relative;overflow:hidden}
@@ -140,7 +140,7 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 .notification-item .notif-icon{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px}
 .notification-item .notif-content{flex:1}.notification-item .notif-title{font-size:14px;font-weight:700}.notification-item .notif-text{font-size:13px;color:var(--text-secondary);margin-top:4px;line-height:1.5}.notification-item .notif-time{font-size:11px;color:var(--text-hint);margin-top:8px}
 
-.profile-header{text-align:center;padding:32px 24px;background:linear-gradient(160deg,#15803d 0%,#16a34a 50%,#22c55e 100%);border-radius:0 0 var(--radius-2xl) var(--radius-2xl);color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
+.profile-header{text-align:center;padding:32px 24px;background:linear-gradient(160deg,#0E241D 0%,#16332A 50%,#2F5A48 100%);border-radius:0 0 var(--radius-2xl) var(--radius-2xl);color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
 .profile-header::before{content:'';position:absolute;top:-40%;right:-20%;width:250px;height:250px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%}
 .profile-avatar{width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:40px;border:3px solid rgba(255,255,255,.3);position:relative;z-index:1}
 .profile-header h2{font-size:22px;font-weight:700;position:relative;z-index:1}.profile-header p{font-size:14px;opacity:.85;margin-top:4px;position:relative;z-index:1}
@@ -170,7 +170,7 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 .map-placeholder .material-icons-round{font-size:56px;margin-bottom:10px}.map-placeholder p{font-size:15px;font-weight:600}
 .leaflet-control-zoom a{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important}
 .leaflet-popup-content-wrapper{border-radius:var(--radius)!important;box-shadow:var(--shadow-lg)!important}
-.leaflet-popup-content{margin:12px 16px!important;font-family:'Noto Sans Bengali','Inter',sans-serif!important}
+.leaflet-popup-content{margin:12px 16px!important;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Noto Sans Bengali",sans-serif!important}
 .leaflet-popup-content b{font-size:14px}
 .leaflet-control-attribution{font-size:10px!important}
 .leaflet-control-attribution a{color:var(--primary)!important}
@@ -232,6 +232,148 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 @media(max-width:767px){.app-header{padding:0 12px}.app-header h1{font-size:15px}.app-content{padding:20px 14px 96px}.section{padding:0}.quick-actions{gap:8px}.quick-action{padding:13px 6px}.feature-card{padding:16px}.weather-temp{font-size:52px}}
 @media(max-width:380px){.quick-actions{grid-template-columns:repeat(2,1fr)}.lang-toggle .lang-btn{padding:5px 8px}.app-header .header-action{width:36px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ===== DESIGN SYSTEM TOKENS ===== */
+:root{--topbar-h:64px;--sidebar-w:248px;--sidebar-collapsed:72px;--ease:cubic-bezier(.4,0,.2,1)}
+
+/* ===== DARK MODE (CSS variables) ===== */
+html[data-theme="dark"]{
+  --bg:#0b1220;--surface:#111827;--surface-hover:#1f2937;
+  --text:#f1f5f9;--text-secondary:#94a3b8;--text-hint:#64748b;
+  --border:#1f2937;--border-light:#1e293b;
+  --primary-50:#052e16;--primary-100:#14532d;
+  --error-light:#450a0a;--info-light:#172554;
+  --shadow:0 1px 3px rgba(0,0,0,.5),0 1px 2px rgba(0,0,0,.35);
+  --shadow-md:0 4px 12px rgba(0,0,0,.5),0 2px 4px rgba(0,0,0,.35);
+  --shadow-lg:0 12px 24px rgba(0,0,0,.55),0 4px 8px rgba(0,0,0,.35);
+  --shadow-xl:0 20px 40px rgba(0,0,0,.6);
+}
+html[data-theme="dark"] body{background-image:none}
+html[data-theme="dark"] .app-header{background:rgba(11,18,32,.85);border-bottom-color:rgba(255,255,255,.06)}
+html[data-theme="dark"] .bg-map{opacity:.04}
+html[data-theme="dark"] .bottom-nav{background:rgba(11,18,32,.95);border-right-color:rgba(255,255,255,.06);box-shadow:8px 0 30px rgba(0,0,0,.4);border-top-color:rgba(255,255,255,.05)}
+html[data-theme="dark"] .nav-item.active{background:rgba(246,241,228,.10);color:#E3A23B}
+html[data-theme="dark"] .form-select,html[data-theme="dark"] .input-wrapper input,html[data-theme="dark"] select{background:#111827;color:#f1f5f9;border-color:#374151}
+html[data-theme="dark"] .quick-action,html[data-theme="dark"] .feature-card,html[data-theme="dark"] .npk-card,html[data-theme="dark"] .forecast-item,html[data-theme="dark"] .map-data-card,html[data-theme="dark"] .notification-item,html[data-theme="dark"] .market-item,html[data-theme="dark"] .profile-menu-item{background:#111827;border-color:#1f2937}
+html[data-theme="dark"] .section-tab,html[data-theme="dark"] .map-tab{background:#111827;border-color:#374151;color:#94a3b8}
+html[data-theme="dark"] .section-tab.active,html[data-theme="dark"] .map-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+html[data-theme="dark"] .upload-area{background:#111827;border-color:#374151}
+html[data-theme="dark"] .lang-toggle{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+html[data-theme="dark"] .topbar-search{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+html[data-theme="dark"] .topbar-search input{color:#f1f5f9}
+html[data-theme="dark"] .topbar-search input::placeholder{color:#64748b}
+html[data-theme="dark"] .user-dropdown{background:#111827;border-color:#1f2937}
+html[data-theme="dark"] .user-dropdown button{color:#e2e8f0}
+html[data-theme="dark"] .user-dropdown button:hover{background:rgba(34,197,94,.12)}
+html[data-theme="dark"] .stat-card{background:#111827;border-color:#1f2937}
+html[data-theme="dark"] .card{background:#111827;border-color:#1f2937}
+html[data-theme="dark"] .auth-tab.active{background:#111827}
+html[data-theme="dark"] .chat-input-area input{background:#0b1220;border-color:#374151;color:#f1f5f9}
+html[data-theme="dark"] .skeleton{background:linear-gradient(90deg,#1f2937 25%,#374151 50%,#1f2937 75%);background-size:200% 100%}
+
+/* ===== TOP BAR SEARCH ===== */
+.topbar-search{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);border-radius:100px;padding:8px 16px;min-width:0;flex:1;max-width:360px;transition:border-color .2s,box-shadow .2s}
+.topbar-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-100)}
+.topbar-search .material-icons-round{font-size:18px;color:var(--text-hint);flex-shrink:0}
+.topbar-search input{border:none;outline:none;background:transparent;font-size:14px;font-family:inherit;color:var(--text);width:100%;min-width:0}
+.topbar-search input::placeholder{color:var(--text-hint)}
+@media(max-width:767px){.topbar-search{display:none}}
+
+/* ===== TOP BAR ACTIONS ===== */
+.topbar-actions{display:flex;align-items:center;gap:6px}
+.header-action .badge{width:auto;min-width:18px;height:18px;padding:0 5px;font-size:10px;font-weight:800;line-height:18px;text-align:center;border-radius:9px;background:var(--error);color:#fff;border:2px solid var(--surface);animation:none;position:absolute;top:4px;right:4px}
+
+/* ===== DARK MODE TOGGLE ===== */
+#darkModeToggle .material-icons-round{transition:transform .4s var(--ease)}
+#darkModeToggle:hover .material-icons-round{transform:rotate(20deg)}
+
+/* ===== USER AVATAR DROPDOWN ===== */
+.user-menu{position:relative}
+.user-avatar-btn{width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:linear-gradient(135deg,var(--primary-100),var(--primary));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all .2s}
+.user-avatar-btn:hover{border-color:var(--primary);transform:scale(1.05)}
+.user-avatar-btn .material-icons-round{font-size:22px}
+.user-dropdown{position:absolute;top:calc(100% + 10px);right:0;min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:8px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .22s var(--ease);z-index:1100}
+.user-dropdown.open{opacity:1;visibility:visible;transform:translateY(0)}
+.user-dropdown-header{padding:12px 14px;border-bottom:1px solid var(--border-light);margin-bottom:6px}
+.user-dropdown-header .u-name{font-size:14px;font-weight:700;color:var(--text);display:block}
+.user-dropdown-header .u-email{font-size:12px;color:var(--text-secondary);display:block;margin-top:2px;word-break:break-all}
+.user-dropdown button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border:none;background:transparent;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:inherit;color:var(--text);cursor:pointer;transition:background .15s;text-align:left}
+.user-dropdown button:hover{background:var(--surface-hover)}
+.user-dropdown button.danger{color:var(--error)}
+.user-dropdown button .material-icons-round{font-size:18px;color:var(--text-secondary)}
+.user-dropdown button.danger .material-icons-round{color:var(--error)}
+
+/* ===== SIDEBAR TOGGLE (desktop) ===== */
+.sidebar-toggle{display:none}
+@media(min-width:1100px){.sidebar-toggle{display:flex}}
+body.sidebar-collapsed .bottom-nav{width:var(--sidebar-collapsed)!important;padding-left:8px!important;padding-right:8px!important}
+body.sidebar-collapsed .bottom-nav .nav-item{justify-content:center!important;gap:0!important;padding:13px 0!important}
+body.sidebar-collapsed .bottom-nav .nav-item span:not(.material-icons-round){display:none}
+body.sidebar-collapsed .app-header{margin-left:var(--sidebar-collapsed)!important}
+body.sidebar-collapsed .screen>.app-content{margin-left:var(--sidebar-collapsed)!important}
+body.sidebar-collapsed .sidebar-section-label{display:none}
+
+/* ===== SIDEBAR SECTION LABELS ===== */
+.sidebar-section-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text-hint);padding:14px 16px 6px;user-select:none}
+
+/* ===== SIDEBAR ACTIVE INDICATOR ===== */
+.bottom-nav .nav-item{position:relative}
+.bottom-nav .nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:0 3px 3px 0;background:var(--primary)}
+
+/* ===== STAT CARDS (KPI GRID) ===== */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.stat-card{background:var(--surface);border:1px solid rgba(0,0,0,.04);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease);display:flex;flex-direction:column;gap:12px}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:0;transition:opacity .3s}
+.stat-card:hover::after{opacity:1}
+.stat-card.tone-blue::after{background:linear-gradient(90deg,#3E7C93,#7dd3fc)}
+.stat-card.tone-amber::after{background:linear-gradient(90deg,#E3A23B,#C9822B)}
+.stat-card.tone-red::after{background:linear-gradient(90deg,#C15A3F,#f87171)}
+.stat-card.tone-green::after{background:linear-gradient(90deg,var(--primary),var(--primary-light))}
+.stat-card-top{display:flex;align-items:center;justify-content:space-between}
+.stat-card-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.stat-card-icon.tone-blue{background:linear-gradient(135deg,rgba(62,124,147,.14),rgba(62,124,147,.05));color:#3E7C93}
+.stat-card-icon.tone-amber{background:linear-gradient(135deg,rgba(227,162,59,.14),rgba(227,162,59,.05));color:#C9822B}
+.stat-card-icon.tone-red{background:linear-gradient(135deg,rgba(193,90,63,.14),rgba(193,90,63,.05));color:#C15A3F}
+.stat-card-icon.tone-green{background:linear-gradient(135deg,rgba(76,122,86,.14),rgba(76,122,86,.05));color:var(--primary)}
+.stat-card-value{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1;color:var(--text)}
+.stat-card-label{font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:2px}
+.stat-card-sub{font-size:12px;color:var(--text-hint);margin-top:2px}
+.stat-card-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;margin-top:auto;transition:gap .2s}
+.stat-card-link:hover{gap:8px}
+.stat-card-link .material-icons-round{font-size:16px}
+.stat-card-live{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--primary-100);color:var(--primary);border-radius:100px;font-size:10px;font-weight:800;letter-spacing:.04em}
+.stat-card-live .dot{width:6px;height:6px;background:var(--primary);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+
+/* ===== SKELETON / SHIMMER ===== */
+.skeleton{border-radius:8px;background:linear-gradient(90deg,rgba(0,0,0,.06) 25%,rgba(0,0,0,.11) 50%,rgba(0,0,0,.06) 75%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-line{height:14px;margin-bottom:10px}
+.skeleton-line.w40{width:40%}.skeleton-line.w60{width:60%}.skeleton-line.w80{width:80%}
+.skeleton-circle{width:44px;height:44px;border-radius:50%}
+.skeleton-stat{height:30px;width:55%;margin-bottom:8px}
+.skel-row{display:flex;align-items:center;gap:12px}
+
+/* ===== MOBILE HAMBURGER / DRAWER ===== */
+.mobile-drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1190;opacity:0;transition:opacity .3s}
+.mobile-drawer-overlay.show{display:block;opacity:1}
+@media(max-width:767px){
+  .sidebar-toggle{display:flex}
+  .header-back:not(.sidebar-toggle){display:none}
+  .bottom-nav{transform:translateY(110%);transition:transform .35s var(--ease);height:auto;max-height:75vh;flex-direction:column;justify-content:flex-start;align-items:stretch;padding:20px 14px;gap:6px;overflow-y:auto;bottom:0;top:auto;border-radius:20px 20px 0 0;border-top:1px solid var(--border)}
+  .bottom-nav.open{transform:translateY(0)}
+  .bottom-nav .nav-item{flex-direction:row;justify-content:flex-start;gap:14px;padding:13px 16px;min-width:0;text-align:left}
+  .bottom-nav .nav-item span{font-size:14px}
+  .bottom-nav .nav-item.active .material-icons-round{width:34px;height:30px;border-radius:9px;font-size:19px}
+  .sidebar-section-label{padding:16px 16px 4px}
+}
+@media(min-width:768px) and (max-width:1099px){
+  .sidebar-toggle{display:none}
+}
+
+/* ===== RESPONSIVE STAT CARDS ===== */
+@media(max-width:480px){.stat-cards{grid-template-columns:1fr 1fr;gap:10px}.stat-card{padding:14px}.stat-card-value{font-size:24px}.stat-card-sub{display:none}}
+@media(min-width:1100px){.stat-cards{grid-template-columns:repeat(4,1fr)}}
 </style>
 <link rel="stylesheet" href="design-system.css">
 </head>
@@ -240,59 +382,183 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="screen active" id="dashboardScreen">
-  <header class="app-header">
+  <header class="app-header" role="banner">
+    <button class="header-back sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle navigation sidebar" aria-expanded="true" aria-controls="bottomNav"><span class="material-icons-round">menu</span></button>
     <button class="header-back" onclick="window.location.href='/'" aria-label="Landing page"><span class="material-icons-round">arrow_back</span></button>
     <h1 data-i18n="appTitle">স্মার্ট ফার্মিং AI</h1>
-    <div class="lang-toggle" style="margin-right:4px">
-      <button class="lang-btn active" onclick="setLang('bn')" id="langBtnBnApp">বাং</button>
-      <button class="lang-btn" onclick="setLang('en')" id="langBtnEnApp">EN</button>
+    <div class="topbar-search" role="search">
+      <span class="material-icons-round" aria-hidden="true">search</span>
+      <input type="search" id="topbarSearchInput" placeholder="খুঁজুন..." aria-label="Search dashboard" onkeydown="if(event.key==='Enter')topbarSearch()">
     </div>
-    <button class="header-action" onclick="navigateTo('notifications')" aria-label="Notifications"><span class="material-icons-round">notifications_none</span><span class="badge"></span></button>
-    <button class="header-action" onclick="navigateTo('profile')" aria-label="Profile"><span class="material-icons-round">account_circle</span></button>
+    <div class="topbar-actions">
+      <div class="lang-toggle" style="margin-right:4px">
+        <button class="lang-btn active" onclick="setLang('bn')" id="langBtnBnApp">বাং</button>
+        <button class="lang-btn" onclick="setLang('en')" id="langBtnEnApp">EN</button>
+      </div>
+      <button class="header-action" id="darkModeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Dark mode"><span class="material-icons-round" id="darkModeIcon">dark_mode</span></button>
+      <button class="header-action" onclick="navigateTo('notifications')" aria-label="Notifications with unread count" id="notifBtn"><span class="material-icons-round">notifications_none</span><span class="badge" id="notifBadge">3</span></button>
+      <div class="user-menu">
+        <button class="user-avatar-btn" id="userMenuBtn" onclick="toggleUserMenu(event)" aria-label="Open user profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="userDropdown"><span class="material-icons-round">account_circle</span></button>
+        <div class="user-dropdown" id="userDropdown" role="menu" aria-label="User menu">
+          <div class="user-dropdown-header">
+            <span class="u-name" id="dropdownUserName">কৃষক</span>
+            <span class="u-email" id="dropdownUserEmail">Smart Farming AI</span>
+          </div>
+          <button role="menuitem" onclick="toggleUserMenu();navigateTo('profile')"><span class="material-icons-round">person</span> প্রোফাইল</button>
+          <button role="menuitem" onclick="toggleUserMenu();navigateTo('notifications')"><span class="material-icons-round">settings</span> সেটিংস</button>
+          <button role="menuitem" class="danger" onclick="toggleUserMenu();doLogout()"><span class="material-icons-round">logout</span> লগআউট</button>
+        </div>
+      </div>
+    </div>
   </header>
 
   <div class="app-content" id="mainContent">
-    <div style="margin-bottom:24px">
-      <h2 style="font-size:22px;font-weight:800"><span data-i18n="welcome">স্বাগতম</span>, <span id="userName">কৃষক</span>! &#128075;</h2>
-      <p style="font-size:14px;color:var(--text-secondary);margin-top:6px" data-i18n="todayWeather">আজকের আবহাওয়া: 28°C, আর্দ্রতা: ৭৫%</p>
-    </div>
+    <!-- HERO BANNER -->
+    <section class="sf-hero" aria-labelledby="heroGreeting">
+      <div class="sf-hero-main">
+        <h2 class="hero-greeting" id="heroGreeting"><span data-i18n="welcome">স্বাগতম</span>, <span id="userName">কৃষক</span>!</h2>
+        <p class="hero-sub" id="todayWeather">আজকের আবহাওয়া লোড হচ্ছে...</p>
+        <div class="sf-hero-search" id="aiSearchBox" role="search">
+          <span class="material-icons-round" aria-hidden="true">search</span>
+          <input type="text" id="aiSearchInput" placeholder="যেকোনো কিছু জিজ্ঞাসা করুন..." aria-label="AI search" onkeydown="if(event.key==='Enter')goToAISearch()">
+          <button class="hero-send" onclick="goToAISearch()" aria-label="Send search"><span class="material-icons-round">arrow_forward</span></button>
+        </div>
+      </div>
+      <div class="sf-hero-pills" aria-label="Live stats">
+        <div class="sf-stat-pill">
+          <div class="pill-label" data-i18n="weather">আবহাওয়া</div>
+          <div class="pill-value"><span id="heroTemp">--</span><span class="pill-unit">°C</span></div>
+        </div>
+        <div class="sf-stat-pill">
+          <div class="pill-label">আর্দ্রতা</div>
+          <div class="pill-value"><span id="heroHumidity">--</span><span class="pill-unit">%</span></div>
+        </div>
+        <div class="sf-stat-pill">
+          <div class="pill-label" data-i18n="marketAnalysis">বাজার</div>
+          <div class="pill-value"><span id="heroMarket">--</span><span class="pill-unit">৳</span></div>
+        </div>
+      </div>
+    </section>
 
-    <!-- AI SEARCH BAR — Google style -->
-    <div class="section" style="padding:0;margin-bottom:28px">
-      <div style="position:relative">
-        <div style="display:flex;align-items:center;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-2xl);padding:6px 6px 6px 20px;box-shadow:var(--shadow-md);transition:all .3s" id="aiSearchBox">
-          <span class="material-icons-round" style="color:var(--text-hint);font-size:22px;margin-right:12px">search</span>
-          <input type="text" id="aiSearchInput" placeholder="যেকোনো কিছু জিজ্ঞাসা করুন... (ধানের রোগ, বাজারদর, সার)" style="flex:1;border:none;outline:none;font-size:16px;font-family:inherit;background:transparent;color:var(--text);padding:12px 0" onkeydown="if(event.key==='Enter')goToAISearch()">
-          <button onclick="goToAISearch()" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(22,163,74,.3);transition:all .2s;flex-shrink:0" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-            <span class="material-icons-round" style="color:#fff;font-size:22px">arrow_forward</span>
-          </button>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center">
-          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#127806; ধানের রোগ</span>
-          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#128200; আজকের দাম</span>
-          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#129716; সার কখন দিবেন</span>
-          <span onclick="quickAISearch(this)" style="padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .2s">&#128031; ইলিশ মাছের চাষ</span>
-        </div>
+    <!-- QUICK-ACTION CHIPS -->
+    <div class="section sf-chips-wrap">
+      <div class="sf-chips" role="list">
+        <button type="button" class="sf-chip" onclick="quickAISearch(this)" role="listitem">&#127806; ধানের রোগ</button>
+        <button type="button" class="sf-chip" onclick="quickAISearch(this)" role="listitem">&#128200; আজকের দাম</button>
+        <button type="button" class="sf-chip" onclick="quickAISearch(this)" role="listitem">&#129716; সার কখন দিবেন</button>
+        <button type="button" class="sf-chip" onclick="quickAISearch(this)" role="listitem">&#128031; ইলিশ মাছের চাষ</button>
       </div>
     </div>
 
-    <div class="section" style="padding:0;margin-bottom:28px">
-      <div class="section-header"><div class="section-title" data-i18n="quickActions">দ্রুত পদক্ষেপ</div></div>
-      <div class="quick-actions">
-        <button class="quick-action" onclick="navigateTo('weather')"><div class="icon-circle tone-blue"><span class="material-icons-round">weather</span></div><span class="label" data-i18n="weather">আবহাওয়া</span></button>
-        <button class="quick-action" onclick="navigateTo('soil')"><div class="icon-circle tone-green"><span class="material-icons-round">soil</span></div><span class="label" data-i18n="soilAnalysis">মাটি বিশ্লেষণ</span></button>
-        <button class="quick-action" onclick="navigateTo('crop')"><div class="icon-circle tone-amber"><span class="material-icons-round">sprout</span></div><span class="label" data-i18n="cropRec">ফসল সুপারিশ</span></button>
-        <button class="quick-action" onclick="navigateTo('disease')"><div class="icon-circle tone-red"><span class="material-icons-round">scan</span></div><span class="label" data-i18n="diseaseDetect">রোগ সনাক্ত</span></button>
+    <!-- KPI OVERVIEW CARDS (async + skeleton) -->
+    <section class="section" style="padding:0;margin-bottom:28px" aria-labelledby="overviewTitle">
+      <div class="section-header">
+        <div class="section-title" id="overviewTitle">ওভারভিউ</div>
+        <div class="section-link" onclick="navigateTo('home')">রিফ্রেশ</div>
       </div>
-    </div>
+      <div class="stat-cards" id="statCards">
+        <!-- 1. Weather snapshot -->
+        <article class="stat-card tone-blue" id="statWeatherCard" aria-label="Weather snapshot">
+          <div class="stat-card-skeleton" id="statWeatherSkeleton">
+            <div class="skel-row"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w40"></div></div></div>
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-line w80"></div>
+          </div>
+          <div class="stat-card-content" id="statWeatherContent" hidden>
+            <div class="stat-card-top">
+              <div class="stat-card-icon tone-blue"><span class="material-icons-round">weather</span></div>
+              <span class="stat-card-live"><span class="dot"></span> লাইভ</span>
+            </div>
+            <div>
+              <div class="stat-card-value" id="statWeatherValue">--°C</div>
+              <div class="stat-card-label" id="statWeatherLabel">লোড হচ্ছে...</div>
+              <div class="stat-card-sub" id="statWeatherSub">আর্দ্রতা: --%</div>
+            </div>
+            <button class="stat-card-link" onclick="navigateTo('weather')" aria-label="View more weather details">আরও দেখুন <span class="material-icons-round">arrow_forward</span></button>
+          </div>
+        </article>
 
+        <!-- 2. Today's market highlight -->
+        <article class="stat-card tone-amber" id="statMarketCard" aria-label="Today's market highlight">
+          <div class="stat-card-skeleton" id="statMarketSkeleton">
+            <div class="skel-row"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w40"></div></div></div>
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-line w80"></div>
+          </div>
+          <div class="stat-card-content" id="statMarketContent" hidden>
+            <div class="stat-card-top">
+              <div class="stat-card-icon tone-amber"><span class="material-icons-round">show_chart</span></div>
+              <span class="stat-card-live"><span class="dot"></span> আজকের</span>
+            </div>
+            <div>
+              <div class="stat-card-value" id="statMarketValue">--</div>
+              <div class="stat-card-label" id="statMarketLabel">শীর্ষ ফসল</div>
+              <div class="stat-card-sub" id="statMarketSub">৳/কেজি</div>
+            </div>
+            <button class="stat-card-link" onclick="navigateTo('market')" aria-label="View more market prices">আরও দেখুন <span class="material-icons-round">arrow_forward</span></button>
+          </div>
+        </article>
+
+        <!-- 3. Disease alert count -->
+        <article class="stat-card tone-red" id="statDiseaseCard" aria-label="Disease alerts count">
+          <div class="stat-card-skeleton" id="statDiseaseSkeleton">
+            <div class="skel-row"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w40"></div></div></div>
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-line w80"></div>
+          </div>
+          <div class="stat-card-content" id="statDiseaseContent" hidden>
+            <div class="stat-card-top">
+              <div class="stat-card-icon tone-red"><span class="material-icons-round">bug_report</span></div>
+            </div>
+            <div>
+              <div class="stat-card-value" id="statDiseaseValue">0</div>
+              <div class="stat-card-label">রোগ সতর্কতা</div>
+              <div class="stat-card-sub" id="statDiseaseSub">আপনার এলাকায় সক্রিয় সতর্কতা</div>
+            </div>
+            <button class="stat-card-link" onclick="navigateTo('disease')" aria-label="View more disease alerts">আরও দেখুন <span class="material-icons-round">arrow_forward</span></button>
+          </div>
+        </article>
+
+        <!-- 4. Crop recommendation shortcut -->
+        <article class="stat-card tone-green" id="statCropCard" aria-label="Quick crop recommendation">
+          <div class="stat-card-skeleton" id="statCropSkeleton">
+            <div class="skel-row"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w40"></div></div></div>
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-line w80"></div>
+          </div>
+          <div class="stat-card-content" id="statCropContent" hidden>
+            <div class="stat-card-top">
+              <div class="stat-card-icon tone-green"><span class="material-icons-round">eco</span></div>
+            </div>
+            <div>
+              <div class="stat-card-value" id="statCropValue">AI</div>
+              <div class="stat-card-label">ফসল সুপারিশ</div>
+              <div class="stat-card-sub">লোকেশন থেকে সেরা ফসল খুঁজুন</div>
+            </div>
+            <button class="stat-card-link" onclick="navigateTo('crop')" aria-label="Go to crop recommendation">শুরু করুন <span class="material-icons-round">arrow_forward</span></button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- QUICK SERVICES -->
     <div class="section" style="padding:0;margin-bottom:28px">
       <div class="section-header"><div class="section-title" data-i18n="allFeatures">বৈশিষ্ট্যসমূহ</div></div>
-      <div class="feature-grid">
-        <button class="feature-card" onclick="navigateTo('disease')"><div class="feature-icon tone-red"><span class="material-icons-round">scan</span></div><div class="feature-title" data-i18n="diseaseTitle">রোগ সনাক্তকরণ</div><div class="feature-desc" data-i18n="diseaseDesc">ছবি আপলোড করে ফসলের রোগ শনাক্ত করুন</div></button>
-        <button class="feature-card" onclick="navigateTo('market')"><div class="feature-icon tone-amber"><span class="material-icons-round">show_chart</span></div><div class="feature-title" data-i18n="marketTitle">বাজার বিশ্লেষণ</div><div class="feature-desc" data-i18n="marketDesc">সর্বশেষ ফসলের দাম ও ট্রেন্ড</div></button>
-        <button class="feature-card" onclick="navigateTo('chatbot')"><div class="feature-icon tone-purple"><span class="material-icons-round">chat</span></div><div class="feature-title" data-i18n="chatbotTitle">AI চ্যাটবট</div><div class="feature-desc" data-i18n="chatbotDesc">কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন</div></button>
-        <button class="feature-card" onclick="navigateTo('maps')"><div class="feature-icon tone-green"><span class="material-icons-round">map</span></div><div class="feature-title" data-i18n="mapTitle">মানচিত্র</div><div class="feature-desc" data-i18n="mapDesc">বাংলাদেশের জেলা মানচিত্র</div></button>
+      <div class="sf-services">
+        <button class="sf-service" onclick="navigateTo('weather')"><div class="feature-icon tone-blue"><span class="material-icons-round">weather</span></div><div class="feature-title" data-i18n="weather">আবহাওয়া</div><div class="feature-desc" data-i18n="weather">স্থানীয় আবহাওয়া ও পূর্বাভাস</div></button>
+        <button class="sf-service" onclick="navigateTo('soil')"><div class="feature-icon tone-green"><span class="material-icons-round">soil</span></div><div class="feature-title" data-i18n="soilAnalysis">মাটি বিশ্লেষণ</div><div class="feature-desc">BARC তথ্যে মাটির রিপোর্ট</div></button>
+        <button class="sf-service sf-service-emphasized" onclick="navigateTo('crop')" aria-label="Crop recommendation">
+          <div class="feature-icon tone-amber"><span class="material-icons-round">sprout</span></div>
+          <div class="sf-svc-body">
+            <div class="feature-title" data-i18n="cropRec">ফসল সুপারিশ</div>
+            <div class="feature-desc">AI দিয়ে আপনার জমির জন্য সেরা ফসল বেছে নিন</div>
+          </div>
+          <span class="sf-svc-arrow"><span class="material-icons-round">arrow_forward</span></span>
+        </button>
+        <button class="sf-service" onclick="navigateTo('disease')"><div class="feature-icon tone-red"><span class="material-icons-round">scan</span></div><div class="feature-title" data-i18n="diseaseTitle">রোগ সনাক্তকরণ</div><div class="feature-desc" data-i18n="diseaseDesc">ছবি আপলোড করে ফসলের রোগ শনাক্ত করুন</div></button>
+        <button class="sf-service" onclick="navigateTo('market')"><div class="feature-icon tone-amber"><span class="material-icons-round">show_chart</span></div><div class="feature-title" data-i18n="marketTitle">বাজার বিশ্লেষণ</div><div class="feature-desc" data-i18n="marketDesc">সর্বশেষ ফসলের দাম ও ট্রেন্ড</div></button>
+        <button class="sf-service" onclick="navigateTo('chatbot')"><div class="feature-icon tone-purple"><span class="material-icons-round">chat</span></div><div class="feature-title" data-i18n="chatbotTitle">AI চ্যাটবট</div><div class="feature-desc" data-i18n="chatbotDesc">কৃষি সম্পর্কে যেকোনো প্রশ্ন করুন</div></button>
+        <button class="sf-service" onclick="navigateTo('maps')"><div class="feature-icon tone-green"><span class="material-icons-round">map</span></div><div class="feature-title" data-i18n="mapTitle">মানচিত্র</div><div class="feature-desc" data-i18n="mapDesc">বাংলাদেশের জেলা মানচিত্র</div></button>
       </div>
     </div>
 
@@ -638,11 +904,37 @@ html[lang="en"] body{font-family:'Inter','Noto Sans Bengali',system-ui,sans-seri
   </div>
 </div>
 
-<nav class="bottom-nav" id="bottomNav">
-  <button class="nav-item active" onclick="navigateTo('home')" data-page="home"><span class="material-icons-round">home</span><span data-i18n="navHome">হোম</span></button>
-  <button class="nav-item" onclick="navigateTo('maps')" data-page="maps"><span class="material-icons-round">map</span><span data-i18n="navMaps">মানচিত্র</span></button>
-  <button class="nav-item" onclick="navigateTo('notifications')" data-page="notifications"><span class="material-icons-round">notifications</span><span data-i18n="navNotifications">বিজ্ঞপ্তি</span></button>
-  <button class="nav-item" onclick="navigateTo('profile')" data-page="profile"><span class="material-icons-round">person</span><span data-i18n="navProfile">প্রোফাইল</span></button>
+<div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleSidebar()" aria-hidden="true"></div>
+<nav class="bottom-nav" id="bottomNav" aria-label="Primary navigation">
+  <div class="sidebar-brand">
+    <span class="sidebar-brand-mark" aria-hidden="true"><span class="material-icons-round">agriculture</span></span>
+    <span class="sidebar-brand-name">Smart Farming AI<small>কৃষি বুদ্ধিমত্তা</small></span>
+  </div>
+  <div class="sidebar-section-label" aria-hidden="true">প্রধান</div>
+  <button class="nav-item active" onclick="toggleSidebarIfMobile();navigateTo('home')" data-page="home" aria-label="Home"><span class="material-icons-round">home</span><span data-i18n="navHome">হোম</span></button>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('weather')" data-page="weather" aria-label="Weather"><span class="material-icons-round">weather</span><span data-i18n="weather">আবহাওয়া</span></button>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('soil')" data-page="soil" aria-label="Soil analysis"><span class="material-icons-round">soil</span><span data-i18n="soilAnalysis">মাটি বিশ্লেষণ</span></button>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('crop')" data-page="crop" aria-label="Crop recommendation"><span class="material-icons-round">sprout</span><span data-i18n="cropRec">ফসল সুপারিশ</span></button>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('disease')" data-page="disease" aria-label="Disease detection"><span class="material-icons-round">scan</span><span data-i18n="diseaseDetect">রোগ সনাক্ত</span></button>
+  <div class="sidebar-section-label" aria-hidden="true">সেবা</div>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('market')" data-page="market" aria-label="Market analysis"><span class="material-icons-round">show_chart</span><span data-i18n="marketAnalysis">বাজার</span></button>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('chatbot')" data-page="chatbot" aria-label="AI chatbot"><span class="material-icons-round">chat</span><span data-i18n="chatbotTitle">AI চ্যাটবট</span></button>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('maps')" data-page="maps" aria-label="Maps"><span class="material-icons-round">map</span><span data-i18n="navMaps">মানচিত্র</span></button>
+  <div class="sidebar-section-label" aria-hidden="true">অ্যাকাউন্ট</div>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('notifications')" data-page="notifications" aria-label="Notifications"><span class="material-icons-round">notifications</span><span data-i18n="navNotifications">বিজ্ঞপ্তি</span></button>
+  <button class="nav-item" onclick="toggleSidebarIfMobile();navigateTo('profile')" data-page="profile" aria-label="Profile"><span class="material-icons-round">person</span><span data-i18n="navProfile">প্রোফাইল</span></button>
+  <div class="sidebar-weather" id="sidebarWeather" aria-label="Weather mini stat">
+    <div class="sw-label">আজকের আবহাওয়া</div>
+    <div class="sw-value"><span id="sidebarTemp">--</span>°C</div>
+    <div class="sw-sub" id="sidebarWeatherSub">আর্দ্রতা --%</div>
+  </div>
+  <button class="sidebar-user" type="button" onclick="toggleSidebarIfMobile();navigateTo('profile')" aria-label="Open profile">
+    <span class="sidebar-user-av"><span class="material-icons-round">person</span></span>
+    <span class="sidebar-user-meta">
+      <span class="sidebar-user-name" id="sidebarUserName">কৃষক</span>
+      <span class="sidebar-user-role">কৃষক প্রোফাইল</span>
+    </span>
+  </button>
 </nav>
 
 <script>
@@ -1251,12 +1543,12 @@ function addDistrictMarkers(){
       // Custom green marker
       var icon = L.divIcon({
         className:'',
-        html:'<div style="width:24px;height:24px;background:#16a34a;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:10px;font-weight:bold">'+dd.name_bn.charAt(0)+'</span></div>',
+        html:'<div style="width:24px;height:24px;background:#16332A;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:10px;font-weight:bold">'+dd.name_bn.charAt(0)+'</span></div>',
         iconSize:[24,24],
         iconAnchor:[12,12]
       });
       var marker = L.marker([coords.lat,coords.lng],{icon:icon}).addTo(leafletMap);
-      marker.bindPopup('<b>'+dd.name_bn+'</b><br>'+div+' Division<br><button onclick="selectDistrictFromMap(\''+d+'\',\''+div+'\')" style="margin-top:8px;padding:4px 12px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Select</button>');
+      marker.bindPopup('<b>'+dd.name_bn+'</b><br>'+div+' Division<br><button onclick="selectDistrictFromMap(\''+d+'\',\''+div+'\')" style="margin-top:8px;padding:4px 12px;background:#16332A;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Select</button>');
     });
   });
 }
@@ -1710,7 +2002,7 @@ function getRecommendation() {
       if (r.reference_sources && r.reference_sources.length > 0) {
         refLinks = '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)"><div style="font-size:10px;color:var(--text-hint);margin-bottom:6px">বাংলাদেশি সংবাদপত্র ও সরকারি সূত্র:</div><div style="display:flex;flex-wrap:wrap;gap:4px">' + r.reference_sources.map(function(ref) {
           var bgColor = ref.type === 'government' ? '#dcfce7' : ref.type === 'news_agency' ? '#fef3c7' : '#eff6ff';
-          var textColor = ref.type === 'government' ? '#16a34a' : ref.type === 'news_agency' ? '#d97706' : '#3b82f6';
+          var textColor = ref.type === 'government' ? '#16332A' : ref.type === 'news_agency' ? '#C9822B' : '#3E7C93';
           return '<a href="' + ref.url + '" target="_blank" rel="noopener" style="display:inline-block;padding:2px 8px;background:' + bgColor + ';color:' + textColor + ';border-radius:8px;font-size:10px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .2s" onmouseover="this.style.opacity=\'0.8\'" onmouseout="this.style.opacity=\'1\'">' + ref.name_bn + ' ↗</a>';
         }).join('') + '</div></div>';
       }
@@ -1732,6 +2024,190 @@ var hash=window.location.hash.replace('#','');
 if(hash==='login'||hash==='register') setTimeout(function(){openAuthModal(hash)},300);
 if(['home','weather','crop','disease','chatbot','maps','notifications','profile'].indexOf(hash)>-1){setTimeout(function(){navigateTo(hash)},0)}
 window.addEventListener('hashchange',function(){var next=window.location.hash.replace('#','');if(['home','weather','crop','disease','chatbot','maps','notifications','profile'].indexOf(next)>-1)navigateTo(next)});
+
+// ===== DARK MODE (CSS variables + localStorage) =====
+(function initDarkMode(){
+  var saved = localStorage.getItem('sfTheme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateDarkModeIcon(saved);
+})();
+function toggleDarkMode(){
+  var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', current);
+  localStorage.setItem('sfTheme', current);
+  updateDarkModeIcon(current);
+  showToast(current === 'dark' ? 'ডার্ক মোড চালু' : 'লাইট মোড চালু', 'info');
+}
+function updateDarkModeIcon(theme){
+  var icon = document.getElementById('darkModeIcon');
+  if (icon) icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+  var btn = document.getElementById('darkModeToggle');
+  if (btn) btn.setAttribute('title', theme === 'dark' ? 'Light mode' : 'Dark mode');
+}
+
+// ===== SIDEBAR TOGGLE =====
+function toggleSidebar(){
+  var nav = document.getElementById('bottomNav');
+  var overlay = document.getElementById('drawerOverlay');
+  var toggle = document.getElementById('sidebarToggle');
+  var isMobile = window.matchMedia('(max-width:767px)').matches;
+  if (isMobile) {
+    var open = nav.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('show', open);
+    if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  } else {
+    var collapsed = document.body.classList.toggle('sidebar-collapsed');
+    if (toggle) toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    localStorage.setItem('sfSidebar', collapsed ? 'collapsed' : 'expanded');
+    try { if (leafletMap) setTimeout(function(){ leafletMap.invalidateSize() }, 350); } catch(e){}
+  }
+}
+function toggleSidebarIfMobile(){
+  if (window.matchMedia('(max-width:767px)').matches) {
+    var nav = document.getElementById('bottomNav');
+    var overlay = document.getElementById('drawerOverlay');
+    var toggle = document.getElementById('sidebarToggle');
+    nav.classList.remove('open');
+    if (overlay) overlay.classList.remove('show');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  }
+}
+(function restoreSidebar(){
+  if (localStorage.getItem('sfSidebar') === 'collapsed' && !window.matchMedia('(max-width:767px)').matches) {
+    document.body.classList.add('sidebar-collapsed');
+    var toggle = document.getElementById('sidebarToggle');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  }
+})();
+
+// ===== USER PROFILE DROPDOWN =====
+function toggleUserMenu(e){
+  if (e) e.stopPropagation();
+  var dd = document.getElementById('userDropdown');
+  var btn = document.getElementById('userMenuBtn');
+  if (!dd) return;
+  var open = dd.classList.toggle('open');
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.addEventListener('click', function(e){
+  var dd = document.getElementById('userDropdown');
+  var btn = document.getElementById('userMenuBtn');
+  if (dd && dd.classList.contains('open') && !dd.contains(e.target) && !(btn && btn.contains(e.target))) {
+    dd.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') {
+    var dd = document.getElementById('userDropdown');
+    var btn = document.getElementById('userMenuBtn');
+    if (dd) dd.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+// ===== TOPBAR SEARCH =====
+function topbarSearch(){
+  var inp = document.getElementById('topbarSearchInput');
+  if (inp && inp.value.trim()) {
+    document.getElementById('aiSearchInput').value = inp.value.trim();
+    goToAISearch();
+  }
+}
+
+// ===== STAT CARDS: skeleton → content =====
+function revealStatCard(skeletonId, contentId){
+  var sk = document.getElementById(skeletonId);
+  var ct = document.getElementById(contentId);
+  if (sk) sk.style.display = 'none';
+  if (ct) ct.hidden = false;
+}
+function loadStatCards(){
+  // 1. Weather snapshot
+  fetch(API_BASE + '/weather?lat=23.81&lng=90.41&lang=' + currentLang)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.current) {
+        document.getElementById('statWeatherValue').textContent = d.current.temp + '°C';
+        document.getElementById('statWeatherLabel').textContent = d.current.condition;
+        document.getElementById('statWeatherSub').textContent = (currentLang==='bn'?'আর্দ্রতা: ':'Humidity: ') + d.current.humidity + '%';
+        var ht = document.getElementById('heroTemp');
+        if (ht) ht.textContent = d.current.temp;
+        var hh = document.getElementById('heroHumidity');
+        if (hh) hh.textContent = d.current.humidity;
+        var tw = document.getElementById('todayWeather');
+        if (tw) tw.textContent = (currentLang==='bn'?'আজকের আবহাওয়া: ':'Today\u2019s weather: ') + d.current.temp + '\u00B0C \u2014 ' + d.current.condition + (currentLang==='bn'?', আর্দ্রতা ':', humidity ') + d.current.humidity + '%';
+        var st = document.getElementById('sidebarTemp');
+        if (st) st.textContent = d.current.temp;
+        var ss = document.getElementById('sidebarWeatherSub');
+        if (ss) ss.textContent = (currentLang==='bn'?'আর্দ্রতা ':'Humidity ') + d.current.humidity + '%';
+        var sw = document.getElementById('sidebarWeather');
+        if (sw) sw.classList.add('show');
+      }
+      revealStatCard('statWeatherSkeleton', 'statWeatherContent');
+    })
+    .catch(function(){ revealStatCard('statWeatherSkeleton', 'statWeatherContent'); });
+
+  // 2. Market highlight
+  fetch(API_BASE + '/market/prices')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var prices = d.prices || {};
+      var keys = Object.keys(prices);
+      if (keys.length > 0) {
+        var top = prices[keys[0]];
+        document.getElementById('statMarketValue').textContent = (top.maxPrice || top.minPrice || '--') + ' ৳';
+        document.getElementById('statMarketLabel').textContent = (top.name || keys[0]);
+        document.getElementById('statMarketSub').textContent = (top.minPrice||0) + '–' + (top.maxPrice||0) + ' ৳/কেজি';
+        var hm = document.getElementById('heroMarket');
+        if (hm) hm.textContent = top.maxPrice || top.minPrice || '--';
+      }
+      revealStatCard('statMarketSkeleton', 'statMarketContent');
+    })
+    .catch(function(){ revealStatCard('statMarketSkeleton', 'statMarketContent'); });
+
+  // 3. Disease alerts (from notifications)
+  fetch(API_BASE + '/db/notifications')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var items = d.items || d.notifications || [];
+      var diseaseCount = items.filter(function(n){
+        return /disease|রোগ/i.test((n.title||'') + (n.text||''));
+      }).length;
+      document.getElementById('statDiseaseValue').textContent = diseaseCount;
+      var unread = items.filter(function(n){ return n.unread; }).length;
+      var badge = document.getElementById('notifBadge');
+      if (badge) { badge.textContent = unread || items.length || 0; badge.style.display = (unread || items.length) ? '' : 'none'; }
+      revealStatCard('statDiseaseSkeleton', 'statDiseaseContent');
+    })
+    .catch(function(){ revealStatCard('statDiseaseSkeleton', 'statDiseaseContent'); });
+
+  // 4. Crop rec shortcut (instant, no fetch needed)
+  setTimeout(function(){ revealStatCard('statCropSkeleton', 'statCropContent'); }, 400);
+
+  // Safety: never leave skeletons forever
+  setTimeout(function(){
+    ['statWeather','statMarket','statDisease','statCrop'].forEach(function(id){
+      var sk = document.getElementById(id + 'Skeleton');
+      var ct = document.getElementById(id + 'Content');
+      if (sk && sk.style.display !== 'none') { sk.style.display = 'none'; if (ct) ct.hidden = false; }
+    });
+  }, 6000);
+}
+loadStatCards();
+
+// Keep dropdown user info in sync
+var _origUpdateUserProfile = updateUserProfile;
+updateUserProfile = function(){
+  _origUpdateUserProfile();
+  var dn = document.getElementById('dropdownUserName');
+  var de = document.getElementById('dropdownUserEmail');
+  var sn = document.getElementById('sidebarUserName');
+  var n = currentLang==='en' ? (currentUser.nameEn||'Farmer') : (currentUser.nameBn||'কৃষক');
+  if (dn) dn.textContent = n;
+  if (sn) sn.textContent = n;
+  if (de) de.textContent = currentUser.email || 'Smart Farming AI';
+};
 
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
