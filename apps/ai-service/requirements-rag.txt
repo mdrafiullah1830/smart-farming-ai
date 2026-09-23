@@ -1,0 +1,4 @@
+# Optional full travel RAG (includes sentence-transformers → torch).
+# Local/dev/CI only — do NOT install on Render free.
+-r requirements.txt
+sentence-transformers==3.4.1

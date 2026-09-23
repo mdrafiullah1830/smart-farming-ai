@@ -39,9 +39,10 @@ prevent authentication, soil lookup, weather, farm management, or market data.
 5. Deploy the Render blueprint at repository root (`render.yaml`) and set its
    `SERVICE_TOKEN` to the same value as the Worker's `AI_SERVICE_TOKEN`.
    Both services use repo-root Docker build context, `PYTHONUNBUFFERED=1`,
-   and listen on `$PORT` (default `10000`). The AI image reuses the committed
-   travel RAG index (`app/travel/data/index/*`) so free-tier builds do not
-   re-download a HuggingFace model unless those files are missing.
+   and listen on `$PORT` (default `10000`).
+   **Do not install `sentence-transformers`/torch on Render free (512 MB).**
+   Production `requirements.txt` omits torch; travel RAG reports `unavailable`
+   there. Full RAG is local/CI only via `requirements-rag.txt`.
 6. Deploy the Worker, then place its URL in the frontend configuration.
 7. Link `frontend/web` as the Vercel project root and deploy the static frontend.
 8. Monitor only Render's `/health`; never use an endpoint that queries D1, R2,

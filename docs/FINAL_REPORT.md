@@ -94,9 +94,11 @@ Config projects: chromium, firefox, webkit, Mobile Chrome (Pixel 5), Mobile Safa
 |--------------|-----|
 | Backend bound only to `:8000` while Render health-checks `$PORT` | `backend/Dockerfile` CMD uses `${PORT:-10000}` and `0.0.0.0` |
 | Python stdout buffered → empty/late Render logs | `PYTHONUNBUFFERED=1` + `PYTHONDONTWRITEBYTECODE=1` in both images and `render.yaml` |
-| AI image always rebuilt travel RAG (HF download → free-tier timeout) | Prebuilt `travel_index.faiss` + `travel_metadata.pkl` committed (`.gitignore` negation); Dockerfile rebuilds only if missing |
+| `sentence-transformers` (torch) install OOMs Render free (512 MB) | Prod `requirements.txt` excludes torch; `requirements-rag.txt` for local/CI; lazy RAG imports; `/health` still 200 with travel `unavailable` |
+| AI image always rebuilt travel RAG (HF download → free-tier timeout) | Prebuilt `travel_index.faiss` + `travel_metadata.pkl` committed; no index rebuild in production Dockerfile |
 | Ambiguous blueprints | Root `render.yaml` is source of truth; nested `apps/ai-service/render.yaml` marked legacy |
 | CI `docker build apps/ai-service` used wrong context | `docker build -f apps/ai-service/Dockerfile .` + backend build job |
+| Worker CI Node 20 lacked `--experimental-strip-types` | CI uses Node 22 |
 
 ## 8. Known limitations (not silent)
 

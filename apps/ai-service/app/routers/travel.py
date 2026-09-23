@@ -43,9 +43,12 @@ def get_retriever() -> TravelRetriever:
 
 
 def load() -> None:
-    """Initialize the travel embedder at startup."""
-    get_embedder()
-    logger.info("Travel router loaded")
+    """Initialize the travel embedder at startup (does not load torch)."""
+    try:
+        get_embedder()
+        logger.info("Travel router loaded")
+    except Exception as exc:
+        logger.warning("Travel router degraded at startup: %s", exc)
 
 
 class TravelAskRequest(BaseModel):
@@ -126,7 +129,11 @@ async def travel_ask(
     if not retriever.embedder.is_ready():
         raise HTTPException(
             status_code=503,
-            detail="RAG index not ready. Please build the index first using: python -m app.travel.rag.index_builder"
+            detail=(
+                "Travel RAG is unavailable on this deployment "
+                "(embedding model or index not installed). "
+                "Install requirements-rag.txt and rebuild the index to enable it."
+            ),
         )
 
     results = retriever.retrieve(request.question, top_k=5)
@@ -395,10 +402,16 @@ async def travel_health(
             if cat_dir.is_dir():
                 data_files += len(list(cat_dir.glob("*.md"))) + len(list(cat_dir.glob("*.json")))
 
+    from app.travel.rag import embedding_available
+
     return HealthResponse(
         status="ok" if index_ready else "degraded",
-        rag_index="ready" if index_ready else "not_built",
-        embedding_model="sentence-transformers/all-MiniLM-L6-v2",
+        rag_index="ready" if index_ready else ("index_only" if embedder.load_index() else "not_built"),
+        embedding_model=(
+            "sentence-transformers/all-MiniLM-L6-v2"
+            if embedding_available()
+            else "unavailable"
+        ),
         data_files=data_files,
     )
 

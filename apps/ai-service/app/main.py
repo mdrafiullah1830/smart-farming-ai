@@ -245,10 +245,13 @@ async def health() -> dict[str, object]:
     `unavailable` otherwise, so an operator can see exactly what this deployment
     can serve without probing every endpoint.
     """
-    from app.travel.rag import TravelEmbedder
-    embedder = TravelEmbedder()
-    travel_ready = embedder.is_ready()
-    
+    try:
+        from app.travel.rag import TravelEmbedder
+        embedder = TravelEmbedder()
+        travel_ready = embedder.is_ready()
+    except Exception:
+        travel_ready = False
+
     return {
         "status": "ok",
         "service": "smart-farming-ai",

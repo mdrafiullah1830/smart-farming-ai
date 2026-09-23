@@ -1,12 +1,11 @@
 """Retrieval module for travel RAG."""
 
-import faiss
 import logging
 from typing import List, Dict, Any, Optional
 
 import numpy as np
 
-from .embedder import TravelEmbedder
+from .embedder import TravelEmbedder, _import_faiss
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +24,7 @@ class TravelRetriever:
             if not self.embedder.load_index():
                 return []
 
+        faiss = _import_faiss()
         k = top_k or self.top_k
         query_embedding = self.embedder.model.encode([query], convert_to_numpy=True)
         query_embedding = query_embedding.astype(np.float32)
@@ -57,6 +57,7 @@ class TravelRetriever:
         if not self.embedder.is_ready():
             return []
 
+        faiss = _import_faiss()
         k = top_k or self.top_k
         query_embedding = self.embedder.model.encode([query], convert_to_numpy=True)
         query_embedding = query_embedding.astype(np.float32)

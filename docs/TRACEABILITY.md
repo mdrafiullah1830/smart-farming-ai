@@ -51,8 +51,9 @@ npm run test:ai
 
 Root `render.yaml` deploys two Docker web services with strict health checks.
 Both images set `PYTHONUNBUFFERED=1` and bind `0.0.0.0:$PORT` (default 10000).
-The AI image ships the prebuilt travel RAG index so Render free-tier builds do
-not re-download a HuggingFace model.
+Production AI image **does not install torch** (Render free is 512 MB);
+`/health` returns 200 with `travel: unavailable` until `requirements-rag.txt`
+is installed. Prebuilt RAG index is committed for optional local rebuilds.
 
 ## Push evidence
 

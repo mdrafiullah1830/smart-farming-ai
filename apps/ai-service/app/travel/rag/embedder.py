@@ -1,16 +1,16 @@
-"""Embedding and FAISS index building for travel RAG."""
+"""Embedding and FAISS index building for travel RAG.
+
+Heavy deps (sentence-transformers → torch) are imported lazily so the API
+can boot on Render free (512 MB) where torch cannot be installed.
+"""
 
 import json
 import logging
-import os
 import pickle
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Any as _Any
 
-import faiss
 import numpy as np
-from sentence_transformers import SentenceTransformer
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,35 @@ CHUNK_OVERLAP = 50
 INDEX_DIR = Path(__file__).parent.parent / "data" / "index"
 
 
+def _import_faiss():
+    try:
+        import faiss
+        return faiss
+    except ImportError as exc:
+        raise RuntimeError("faiss-cpu is required for travel RAG") from exc
+
+
+def _import_sentence_transformer():
+    try:
+        from sentence_transformers import SentenceTransformer
+        return SentenceTransformer
+    except ImportError as exc:
+        raise RuntimeError(
+            "sentence-transformers is not installed (requirements-rag.txt); "
+            "travel retrieval is unavailable on this deployment"
+        ) from exc
+
+
+def embedding_available() -> bool:
+    """True when the embedding model can be loaded on this host."""
+    try:
+        _import_sentence_transformer()
+        _import_faiss()
+        return True
+    except Exception:
+        return False
+
+
 class TravelEmbedder:
     """Handles embedding generation and FAISS index management."""
 
@@ -27,15 +56,16 @@ class TravelEmbedder:
         self.model_name = model_name
         self.index_dir = index_dir or INDEX_DIR
         self.index_dir.mkdir(parents=True, exist_ok=True)
-        self._model: Optional[SentenceTransformer] = None
-        self._index: Optional[faiss.Index] = None
+        self._model: Optional[_Any] = None
+        self._index: Optional[_Any] = None
         self._metadata: List[Dict[str, Any]] = []
 
     @property
-    def model(self) -> SentenceTransformer:
+    def model(self) -> _Any:
         if self._model is None:
+            st = _import_sentence_transformer()
             logger.info(f"Loading embedding model: {self.model_name}")
-            self._model = SentenceTransformer(self.model_name)
+            self._model = st(self.model_name)
         return self._model
 
     def get_embedding_dimension(self) -> int:
@@ -43,12 +73,22 @@ class TravelEmbedder:
 
     def chunk_text(self, text: str, metadata: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Split text into chunks with metadata."""
-        splitter = RecursiveCharacterTextSplitter(
-            chunk_size=CHUNK_SIZE,
-            chunk_overlap=CHUNK_OVERLAP,
-            separators=["\n\n", "\n", ". ", " ", ""],
-        )
-        chunks = splitter.split_text(text)
+        try:
+            from langchain_text_splitters import RecursiveCharacterTextSplitter
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=CHUNK_SIZE,
+                chunk_overlap=CHUNK_OVERLAP,
+                separators=["\n\n", "\n", ". ", " ", ""],
+            )
+            chunks = splitter.split_text(text)
+        except ImportError:
+            # Fallback splitter when langchain-text-splitters is absent.
+            chunks = []
+            step = CHUNK_SIZE
+            for i in range(0, len(text), step - CHUNK_OVERLAP or step):
+                piece = text[i:i + step]
+                if piece.strip():
+                    chunks.append(piece)
         return [
             {
                 "text": chunk,
@@ -103,8 +143,9 @@ class TravelEmbedder:
 
         return all_chunks
 
-    def build_index(self, chunks: Optional[List[Dict[str, Any]]] = None) -> faiss.Index:
+    def build_index(self, chunks: Optional[List[Dict[str, Any]]] = None) -> _Any:
         """Build FAISS index from chunks."""
+        faiss = _import_faiss()
         if chunks is None:
             chunks = self.load_data_files()
 
@@ -131,6 +172,7 @@ class TravelEmbedder:
         """Save FAISS index and metadata to disk."""
         if self._index is None:
             return
+        faiss = _import_faiss()
 
         index_path = self.index_dir / "travel_index.faiss"
         metadata_path = self.index_dir / "travel_metadata.pkl"
@@ -151,6 +193,7 @@ class TravelEmbedder:
             return False
 
         try:
+            faiss = _import_faiss()
             self._index = faiss.read_index(str(index_path))
             with open(metadata_path, "rb") as f:
                 self._metadata = pickle.load(f)
@@ -161,7 +204,7 @@ class TravelEmbedder:
             return False
 
     @property
-    def index(self) -> Optional[faiss.Index]:
+    def index(self) -> Optional[_Any]:
         if self._index is None:
             self.load_index()
         return self._index
@@ -173,4 +216,7 @@ class TravelEmbedder:
         return self._metadata
 
     def is_ready(self) -> bool:
-        return self.index is not None and self._index.ntotal > 0
+        """True only when both the index and the embedding model can serve queries."""
+        if not embedding_available():
+            return False
+        return self.index is not None and self._index is not None and self._index.ntotal > 0

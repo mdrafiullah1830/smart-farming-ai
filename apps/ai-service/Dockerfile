@@ -6,22 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install Python dependencies
+# Install Python dependencies (no torch — Render free is 512 MB)
 COPY apps/ai-service/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Copy application code (includes prebuilt travel RAG index when committed)
 COPY apps/ai-service/app/ /app/app/
-
-# Rebuild RAG index only if prebuilt artifacts are missing from the clone.
-# A full rebuild downloads a HuggingFace model and is the usual Render free-tier timeout.
-RUN if [ ! -f /app/app/travel/data/index/travel_index.faiss ] \
-    || [ ! -f /app/app/travel/data/index/travel_metadata.pkl ]; then \
-      echo "Prebuilt travel index missing — rebuilding"; \
-      python -m app.travel.rag.index_builder; \
-    else \
-      echo "Using prebuilt travel RAG index"; \
-    fi
 
 # Pre-exported ONNX artifacts
 COPY apps/ai-service/models/ /app/models/

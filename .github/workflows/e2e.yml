@@ -17,17 +17,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Install Playwright (root, where config + tests live)
+      - name: Install Playwright
         run: |
-          npm init -y
-          npm install -D @playwright/test serve
+          npm ci
           npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
         run: |
-          npx playwright test tests/e2e.spec.ts --project=chromium --grep-invert="API Integration" --reporter=github
+          npx playwright test tests/e2e.spec.ts --project=chromium --reporter=github
         env:
           E2E_BASE_URL: http://localhost:3000
 
@@ -38,28 +37,3 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-
-  e2e-api:
-    name: API Integration Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Playwright (root, where config + tests live)
-        run: |
-          npm init -y
-          npm install -D @playwright/test
-          npx playwright install --with-deps chromium
-
-      - name: Run API tests against deployed Worker
-        run: |
-          npx playwright test tests/e2e.spec.ts --project=chromium --grep="API Integration" --reporter=github
-        env:
-          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-          E2E_API_BASE: ${{ secrets.E2E_API_BASE }}

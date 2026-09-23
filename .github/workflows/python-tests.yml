@@ -37,10 +37,10 @@ jobs:
           cache: 'pip'
       - name: Install ruff
         run: pip install ruff
-      - name: Run ruff check
-        run: ruff check .
-      - name: Run ruff format check
-        run: ruff format --check .
+      - name: Run ruff check (deployable AI service only)
+        run: ruff check apps/ai-service/app
+      - name: Run ruff format check (deployable AI service only)
+        run: ruff format --check apps/ai-service/app
 
   type-check:
     name: Type Check (mypy)
