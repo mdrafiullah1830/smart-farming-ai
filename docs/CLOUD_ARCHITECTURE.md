@@ -36,8 +36,12 @@ prevent authentication, soil lookup, weather, farm management, or market data.
 2. Create the `smart-farming-uploads` R2 bucket.
 3. Set `JWT_SECRET` and `AI_SERVICE_TOKEN` using Wrangler secrets.
 4. Apply D1 migrations from `apps/worker-api`.
-5. Deploy the Render blueprint at repository root and set its `SERVICE_TOKEN`
-   to the same value as the Worker's `AI_SERVICE_TOKEN`.
+5. Deploy the Render blueprint at repository root (`render.yaml`) and set its
+   `SERVICE_TOKEN` to the same value as the Worker's `AI_SERVICE_TOKEN`.
+   Both services use repo-root Docker build context, `PYTHONUNBUFFERED=1`,
+   and listen on `$PORT` (default `10000`). The AI image reuses the committed
+   travel RAG index (`app/travel/data/index/*`) so free-tier builds do not
+   re-download a HuggingFace model unless those files are missing.
 6. Deploy the Worker, then place its URL in the frontend configuration.
 7. Link `frontend/web` as the Vercel project root and deploy the static frontend.
 8. Monitor only Render's `/health`; never use an endpoint that queries D1, R2,

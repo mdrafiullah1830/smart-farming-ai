@@ -6,6 +6,7 @@
 ```
 http://localhost:8000/api/v1
 ```
+Worker (Cloudflare) equivalent: `https://<worker>/api/v1/...`
 
 ### Authentication
 
@@ -13,6 +14,12 @@ All endpoints (except register/login) require JWT Bearer token:
 ```
 Authorization: Bearer <access_token>
 ```
+
+### Observability (Worker)
+
+- Request ID: every response includes `X-Request-Id` (client-supplied or server UUID).
+- Structured logs: JSON lines with `ts`, `level`, `msg`, `requestId`, `method`, `path`, `status`, `durationMs`.
+- Rate limit: 60 req/min/IP when KV is configured; `X-RateLimit-*` + `Retry-After` on 429.
 
 ---
 

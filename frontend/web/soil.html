@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Soil Intelligence — Smart Farming AI</title>
@@ -7,34 +7,133 @@
 </head>
 <body class="app-body">
   <aside class="sidebar">
-    <a class="brand" href="index.html"><span class="brand-mark"><span class="material-icons-round">sprout</span></span><span class="brand-copy">Smart Farming AI<small>Bangladesh</small></span></a>
-    <nav class="side-nav"><a href="dashboard.html"><span class="material-icons-round">home</span>Overview</a><a href="dashboard.html#fields"><span class="material-icons-round">sprout</span>Fields</a><a href="market.html"><span class="material-icons-round">show_chart</span>Market</a><a class="active" href="soil.html"><span class="material-icons-round">soil</span>Soil</a><a href="ai-search.html"><span class="material-icons-round">search</span>AI Search</a><a href="dashboard.html#alerts"><span class="material-icons-round">notifications</span>Alerts <span class="chip" style="margin-left:auto;background:#d9403f;color:#fff;padding:3px 7px">3</span></a></nav>
+    <a class="brand" href="index.html"><span class="brand-mark"><span class="material-icons-round">sprout</span></span><span class="brand-copy">Smart Farming AI<small data-i18n="brandTag">Bangladesh</small></span></a>
+    <nav class="side-nav">
+      <a href="dashboard.html"><span class="material-icons-round">home</span><span data-i18n="navHome">Overview</span></a>
+      <a href="dashboard.html#fields"><span class="material-icons-round">sprout</span><span data-i18n="fields">Fields</span></a>
+      <a href="market.html"><span class="material-icons-round">show_chart</span><span data-i18n="navMarket">Market</span></a>
+      <a class="active" href="soil.html"><span class="material-icons-round">soil</span><span data-i18n="navSoil">Soil</span></a>
+      <a href="ai-search.html"><span class="material-icons-round">search</span><span data-i18n="navAI">AI Search</span></a>
+      <a href="dashboard.html#alerts"><span class="material-icons-round">notifications</span><span data-i18n="notifications">Alerts</span></a>
+      <div class="nav-spacer"></div>
+      <a href="index.html#resources"><span class="material-icons-round">library_books</span><span data-i18n="resources">Resources</span></a>
+      <a href="index.html#insights"><span class="material-icons-round">tune</span><span data-i18n="insights">Insights</span></a>
+    </nav>
     <div class="sidebar-note">Healthier Soil<br>Stronger Farmers<br>A Greener Bangladesh</div>
   </aside>
-  <header class="top-command"><div class="command-search"><span class="material-icons-round">search</span><input placeholder="Search fields, crops, soil data, recommendations…" aria-label="Search"><span class="command-kbd">Ctrl K</span></div><button class="btn icon-btn"><span class="material-icons-round">notifications_none</span></button><div class="user-menu"><span class="avatar">RC</span><span><strong>Rafi Chowdhury</strong><small>Farmer · Mymensingh</small></span></div></header>
+
+  <header class="top-command">
+    <div class="command-search"><span class="material-icons-round">search</span><input id="commandSearch" placeholder="Search fields, crops, soil data…" data-i18n-placeholder="searchPlaceholder" aria-label="Search"><span class="command-kbd">Ctrl K</span></div>
+    <button class="btn icon-btn" type="button" data-open-search data-i18n-aria="search" aria-label="Search"><span class="material-icons-round">search</span></button>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="btn" type="button" data-lang="bn">বাংলা</button>
+      <button class="btn" type="button" data-lang="en">EN</button>
+    </div>
+    <div class="user-menu"><span class="avatar" data-user-avatar>—</span><span><strong data-user-name>—</strong></span></div>
+  </header>
 
   <main class="app-main"><div class="page-wrap">
-    <div class="page-heading"><div><h1>Soil Intelligence</h1><p>Understand your land. Apply the right dose.</p></div><div class="soil-context"><label class="context-box">🌿 <select id="fieldSelect" style="border:0;background:transparent;font-weight:730"><option>Field A (North)</option><option>Field B (South)</option><option>Field C (East)</option></select></label><span class="context-box">📍 Mymensingh</span><span class="context-box">📅 Last tested<br><b>12 May 2024</b></span><button class="btn">Compare Fields</button><button class="btn btn-primary"><span class="material-icons-round">cloud_download</span>Download Report</button></div></div>
+    <div class="page-heading">
+      <div><h1 data-i18n="soilTitle">Soil Intelligence</h1><p data-i18n="soilLead">Understand your land. Apply the right dose.</p></div>
+      <div class="soil-context">
+        <label class="context-box">🌿 <select id="fieldSelect" aria-label="Field" style="border:0;background:transparent;font-weight:730"></select></label>
+        <label class="context-box"><span data-i18n="division">Division</span> <select id="divisionSelect" aria-label="Division" style="border:0;background:transparent;font-weight:730"></select></label>
+        <label class="context-box"><span data-i18n="district">District</span> <select id="districtSelect" data-i18n-aria="selectDistrict" aria-label="Select district" style="border:0;background:transparent;font-weight:730"></select></label>
+        <label class="context-box"><span data-i18n="upazila">Upazila</span> <select id="upazilaSelect" data-i18n-aria="selectUpazila" aria-label="Select upazila" style="border:0;background:transparent;font-weight:730"></select></label>
+        <p class="form-error" id="filterError" role="alert" hidden></p>
+        <button class="btn" type="button" id="locationBtn">📍</button>
+        <p class="form-error" id="locationError" role="alert" hidden></p>
+        <button class="btn" type="button" id="compareBtn" aria-expanded="false" data-i18n="compareFields">Compare Fields</button>
+        <button class="btn" type="button" id="viewReportBtn" data-i18n="viewReport">View Report</button>
+        <button class="btn btn-primary" type="button" id="downloadReportBtn"><span class="material-icons-round">cloud_download</span> <span data-i18n="downloadReport">Download Report</span></button>
+      </div>
+    </div>
 
-    <section class="soil-kpis">
-      <article class="panel soil-card health-card"><div><h3>🌿 Soil Health Score</h3><div class="ring" style="--value:76"><div class="ring-value">76<small>Good</small></div></div></div><div class="mini-list"><div><span>Excellent</span><b>90–100</b></div><div><span>Good</span><b>70–89</b></div><div><span>Moderate</span><b>50–69</b></div><div><span>Poor</span><b>30–49</b></div></div></article>
-      <article class="panel soil-card"><h3>🌿 Nitrogen (N)</h3><div class="half-gauge" style="--gauge-color:#e7a437;--gauge-value:26%"><strong>48<small style="font-size:11px"> kg/ha</small></strong></div><span class="soil-status" style="background:#fff3d6;color:#a46505">Moderate</span><p class="muted" style="font-size:11px;text-align:center">Optimal: 80–120</p></article>
-      <article class="panel soil-card"><h3>🌿 Phosphorus (P)</h3><div class="half-gauge" style="--gauge-color:#e8534f;--gauge-value:18%"><strong>22<small style="font-size:11px"> kg/ha</small></strong></div><span class="soil-status" style="background:#ffe9e6;color:#c33633">Low</span><p class="muted" style="font-size:11px;text-align:center">Optimal: 40–60</p></article>
-      <article class="panel soil-card"><h3>🌿 Potassium (K)</h3><div class="half-gauge" style="--gauge-color:#39a24a;--gauge-value:44%"><strong>180<small style="font-size:11px"> kg/ha</small></strong></div><span class="soil-status">High</span><p class="muted" style="font-size:11px;text-align:center">Optimal: 120–180</p></article>
-      <article class="panel soil-card"><h3>💧 pH Level</h3><div class="half-gauge" style="--gauge-color:#45ae55;--gauge-value:34%"><strong>6.4</strong></div><span class="soil-status">Slightly Acidic</span><p class="muted" style="font-size:11px;text-align:center">Optimal: 6.0–7.0</p></article>
-      <article class="panel soil-card radar"><h3>🌿 Soil Health Radar</h3><svg viewBox="0 0 220 170" role="img" aria-label="Soil health radar chart"><g transform="translate(110 83)" fill="none" stroke="#bfd8ca"><polygon points="0,-66 63,-20 39,54 -39,54 -63,-20"/><polygon points="0,-45 43,-14 27,37 -27,37 -43,-14"/><polygon points="0,-24 23,-7 14,19 -14,19 -23,-7"/></g><g transform="translate(110 83)"><polygon points="0,-49 48,-15 31,43 -35,48 -45,-14" fill="rgba(22,132,95,.25)" stroke="#16845f" stroke-width="2"/></g><g font-size="10" fill="#45655a"><text x="94" y="10">Nutrient</text><text x="184" y="68">pH</text><text x="167" y="156">Moisture</text><text x="4" y="156">Organic Matter</text><text x="2" y="69">Structure</text></g></svg></article>
+    <section class="soil-kpis" id="soilReport" data-state="loading">
+      <article class="panel soil-card health-card">
+        <div><h3 data-i18n="soilHealth">Soil Health Score</h3><div class="ring" id="healthRing" style="--value:0"><div class="ring-value" id="healthScore">—<small>—</small></div></div></div>
+        <div class="mini-list"><div><span data-i18n="reportSource">Source</span><b id="reportSource">—</b></div><div><span data-i18n="lastTested">Last tested</span><b id="lastTested">—</b></div></div>
+      </article>
+      <article class="panel soil-card" id="gaugeN">
+        <h3>N</h3>
+        <div class="half-gauge" style="--gauge-color:#e7a437;--gauge-value:0%"><strong>—</strong></div>
+        <span class="soil-status" id="gaugeNStatus">—</span>
+        <p class="muted" style="font-size:11px;text-align:center" id="gaugeNOptimal">—</p>
+      </article>
+      <article class="panel soil-card" id="gaugeP">
+        <h3>P</h3>
+        <div class="half-gauge" style="--gauge-color:#e8534f;--gauge-value:0%"><strong>—</strong></div>
+        <span class="soil-status" id="gaugePStatus">—</span>
+        <p class="muted" style="font-size:11px;text-align:center" id="gaugePOptimal">—</p>
+      </article>
+      <article class="panel soil-card" id="gaugeK">
+        <h3>K</h3>
+        <div class="half-gauge" style="--gauge-color:#39a24a;--gauge-value:0%"><strong>—</strong></div>
+        <span class="soil-status" id="gaugeKStatus">—</span>
+        <p class="muted" style="font-size:11px;text-align:center" id="gaugeKOptimal">—</p>
+      </article>
+      <article class="panel soil-card" id="gaugePh">
+        <h3>pH</h3>
+        <div class="half-gauge" style="--gauge-color:#45ae55;--gauge-value:0%"><strong>—</strong></div>
+        <span class="soil-status" id="gaugePhStatus">—</span>
+        <p class="muted" style="font-size:11px;text-align:center" id="gaugePhOptimal">—</p>
+      </article>
+      <article class="panel soil-card radar">
+        <h3 data-i18n="soilHealth">Soil Health</h3>
+        <p class="muted" id="reportTitle">—</p>
+        <p class="muted" id="locationContext">—</p>
+      </article>
     </section>
 
     <section class="soil-grid">
-      <article class="panel soil-map"><div class="panel-title"><h2>🗺 Field Map & Sample Points</h2></div><div class="soil-map-image"><span class="sample-pin" style="left:24%;top:19%">S1</span><span class="sample-pin" style="left:66%;top:22%">S2</span><span class="sample-pin" style="left:47%;top:48%">S3</span><span class="sample-pin" style="left:29%;top:68%">S4</span></div></article>
-      <article class="panel table-panel"><div class="panel-title"><h2>Field Comparison</h2><a href="#">View all fields →</a></div><table><thead><tr><th>Parameter</th><th>Field A</th><th>Field B</th><th>Field C</th></tr></thead><tbody><tr><td>Health Score</td><td>76</td><td>62</td><td>85</td></tr><tr><td>Nitrogen</td><td>48</td><td>62</td><td>90</td></tr><tr><td>Phosphorus</td><td>22</td><td>35</td><td>28</td></tr><tr><td>Potassium</td><td>180</td><td>120</td><td>160</td></tr><tr><td>pH Level</td><td>6.4</td><td>5.8</td><td>6.8</td></tr><tr><td>Organic Matter</td><td>1.8%</td><td>1.4%</td><td>2.1%</td></tr><tr><td>Texture</td><td>Loam</td><td>Sandy Loam</td><td>Clay Loam</td></tr></tbody></table></article>
+      <article class="panel soil-map">
+        <div class="panel-title"><h2 data-i18n="fieldMap">Field Map & Sample Points</h2></div>
+        <div class="soil-map-image"><span class="sample-pin" style="left:24%;top:19%">S1</span><span class="sample-pin" style="left:66%;top:22%">S2</span><span class="sample-pin" style="left:47%;top:48%">S3</span><span class="sample-pin" style="left:29%;top:68%">S4</span></div>
+      </article>
+
+      <article class="panel table-panel" id="comparePanel" hidden>
+        <div class="panel-title"><h2 data-i18n="compareFields">Field Comparison</h2></div>
+        <table><thead><tr id="compareHead"></tr></thead><tbody id="compareBody"></tbody></table>
+      </article>
+
       <div style="display:grid;gap:10px">
-        <article class="panel table-panel"><div class="panel-title"><h2>Fertilizer Dose Plan</h2><span class="chip">For Aman Rice</span></div><div class="dose-list"><div class="dose"><span>🌿</span><span><b>Urea (N)</b><small class="muted" style="display:block">For nitrogen</small></span><strong>120 kg/ha</strong></div><div class="dose"><span>🟤</span><span><b>TSP (P)</b><small class="muted" style="display:block">For phosphorus</small></span><strong>90 kg/ha</strong></div><div class="dose"><span>🔴</span><span><b>MOP (K)</b><small class="muted" style="display:block">For potassium</small></span><strong>60 kg/ha</strong></div></div></article>
-        <article class="panel table-panel"><div class="panel-title"><h2>Recommended Crops</h2><a href="#">View crop guide →</a></div><div class="crop-row"><div class="crop-tile"><span class="emoji">🌾</span>Rice</div><div class="crop-tile"><span class="emoji">🌽</span>Maize</div><div class="crop-tile"><span class="emoji">🌿</span>Jute</div><div class="crop-tile"><span class="emoji">🥬</span>Vegetables</div></div></article>
+        <article class="panel table-panel">
+          <div class="panel-title"><h2 data-i18n="fertilizerPlan">Fertilizer Dose Plan</h2></div>
+          <div class="dose-list" id="doseList"></div>
+          <p class="muted" id="doseCaveat" style="font-size:11px"></p>
+        </article>
+        <article class="panel table-panel">
+          <div class="panel-title"><h2 data-i18n="recommendedCrops">Recommended Crops</h2></div>
+          <div class="crop-row" id="cropRow"><p class="muted" data-i18n="empty">No data yet</p></div>
+          <p class="muted" id="cropSource" style="font-size:11px"></p>
+        </article>
       </div>
-      <article class="panel table-panel"><div class="panel-title"><h2>Next Soil Test</h2></div><div style="padding:15px;border-radius:13px;background:#f7f8f5;text-align:center"><div style="font-size:25px">◷</div><b>12 Nov 2024</b><p class="muted">in 5 months</p></div><button class="btn btn-soft" style="width:100%;margin-top:12px">Set Reminder</button></article>
+
+      <article class="panel table-panel">
+        <div class="panel-title"><h2 data-i18n="nextSoilTest">Next Soil Test</h2></div>
+        <div id="reminderBox" style="padding:15px;border-radius:13px;background:#f7f8f5;text-align:center"></div>
+        <button class="btn btn-soft" type="button" id="setReminderBtn" style="width:100%;margin-top:12px" data-i18n="setReminder">Set Reminder</button>
+      </article>
     </section>
     <div class="soil-profile" role="img" aria-label="Agricultural soil layers"></div>
   </div></main>
+
+  <div class="modal-overlay" id="reminderModal" hidden role="dialog" aria-modal="true" aria-labelledby="reminderModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="reminderModalTitle" data-i18n="setReminder">Set Reminder</h2>
+        <button class="btn icon-btn" type="button" id="reminderCancel" aria-label="Close">×</button>
+      </div>
+      <form id="reminderForm">
+        <label for="reminderDate" data-i18n="lastTested">Date</label>
+        <input id="reminderDate" name="date" type="date" required>
+        <p class="form-error" id="reminderError" role="alert" hidden></p>
+        <button class="btn btn-primary" type="submit" data-i18n="setReminder">Save</button>
+      </form>
+    </div>
+  </div>
+
   <script src="assets/icons.js"></script>
-</body></html>
+  <script type="module" src="scripts/pages/soil.js"></script>
+</body>
+</html>

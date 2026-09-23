@@ -1,26 +1,40 @@
 import type { Env } from './types.ts';
 
-export function corsHeaders(request: Request, env: Env): HeadersInit {
+export function corsHeaders(request: Request, env: Env, requestId?: string): HeadersInit {
   const origin = request.headers.get('Origin') ?? '';
   const allowed = env.ALLOWED_ORIGINS.split(',').map((value) => value.trim());
+  const rid = requestId ?? request.headers.get('X-Request-Id') ?? '';
+  const base: Record<string, string> = { 'Vary': 'Origin' };
+  if (rid) base['X-Request-Id'] = rid;
   if (!origin || !allowed.includes(origin)) {
-    return { 'Vary': 'Origin' };
+    return base;
   }
   return {
+    ...base,
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Device-Key',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Device-Key, X-Request-Id',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Vary': 'Origin',
   };
 }
 
-export function json(request: Request, env: Env, body: unknown, status = 200): Response {
-  return Response.json(body, { status, headers: corsHeaders(request, env) });
+export function json(request: Request, env: Env, body: unknown, status = 200, requestId?: string): Response {
+  return Response.json(body, { status, headers: corsHeaders(request, env, requestId) });
 }
 
-export function error(request: Request, env: Env, status: number, message: string): Response {
-  return json(request, env, { error: message }, status);
+export function error(request: Request, env: Env, status: number, message: string, requestId?: string): Response {
+  return json(request, env, { error: message, requestId }, status, requestId);
+}
+
+export function createRequestId(request: Request): string {
+  const incoming = request.headers.get('X-Request-Id');
+  if (incoming && incoming.length <= 128) return incoming;
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+  }
 }
 
 export function addSecurityHeaders(response: Response): Response {

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Market Intelligence — Smart Farming AI</title>
@@ -7,33 +7,119 @@
 </head>
 <body class="app-body market-page">
   <aside class="sidebar">
-    <a class="brand" href="index.html"><span class="brand-mark"><span class="material-icons-round">sprout</span></span><span class="brand-copy">Smart Farming AI<small>Bangladesh</small></span></a>
-    <nav class="side-nav"><a href="dashboard.html"><span class="material-icons-round">home</span>Dashboard</a><a href="dashboard.html#fields"><span class="material-icons-round">sprout</span>Farm</a><a class="active" href="market.html"><span class="material-icons-round">show_chart</span>Market</a><a href="soil.html"><span class="material-icons-round">soil</span>Soil</a><a href="ai-search.html"><span class="material-icons-round">search</span>AI Search</a><div class="nav-spacer"></div><a href="#"><span class="material-icons-round">library_books</span>Resources</a><a href="#"><span class="material-icons-round">tune</span>Settings</a></nav>
+    <a class="brand" href="index.html"><span class="brand-mark"><span class="material-icons-round">sprout</span></span><span class="brand-copy">Smart Farming AI<small data-i18n="brandTag">Bangladesh</small></span></a>
+    <nav class="side-nav">
+      <a href="dashboard.html"><span class="material-icons-round">home</span><span data-i18n="navDashboard">Dashboard</span></a>
+      <a href="dashboard.html#fields"><span class="material-icons-round">sprout</span><span data-i18n="fields">Farm</span></a>
+      <a class="active" href="market.html"><span class="material-icons-round">show_chart</span><span data-i18n="navMarket">Market</span></a>
+      <a href="soil.html"><span class="material-icons-round">soil</span><span data-i18n="navSoil">Soil</span></a>
+      <a href="ai-search.html"><span class="material-icons-round">search</span><span data-i18n="navAI">AI Search</span></a>
+      <div class="nav-spacer"></div>
+      <a href="index.html#resources"><span class="material-icons-round">library_books</span><span data-i18n="resources">Resources</span></a>
+      <a href="index.html#insights"><span class="material-icons-round">tune</span><span data-i18n="insights">Insights</span></a>
+    </nav>
     <div class="sidebar-note">Healthier Soil<br>Stronger Farmers<br>A Greener Bangladesh</div>
   </aside>
-  <header class="top-command"><div class="command-search"><span class="material-icons-round">search</span><input placeholder="Search commodities, markets, or districts…" aria-label="Search market"><span class="command-kbd">Ctrl K</span></div><button class="btn icon-btn"><span class="material-icons-round">notifications_none</span></button><div class="user-menu"><span class="avatar">AK</span></div></header>
-  <div class="price-ticker"><b>● Live Market Prices</b><span>Aman Rice&nbsp; <b>৳28.50</b> <em class="positive">▲2.3%</em></span><span>Boro Rice&nbsp; <b>৳26.00</b> <em class="positive">▲1.1%</em></span><span>Jute&nbsp; <b>৳54.00</b> <em class="negative">▼0.5%</em></span><span>Maize&nbsp; <b>৳22.00</b> <em class="positive">▲3.2%</em></span><span>Onion&nbsp; <b>৳40.00</b> <em class="negative">▼1.8%</em></span></div>
+
+  <header class="top-command">
+    <div class="command-search"><span class="material-icons-round">search</span><input id="commandSearch" placeholder="Search commodities, markets, or districts…" data-i18n-placeholder="searchPlaceholder" aria-label="Search market"><span class="command-kbd">Ctrl K</span></div>
+    <button class="btn icon-btn" type="button" data-open-search data-i18n-aria="search" aria-label="Search"><span class="material-icons-round">search</span></button>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="btn" type="button" data-lang="bn">বাংলা</button>
+      <button class="btn" type="button" data-lang="en">EN</button>
+    </div>
+    <div class="user-menu"><span class="avatar" data-user-avatar>—</span></div>
+  </header>
+
+  <div class="price-ticker">
+    <b>● <span data-i18n="liveMarketPrices">Live Market Prices</span></b>
+    <span id="tickerPrices" class="ticker-prices">…</span>
+  </div>
 
   <main class="app-main"><div class="page-wrap">
-    <div class="page-heading"><div><h1>Market Intelligence</h1><p>Live prices and smarter selling decisions</p></div><div class="toolbar"><span class="weather-inline">☀️ 32°C · Partly cloudy</span><button class="btn"><span class="material-icons-round">notifications_none</span>Create Alert</button><button class="btn btn-dark"><span class="material-icons-round">cloud_download</span>Export Report</button></div></div>
-    <section class="commodity-strip" id="commodities"><button class="commodity active" data-name="Aman Rice" data-price="28.50"><span class="emoji">🌾</span><span><b>Aman Rice</b><small>Rice (Aman)</small></span></button><button class="commodity" data-name="Boro Rice" data-price="26.00"><span class="emoji">🍚</span><span><b>Boro Rice</b><small>Rice (Boro)</small></span></button><button class="commodity" data-name="Jute" data-price="54.00"><span class="emoji">🌿</span><span><b>Jute</b><small>Fiber crop</small></span></button><button class="commodity" data-name="Maize" data-price="22.00"><span class="emoji">🌽</span><span><b>Maize</b><small>Grain</small></span></button><button class="commodity" data-name="Onion" data-price="40.00"><span class="emoji">🧅</span><span><b>Onion</b><small>Vegetable</small></span></button></section>
+    <div class="page-heading">
+      <div><h1 data-i18n="marketTitle">Market Intelligence</h1><p data-i18n="marketLead">Live prices and smarter selling decisions</p></div>
+      <div class="toolbar">
+        <button class="btn" type="button" id="createAlertBtn"><span class="material-icons-round">notifications_none</span> <span data-i18n="createAlert">Create Alert</span></button>
+        <button class="btn btn-dark" type="button" id="exportBtn"><span class="material-icons-round">cloud_download</span> <span data-i18n="exportReport">Export Report</span></button>
+      </div>
+    </div>
+
+    <section class="commodity-strip" id="commodities" data-state="loading" aria-label="Commodities"></section>
 
     <section class="market-grid">
-      <article class="panel chart-panel"><div class="panel-title"><h2>Price Trend & Forecast</h2><span class="chip">Live</span></div><div class="price-summary"><div><small class="muted">Current Price</small><br><strong>৳ <span id="currentPrice">28.50</span><small>/kg</small></strong></div><span class="chip">▲ 2.3% this week</span><div><small class="muted">Weekly High</small><br><b>৳29.20</b></div><div><small class="muted">Weekly Low</small><br><b>৳27.10</b></div></div><div class="segmented" style="max-width:300px;margin-top:10px"><button class="active">7 Days</button><button>30 Days</button><button>90 Days</button></div><div class="chart-wrap"><svg viewBox="0 0 700 230" role="img" aria-label="Price forecast chart"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#70b38c" stop-opacity=".38"/><stop offset="1" stop-color="#70b38c" stop-opacity="0"/></linearGradient></defs><path d="M0 185 C70 150 115 165 170 140 S260 155 330 125 S420 132 500 98 S600 82 700 55 L700 185 L0 185Z" fill="url(#area)"/><path d="M0 185 C70 150 115 165 170 140 S260 155 330 125" fill="none" stroke="#126846" stroke-width="4"/><path d="M330 125 C420 132 500 98 700 55" fill="none" stroke="#126846" stroke-width="4" stroke-dasharray="7 8"/><line x1="330" x2="330" y1="15" y2="215" stroke="#81928c" stroke-dasharray="4 5"/><text x="340" y="29" fill="#65756f" font-size="13">Today</text></svg></div></article>
-      <article class="panel recommend-panel"><div class="panel-title"><h2>✨ AI Recommendation</h2></div><div class="sell">SELL</div><span class="chip" style="background:#ffe1a5">● High confidence</span><p>Prices are expected to rise in the short term. Consider selling a portion now to lock in gains.</p><div class="factor-list"><div>🌿 <span><b>Rising demand</b><br><small class="muted">Before harvest</small></span></div><div>◉ <span><b>Lower supply</b><br><small class="muted">Nearby markets</small></span></div><div>☀️ <span><b>Favorable trend</b><br><small class="muted">Seasonal outlook</small></span></div></div></article>
-      <article class="panel nearest-panel"><div class="panel-title"><h2>Nearest Market</h2><a href="#">View all →</a></div><b>Kishoreganj Agricultural Market</b><small class="muted" style="display:block">Kishoreganj · 32 km</small><div class="market-map"><i class="map-pin" aria-hidden="true">&nbsp;</i></div><div class="mini-list"><div><span>Distance</span><b>32 km</b></div><div><span>Transport cost</span><b>৳1,200–1,800</b></div><div><span>Travel time</span><b>1.5 hours</b></div></div><button class="btn" style="width:100%;margin-top:12px">Get Directions</button></article>
+      <article class="panel chart-panel">
+        <div class="panel-title"><h2 data-i18n="priceTrend">Price Trend</h2><span class="chip" id="chartCropLabel">—</span></div>
+        <div class="price-summary" id="priceSummary" data-state="loading">
+          <div><small class="muted" data-i18n="currentPrice">Current Price</small><br><strong id="currentPrice">—</strong></div>
+          <span class="chip" id="priceChange">—</span>
+          <div><small class="muted" data-i18n="weeklyHigh">Weekly High</small><br><b id="priceHigh">—</b></div>
+          <div><small class="muted" data-i18n="weeklyLow">Weekly Low</small><br><b id="priceLow">—</b></div>
+        </div>
+        <div class="segmented" id="rangeTabs" style="max-width:300px;margin-top:10px" role="tablist">
+          <button type="button" class="active" data-range="7" aria-selected="true">7 Days</button>
+          <button type="button" data-range="30" aria-selected="false">30 Days</button>
+          <button type="button" data-range="90" aria-selected="false">90 Days</button>
+        </div>
+        <div class="chart-wrap" id="chartWrap" data-state="loading">
+          <svg id="priceChart" viewBox="0 0 700 230" role="img" aria-label="Price history chart"></svg>
+        </div>
+        <button class="btn btn-soft" type="button" id="watchlistAdd" style="margin-top:10px" data-i18n="watchlist">Add to watchlist</button>
+      </article>
+
+      <article class="panel recommend-panel">
+        <div class="panel-title"><h2>✨ <span data-i18n="aiRecommendation">AI Recommendation</span></h2></div>
+        <div id="aiRecommend"><p class="muted" data-i18n="loading">Loading…</p></div>
+      </article>
+
+      <article class="panel nearest-panel">
+        <div class="panel-title"><h2 data-i18n="nearestMarket">Nearest Market</h2></div>
+        <b id="nearestMarketName">—</b>
+        <small class="muted" style="display:block" id="nearestMarketMeta">—</small>
+        <div class="mini-list">
+          <div><span data-i18n="district">District</span><b id="nearestMarketDistrict">—</b></div>
+        </div>
+        <button class="btn" type="button" id="directionsBtn" style="width:100%;margin-top:12px" data-i18n="directions">Get Directions</button>
+      </article>
     </section>
 
     <section class="market-lower">
-      <article class="panel table-panel"><div class="panel-title"><h2>Watchlist</h2><a href="#">Manage →</a></div><table><thead><tr><th>Commodity</th><th>Price</th><th>Change</th><th>Trend</th></tr></thead><tbody><tr><td>🌾 Aman Rice</td><td>28.50</td><td class="positive">▲2.3%</td><td><div class="spark"></div></td></tr><tr><td>🌿 Jute</td><td>54.00</td><td class="negative">▼0.5%</td><td><div class="spark"></div></td></tr><tr><td>🌽 Maize</td><td>22.00</td><td class="positive">▲3.2%</td><td><div class="spark"></div></td></tr><tr><td>🧅 Onion</td><td>40.00</td><td class="negative">▼1.8%</td><td><div class="spark"></div></td></tr></tbody></table></article>
-      <article class="panel table-panel"><div class="panel-title"><h2>District Price Comparison</h2><span class="chip">Aman Rice</span></div><table><thead><tr><th>District</th><th>Current Price</th><th>vs. National Avg.</th><th>Trend</th></tr></thead><tbody><tr><td>Kishoreganj</td><td>29.20</td><td class="positive">+2.5%</td><td><div class="spark"></div></td></tr><tr><td>Mymensingh</td><td>28.50</td><td>0.0%</td><td><div class="spark"></div></td></tr><tr><td>Bogra</td><td>27.80</td><td class="negative">−2.5%</td><td><div class="spark"></div></td></tr><tr><td>Rangpur</td><td>26.90</td><td class="negative">−5.6%</td><td><div class="spark"></div></td></tr></tbody></table></article>
-      <article class="panel insights-panel"><div class="panel-title"><h2>Market Insights</h2></div><div class="insight-row">📈 Prices likely to increase 8–12% in the next 30 days.</div><div class="insight-row">📋 Higher demand expected from urban markets before harvest.</div><div class="insight-row">🌧 Monitor weather conditions for potential supply impact.</div><div class="insight-row">🌿 Good time to sell part of your stock and reduce risk.</div></article>
+      <article class="panel table-panel">
+        <div class="panel-title"><h2 data-i18n="watchlist">Watchlist</h2></div>
+        <table><thead><tr><th data-i18n="commodities">Commodity</th><th data-i18n="currentPrice">Price</th><th data-i18n="lastTested">Updated</th><th></th></tr></thead><tbody id="watchlistBody"></tbody></table>
+      </article>
+      <article class="panel table-panel">
+        <div class="panel-title"><h2 data-i18n="districtCompare">District Price Comparison</h2><span class="chip" id="districtCompareCrop">—</span></div>
+        <table><thead><tr><th data-i18n="district">District</th><th data-i18n="currentPrice">Price</th><th>vs. avg</th><th></th></tr></thead><tbody id="districtCompareBody"></tbody></table>
+      </article>
+      <article class="panel insights-panel">
+        <div class="panel-title"><h2 data-i18n="marketInsights">Market Insights</h2></div>
+        <div id="insightsList"><p class="muted" data-i18n="loading">Loading…</p></div>
+        <div class="panel-title" style="margin-top:14px"><h3 data-i18n="createAlert">Alerts</h3></div>
+        <div id="alertsList"></div>
+      </article>
     </section>
     <div class="market-panorama" role="img" aria-label="Bangladesh farm landscape"></div>
   </div></main>
+
+  <div class="modal-overlay" id="alertModal" hidden role="dialog" aria-modal="true" aria-labelledby="alertModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="alertModalTitle" data-i18n="createAlert">Create Alert</h2>
+        <button class="btn icon-btn" type="button" id="alertCancel" aria-label="Close">×</button>
+      </div>
+      <form id="alertForm">
+        <label for="alertCrop" data-i18n="commodities">Crop</label>
+        <input id="alertCrop" name="crop" required autocomplete="off">
+        <label for="alertPrice" data-i18n="currentPrice">Target price (৳)</label>
+        <input id="alertPrice" name="price" type="number" min="0.01" step="0.01" required>
+        <p class="form-error" id="alertError" role="alert" hidden></p>
+        <button class="btn btn-primary" type="submit" data-i18n="createAlert">Create Alert</button>
+      </form>
+    </div>
+  </div>
+
   <script src="assets/icons.js"></script>
-  <script>
-    document.querySelectorAll('.commodity').forEach(function(card){card.addEventListener('click',function(){document.querySelectorAll('.commodity').forEach(function(c){c.classList.remove('active')});card.classList.add('active');document.getElementById('currentPrice').textContent=card.dataset.price})});
-    document.querySelectorAll('.segmented button').forEach(function(button){button.addEventListener('click',function(){document.querySelectorAll('.segmented button').forEach(function(b){b.classList.remove('active')});button.classList.add('active')})});
-  </script>
-</body></html>
+  <script type="module" src="scripts/pages/market.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "smart-soil-analyzer-fusion360",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "test:frontend": "node --test \"frontend/tests/unit/*.test.js\"",
+    "test:e2e": "playwright test",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "test:e2e:mobile": "playwright test --project=\"Mobile Chrome\" --project=\"Mobile Safari\"",
+    "test:worker": "npm test --prefix apps/worker-api",
+    "typecheck:worker": "npm run typecheck --prefix apps/worker-api",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend",
+    "test:ai": "cd apps/ai-service && ./venv/bin/python -m pytest tests -q",
+    "validate": "npm run lint:frontend && npm run build:frontend && npm run typecheck:worker && npm run test:worker && npm run test:frontend"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "serve": "^14.2.4"
+  }
+}

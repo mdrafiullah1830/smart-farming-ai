@@ -57,7 +57,7 @@ describe('Worker API', () => {
   it('auth register succeeds with valid data', async () => {
     const req = createRequest('/api/v1/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ name_en: 'Test User', email: 'test2@test.com', password: 'password123' }),
+      body: JSON.stringify({ name_en: 'Test User', email: 'test2@test.com', password: 'Password123' }),
     });
     const res = await worker.fetch(req, env);
     // Will fail due to DB mock, but should not be 400
@@ -112,10 +112,12 @@ describe('Worker API', () => {
   });
 
   it('CORS headers present on responses', async () => {
-    const req = createRequest('/health');
+    const req = createRequest('/health', {
+      headers: { Origin: 'http://localhost:3000' },
+    });
     const res = await worker.fetch(req, env);
-    assert.ok(res.headers.has('Access-Control-Allow-Origin'));
-    assert.ok(res.headers.has('Access-Control-Allow-Credentials'));
+    assert.equal(res.headers.get('Access-Control-Allow-Origin'), 'http://localhost:3000');
+    assert.equal(res.headers.get('Access-Control-Allow-Credentials'), 'true');
   });
 
   it('OPTIONS request returns 204', async () => {

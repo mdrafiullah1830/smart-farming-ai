@@ -8,17 +8,16 @@ def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
-    assert data == {
-        "status": "ok",
-        "service": "smart-farming-ai",
-        "models": {
-            "disease": "unavailable",   # no model deployed in the test env
-            "crop": "unavailable",
-            "yield": "unavailable",
-            "market": "unavailable",
-            "advisory": "ok",           # rule-based, no artifact needed
-        },
-    }
+    assert data["status"] == "ok"
+    assert data["service"] == "smart-farming-ai"
+    models = data["models"]
+    assert set(models) == {"disease", "crop", "yield", "market", "advisory", "travel"}
+    assert models["disease"] == "unavailable"   # no model deployed in the test env
+    assert models["crop"] == "unavailable"
+    assert models["yield"] == "unavailable"
+    assert models["market"] == "unavailable"
+    assert models["advisory"] == "ok"           # rule-based, no artifact needed
+    assert models["travel"] in ("ok", "unavailable")  # depends on RAG index readiness
 
 
 def test_disease_requires_service_token() -> None:

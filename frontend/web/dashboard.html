@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Farm Dashboard — Smart Farming AI</title>
@@ -7,63 +7,126 @@
 </head>
 <body class="app-body">
   <aside class="sidebar">
-    <a class="brand" href="index.html"><span class="brand-mark"><span class="material-icons-round">sprout</span></span><span class="brand-copy">Smart Farming AI<small>Bangladesh</small></span></a>
+    <a class="brand" href="index.html"><span class="brand-mark"><span class="material-icons-round">sprout</span></span><span class="brand-copy">Smart Farming AI<small data-i18n="brandTag">Bangladesh</small></span></a>
     <nav class="side-nav" aria-label="Dashboard navigation">
-      <a class="active" href="dashboard.html"><span class="material-icons-round">home</span>Overview</a>
-      <a href="#fields"><span class="material-icons-round">sprout</span>Fields</a>
-      <a href="market.html"><span class="material-icons-round">show_chart</span>Market</a>
-      <a href="soil.html"><span class="material-icons-round">soil</span>Soil</a>
-      <a href="ai-search.html"><span class="material-icons-round">search</span>AI Search</a>
-      <a href="#alerts"><span class="material-icons-round">notifications</span>Alerts <span class="chip" style="margin-left:auto;background:#d9403f;color:#fff;padding:3px 7px">3</span></a>
+      <a class="active" href="dashboard.html"><span class="material-icons-round">home</span><span data-i18n="navDashboard">Overview</span></a>
+      <a href="#fields"><span class="material-icons-round">sprout</span><span data-i18n="fields">Fields</span></a>
+      <a href="market.html"><span class="material-icons-round">show_chart</span><span data-i18n="navMarket">Market</span></a>
+      <a href="soil.html"><span class="material-icons-round">soil</span><span data-i18n="navSoil">Soil</span></a>
+      <a href="ai-search.html"><span class="material-icons-round">search</span><span data-i18n="navAI">AI Search</span></a>
+      <a href="#alerts"><span class="material-icons-round">notifications</span><span data-i18n="notifications">Alerts</span></a>
       <div class="nav-spacer"></div>
-      <a href="#resources"><span class="material-icons-round">library_books</span>Resources</a>
-      <a href="#settings"><span class="material-icons-round">tune</span>Settings</a>
+      <a href="index.html#resources"><span class="material-icons-round">library_books</span><span data-i18n="resources">Resources</span></a>
+      <a href="index.html#insights"><span class="material-icons-round">tune</span><span data-i18n="insights">Insights</span></a>
     </nav>
     <div class="sidebar-note">Healthier Soil<br>Stronger Farmers<br>A Greener Bangladesh</div>
   </aside>
 
   <header class="top-command">
-    <div class="command-search"><span class="material-icons-round">search</span><input aria-label="Search" placeholder="Search anything—fields, crops, prices, weather…"><span class="command-kbd">Ctrl K</span></div>
-    <button class="btn icon-btn" aria-label="Notifications"><span class="material-icons-round">notifications_none</span></button>
-    <div class="user-menu"><span class="avatar">RC</span><span><strong>Rafi Chowdhury</strong><small>Farmer · Mymensingh</small></span></div>
+    <div class="command-search"><span class="material-icons-round">search</span><input id="commandSearch" aria-label="Search" data-i18n-placeholder="searchPlaceholder" placeholder="Search fields, crops, prices, weather…"><span class="command-kbd">Ctrl K</span></div>
+    <button class="btn icon-btn" id="notificationsBtn" type="button" aria-expanded="false" data-i18n-aria="notifications" aria-label="Notifications"><span class="material-icons-round">notifications_none</span><span class="notif-badge" id="notifBadge" hidden>0</span></button>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="btn" type="button" data-lang="bn">বাংলা</button>
+      <button class="btn" type="button" data-lang="en">EN</button>
+    </div>
+    <div class="user-menu"><span class="avatar" data-user-avatar>—</span><span><strong data-user-name>—</strong><small class="muted" data-i18n="footerNote">Guest</small></span></div>
   </header>
+
+  <div class="dropdown-panel" id="notificationsPanel" hidden data-state="loading" aria-live="polite"></div>
 
   <main class="app-main"><div class="page-wrap">
     <div class="page-heading">
-      <div><h1>Good morning, Rafi</h1><p>Here’s what’s happening on your farm today.</p></div>
-      <div class="heading-meta"><span class="weather-inline">☀️ <span><b>32°C</b><small class="muted" style="display:block">Partly cloudy</small></span></span><span class="muted">Mon, 16 Jun 2024<br>Mymensingh, Bangladesh</span></div>
+      <div>
+        <h1><span data-i18n="dashTitle">Good morning</span>, <span id="greetName">—</span></h1>
+        <p data-i18n="dashLead">Here is what is happening on your farm today.</p>
+      </div>
+      <div class="heading-meta">
+        <span class="weather-inline"><span id="heroWeatherIcon">—</span> <span><b id="heroHeadingMeta">—</b></span></span>
+        <span class="muted"><span id="headingDate">—</span></span>
+      </div>
     </div>
 
-    <section class="alert-banner" id="alerts"><div class="alert-symbol">⛈</div><div><strong>Heavy rain expected tomorrow</strong><small>Up to 60–90 mm in Mymensingh. Complete field activities today and ensure proper drainage.</small></div><button class="btn">View details <span class="material-icons-round">arrow_forward</span></button></section>
+    <section class="alert-banner" id="alerts">
+      <div class="alert-symbol">⛈</div>
+      <div><strong data-i18n="weatherAlertTitle">Heavy rain expected tomorrow</strong><small data-i18n="weatherAlertBody">Up to 60–90 mm in Mymensingh. Complete field activities today and ensure proper drainage.</small></div>
+      <a class="btn" href="ai-search.html"><span data-i18n="viewDetails">View details</span> <span class="material-icons-round">arrow_forward</span></a>
+    </section>
 
     <section class="summary-grid">
-      <article class="panel summary-card health-card"><div><h3>🌿 Farm Health</h3><div class="ring"><div class="ring-value">82<small>Good</small></div></div></div><div class="mini-list"><div><span>Crop Health</span><b>85</b></div><div><span>Soil Health</span><b>78</b></div><div><span>Water Management</span><b>80</b></div><div><span>Pest & Disease</span><b>70</b></div><div><span>Overall Trend</span><b class="positive">↗ 12%</b></div></div></article>
-      <article class="panel summary-card"><h3>☀️ Weather</h3><div class="weather-big"><span>🌤</span><strong>32°C</strong></div><p class="muted">Partly cloudy</p><div class="mini-list"><div><span>Humidity</span><b>72%</b></div><div><span>Wind</span><b>12 km/h</b></div></div></article>
-      <article class="panel summary-card"><h3>💧 Soil Moisture</h3><div class="gauge"><strong>68%</strong></div><div class="soil-status">Optimal</div><p class="muted" style="text-align:center;font-size:11px">Ideal range: 60–80%</p></article>
-      <article class="panel summary-card"><h3>💧 Irrigation</h3><div style="display:flex;justify-content:space-between;align-items:center"><b>Live irrigation</b><button class="switch on" id="irrigationSwitch" aria-label="Toggle irrigation"></button></div><p class="muted">Running scheduled plan</p><div class="mini-list"><div><span>Next cycle</span><b>4:00 PM</b></div><div><span>Field</span><b>A (Rice)</b></div></div><button class="btn btn-soft" style="width:100%;margin-top:15px">Manage irrigation</button></article>
-      <article class="panel summary-card"><h3>🌱 Disease Risk</h3><div class="risk-meter"><strong>Low</strong></div><p class="positive" style="text-align:center;font-weight:740">Low risk</p><p class="muted" style="font-size:11px;text-align:center">No immediate threats</p></article>
-      <article class="panel summary-card"><h3>◉ Sensor Status</h3><p><b style="font-size:20px">12 / 12</b> <span class="positive">Online</span></p><div class="sensor-list"><div><span>● Soil Sensors</span><b>4 / 4</b></div><div><span>● Weather Station</span><b>2 / 2</b></div><div><span>● Water Level</span><b>2 / 2</b></div><div><span>● Field Cameras</span><b>2 / 2</b></div><div><span>● pH Sensors</span><b>2 / 2</b></div></div></article>
+      <article class="panel summary-card health-card" id="healthCard">
+        <div><h3 data-i18n="farmHealth">Farm Health</h3><div class="ring" style="--value:0"><div class="ring-value" id="farmHealthScore">—<small>—</small></div></div></div>
+        <div class="mini-list"><div><span data-i18n="cropIntel">Crop Health</span><b>—</b></div><div><span data-i18n="soilHealth">Soil Health</span><b>—</b></div><div><span data-i18n="irrigation">Water</span><b>—</b></div></div>
+      </article>
+      <article class="panel summary-card" id="weatherCard">
+        <h3>☀️ <span data-i18n="weather">Weather</span></h3>
+        <div class="weather-big"><span id="weatherIcon">—</span><strong id="weatherTemp">—</strong></div>
+        <p class="muted" id="weatherCondition">—</p>
+        <div class="mini-list">
+          <div><span data-i18n="humidity">Humidity</span><b id="weatherHumidity">—</b></div>
+          <div><span data-i18n="wind">Wind</span><b id="weatherWind">—</b></div>
+        </div>
+      </article>
+      <article class="panel summary-card" id="moistureCard">
+        <h3>💧 <span data-i18n="soilMoisture">Soil Moisture</span></h3>
+        <div class="gauge"><strong id="moistureValue">—</strong></div>
+        <div class="soil-status" data-i18n="optimal">Optimal</div>
+        <p class="muted" style="text-align:center;font-size:11px" data-i18n="idealRange">Ideal range: 60–80%</p>
+      </article>
+      <article class="panel summary-card" id="irrigationCard">
+        <h3>💧 <span data-i18n="irrigation">Irrigation</span></h3>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b data-i18n="liveIrrigation">Live irrigation</b>
+          <button class="switch" type="button" id="irrigationSwitch" role="switch" aria-checked="false" data-i18n-aria="irrigation" aria-label="Toggle irrigation" disabled></button>
+        </div>
+        <p class="muted" id="irrigationStatus" data-i18n="irrigationUnavailable">No device link — control unavailable</p>
+        <button class="btn btn-soft" type="button" id="irrigationManage" style="width:100%;margin-top:15px" disabled data-i18n="irrigationManage">Manage irrigation</button>
+      </article>
+      <article class="panel summary-card" id="diseaseCard">
+        <h3>🌱 <span data-i18n="diseaseRisk">Disease Risk</span></h3>
+        <div class="risk-meter"><strong>—</strong></div>
+        <p class="muted" style="text-align:center" data-i18n="empty">No data yet</p>
+      </article>
+      <article class="panel summary-card" id="sensorCard">
+        <h3>◉ <span data-i18n="sensorStatus">Sensor Status</span></h3>
+        <p><b style="font-size:20px" id="sensorCount">—</b> <span class="positive" id="sensorLabel" data-i18n="empty">No data yet</span></p>
+        <div class="sensor-list">
+          <div><span>● <span data-i18n="soilSensors">Soil Sensors</span></span><b>—</b></div>
+          <div><span>● <span data-i18n="weatherStation">Weather Station</span></span><b>—</b></div>
+          <div><span>● <span data-i18n="waterLevel">Water Level</span></span><b>—</b></div>
+        </div>
+      </article>
     </section>
 
     <section class="dashboard-grid">
-      <article class="panel map-panel" id="fields"><div class="panel-title"><h2>📍 Your Fields</h2><a href="#">View all fields →</a></div><div class="field-map"><div class="field-outline a">Field A<br>2.4 ha · Rice</div><div class="field-outline b">Field B<br>1.8 ha · Jute</div><div class="field-outline c">Field C<br>1.2 ha · Vegetables</div></div></article>
-      <article class="panel tasks-panel"><div class="panel-title"><h2>📋 Today’s Priorities</h2><span class="muted">5 tasks</span></div><div class="task-list">
-        <label class="task"><time>6:00 AM</time><input type="checkbox" checked><span><b>Check Field A irrigation</b><small>Completed · Soil moisture is optimal</small></span></label>
-        <label class="task"><time>9:00 AM</time><input type="checkbox"><span><b>Inspect Field B for pests</b><small>In progress</small></span></label>
-        <label class="task"><time>11:00 AM</time><input type="checkbox"><span><b>Apply urea to Field D</b><small>Due today</small></span></label>
-        <label class="task"><time>2:00 PM</time><input type="checkbox"><span><b>Check water level</b><small>Field C</small></span></label>
-        <label class="task"><time>4:00 PM</time><input type="checkbox"><span><b>Prepare for heavy rain</b><small>Clean drainage channels</small></span></label>
-      </div><button class="btn btn-primary" style="width:100%">✓ Mark task complete</button></article>
+      <article class="panel map-panel" id="fieldsPanel">
+        <div class="panel-title"><h2>📍 <span data-i18n="yourFields">Your Fields</span></h2><a href="soil.html" data-i18n="viewAll">View all fields</a></div>
+        <div class="field-map" id="fieldMapOverlays"><p class="muted" data-i18n="loading">Loading…</p></div>
+      </article>
+      <article class="panel tasks-panel">
+        <div class="panel-title"><h2>📋 <span data-i18n="tasks">Today’s priorities</span></h2><span class="muted" id="taskCount">0/0</span></div>
+        <div class="task-list" id="taskList"></div>
+        <button class="btn btn-primary" type="button" id="markTasksComplete" style="width:100%" data-i18n="markComplete">Mark selected complete</button>
+      </article>
       <div>
-        <article class="panel forecast-panel"><div class="panel-title"><h2>7-Day Weather Forecast</h2><a href="#">View full forecast →</a></div><div class="weather-days"><div class="day"><b>Mon</b><div class="wx">🌤</div><strong>32°</strong><br>20%</div><div class="day alert"><b>Tue</b><div class="wx">⛈</div><strong>28°</strong><br>90%</div><div class="day"><b>Wed</b><div class="wx">🌧</div><strong>29°</strong><br>70%</div><div class="day"><b>Thu</b><div class="wx">🌤</div><strong>31°</strong><br>40%</div><div class="day"><b>Fri</b><div class="wx">☀️</div><strong>32°</strong><br>20%</div><div class="day"><b>Sat</b><div class="wx">🌤</div><strong>32°</strong><br>20%</div><div class="day"><b>Sun</b><div class="wx">🌤</div><strong>31°</strong><br>30%</div></div></article>
+        <article class="panel forecast-panel" id="weatherForecast">
+          <div class="panel-title"><h2 data-i18n="forecast">7-Day Weather Forecast</h2></div>
+          <div class="weather-days" id="forecastDays"><p class="muted" data-i18n="loading">Loading…</p></div>
+        </article>
         <div class="lower-right-grid">
-          <article class="panel activity-panel"><div class="panel-title"><h3>Recent Activity</h3><span class="muted">All activities</span></div><div class="activity-list"><div><span>💧 Soil moisture updated</span><time>10:24 AM</time></div><div><span>⛈ Weather alert received</span><time>09:15 AM</time></div><div><span>🌿 Irrigation started</span><time>06:00 AM</time></div><div><span>📋 Field B inspection added</span><time>Yesterday</time></div></div></article>
-          <article class="panel activity-panel"><div class="panel-title"><h3>Market Prices</h3><a href="market.html">View market →</a></div><div class="market-mini"><div><span>🌾 Rice (Aman)</span><b>৳28.5 <em class="positive">↑2.3%</em></b></div><div><span>🌽 Maize</span><b>৳22.0 <em class="positive">↑1.1%</em></b></div><div><span>🌿 Jute</span><b>৳54.0 <em class="negative">↓0.5%</em></b></div><div><span>🧅 Onion</span><b>৳40.0 <em class="positive">↑3.2%</em></b></div></div></article>
+          <article class="panel activity-panel">
+            <div class="panel-title"><h3 data-i18n="recentActivity">Recent Activity</h3></div>
+            <div class="activity-list"><p class="muted" data-i18n="empty">No data yet</p></div>
+          </article>
+          <article class="panel activity-panel">
+            <div class="panel-title"><h3 data-i18n="marketPrices">Market Prices</h3><a href="market.html" data-i18n="viewAll">View market</a></div>
+            <div class="market-mini" id="marketMini"><p class="muted" data-i18n="loading">Loading…</p></div>
+          </article>
         </div>
       </div>
     </section>
   </div></main>
+
   <script src="assets/icons.js"></script>
-  <script>document.getElementById('irrigationSwitch').addEventListener('click',function(){this.classList.toggle('on')});</script>
+  <script type="module" src="scripts/pages/dashboard.js"></script>
 </body>
 </html>

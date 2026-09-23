@@ -9,6 +9,12 @@
 .ruff_cache/
 .DS_Store
 
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # Secrets — never commit
 .env
 .env.*
@@ -54,9 +60,14 @@ database/.fuse_hidden*
 ai_models/trained_models/*
 !ai_models/trained_models/.gitkeep
 
+# Prebuilt travel RAG index must ship with the deployable AI service
+!apps/ai-service/app/travel/data/index/*.pkl
+!apps/ai-service/app/travel/data/index/*.faiss
+
 # ONNX models - ignore in ai_models (regenerable) but track in ai-service (deployable)
 ai_models/**/*.onnx
 !apps/ai-service/models/*.onnx
+!apps/ai-service/models/*.onnx.data
 
 # Datasets (large; tracked selectively only)
 soil report/

@@ -152,7 +152,8 @@ export async function verifyGoogleJWT(token: string, clientId: string): Promise<
 
     const data = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
     const signature = decodeBase64url(parts[2]);
-    const valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', publicKey, signature, data);
+    const signatureBuffer = new Uint8Array(signature).buffer as ArrayBuffer;
+    const valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', publicKey, signatureBuffer, data);
     if (!valid) return null;
 
     const payload = JSON.parse(new TextDecoder().decode(decodeBase64url(parts[1])));

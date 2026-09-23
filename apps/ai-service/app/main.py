@@ -14,7 +14,8 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 
 from app.routers import advisory, crop, market, travel, yield_
 
-SERVICE_TOKEN = os.getenv("SERVICE_TOKEN", "")
+# Read token at request time so tests and runtime env changes are honored.
+SERVICE_TOKEN_ENV = "SERVICE_TOKEN"
 MODEL_PATH = os.getenv("MODEL_PATH", "/app/models/disease_model.onnx")
 
 logging.basicConfig(level=logging.INFO)
@@ -229,9 +230,10 @@ class DiseaseResponse(BaseModel):
 
 
 def require_service_token(authorization: Annotated[str | None, Header()] = None) -> None:
-    if not SERVICE_TOKEN:
+    service_token = os.getenv(SERVICE_TOKEN_ENV, "")
+    if not service_token:
         raise HTTPException(status_code=503, detail="Service token is not configured")
-    if authorization != f"Bearer {SERVICE_TOKEN}":
+    if authorization != f"Bearer {service_token}":
         raise HTTPException(status_code=401, detail="Invalid service token")
 
 

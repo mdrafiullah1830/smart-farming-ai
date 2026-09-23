@@ -4,7 +4,7 @@ services:
     name: smart-farming-ai-service
     runtime: docker
     plan: free
-    dockerfilePath: apps/ai-service/Dockerfile
+    dockerfilePath: ./apps/ai-service/Dockerfile
     healthCheckPath: /health
     healthCheckPolicy: strict
     autoDeployTrigger: commit
@@ -15,15 +15,24 @@ services:
         value: production
       - key: MODEL_PATH
         value: /app/models/disease_model.onnx
+      # Render injects PORT; keep it aligned with EXPOSE / default CMD.
       - key: PORT
-        value: 10000
+        value: "10000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: HF_HOME
+        value: /tmp/hf
+      - key: TRANSFORMERS_CACHE
+        value: /tmp/hf
+      - key: SENTENCE_TRANSFORMERS_HOME
+        value: /tmp/hf
 
   # ─── Python Backend API ──────────────────────────────────────────────
   - type: web
     name: smart-farming-ai-backend
     runtime: docker
     plan: free
-    dockerfilePath: backend/Dockerfile
+    dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /api/v1/health
     healthCheckPolicy: strict
     autoDeployTrigger: commit
@@ -32,5 +41,9 @@ services:
         generateValue: true
       - key: APP_ENV
         value: production
+      - key: PORT
+        value: "10000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
       - key: CORS_ORIGINS
         value: https://smart-farming-ai.onrender.com,http://localhost:3000

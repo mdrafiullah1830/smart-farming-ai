@@ -1,4 +1,4 @@
-import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders } from './http.ts';
+import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders, createRequestId } from './http.ts';
 import { authenticateDevice } from './sensors.ts';
 import type { Env } from './types.ts';
 import { currentUser } from './auth.ts';
@@ -132,17 +132,29 @@ async function route(request: Request, env: Env): Promise<Response> {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const started = Date.now();
+    const requestId = createRequestId(request);
+    const url = new URL(request.url);
     let rateLimitInfo: { allowed: boolean; remaining: number; resetTime: number } | null = null;
 
     // Apply rate limiting to all API endpoints except health
-    const url = new URL(request.url);
     if (url.pathname !== '/health' && url.pathname.startsWith('/api/')) {
       rateLimitInfo = await checkRateLimit(request, env);
       if (rateLimitInfo && !rateLimitInfo.allowed) {
+        console.log(JSON.stringify({
+          ts: new Date().toISOString(),
+          level: 'warn',
+          msg: 'rate_limited',
+          requestId,
+          method: request.method,
+          path: url.pathname,
+          status: 429,
+          durationMs: Date.now() - started,
+        }));
         return addSecurityHeaders(addRateLimitHeaders(
-          new Response(JSON.stringify({ error: 'Too Many Requests' }), {
+          new Response(JSON.stringify({ error: 'Too Many Requests', requestId }), {
             status: 429,
-            headers: corsHeaders(request, env)
+            headers: corsHeaders(request, env, requestId)
           }),
           rateLimitInfo
         ));
@@ -151,10 +163,41 @@ export default {
 
     try {
       const response = await route(request, env);
-      return addSecurityHeaders(addRateLimitHeaders(response, rateLimitInfo));
+      const withId = new Headers(response.headers);
+      withId.set('X-Request-Id', requestId);
+      const out = addSecurityHeaders(addRateLimitHeaders(
+        new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: withId,
+        }),
+        rateLimitInfo
+      ));
+      console.log(JSON.stringify({
+        ts: new Date().toISOString(),
+        level: response.status >= 500 ? 'error' : response.status >= 400 ? 'warn' : 'info',
+        msg: 'request',
+        requestId,
+        method: request.method,
+        path: url.pathname,
+        status: response.status,
+        durationMs: Date.now() - started,
+      }));
+      return out;
     } catch (cause) {
+      console.log(JSON.stringify({
+        ts: new Date().toISOString(),
+        level: 'error',
+        msg: 'request_failed',
+        requestId,
+        method: request.method,
+        path: url.pathname,
+        status: 500,
+        durationMs: Date.now() - started,
+        error: cause instanceof Error ? cause.message : String(cause),
+      }));
       console.error('request_failed', cause);
-      return addSecurityHeaders(addRateLimitHeaders(error(request, env, 500, 'Internal server error'), rateLimitInfo));
+      return addSecurityHeaders(addRateLimitHeaders(error(request, env, 500, 'Internal server error', requestId), rateLimitInfo));
     }
   },
 };

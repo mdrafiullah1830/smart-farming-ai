@@ -1,3 +1,6 @@
+# Legacy nested blueprint — prefer the repository-root render.yaml, which
+# builds this Dockerfile with the full repo as context (COPY paths are
+# apps/ai-service/...). Kept only for manual one-off service creation.
 services:
   - type: web
     name: smart-farming-ai
@@ -5,7 +8,14 @@ services:
     plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
+    healthCheckPolicy: strict
     autoDeployTrigger: commit
     envVars:
       - key: SERVICE_TOKEN
         sync: false
+      - key: APP_ENV
+        value: production
+      - key: MODEL_PATH
+        value: /app/models/disease_model.onnx
+      - key: PYTHONUNBUFFERED
+        value: "1"
