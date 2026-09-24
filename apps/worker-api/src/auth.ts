@@ -167,18 +167,31 @@ export async function verifyGoogleJWT(token: string, clientId: string): Promise<
   }
 }
 
-export async function hashPassword(password: string, salt: string = crypto.randomUUID()): Promise<string> {
+// Cloudflare Workers' WebCrypto rejects PBKDF2 iteration counts above 100000
+// (NotSupportedError), so the work factor is capped there instead of the
+// desktop-recommended 600000. Raising it would break registration in prod.
+export const PBKDF2_ITERATIONS = 100_000;
+
+export async function hashPassword(password: string, salt: string = crypto.randomUUID(), iterations: number = PBKDF2_ITERATIONS): Promise<string> {
   const material = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', hash: 'SHA-256', salt: encoder.encode(salt), iterations: 210_000 },
+    { name: 'PBKDF2', hash: 'SHA-256', salt: encoder.encode(salt), iterations },
     material,
     256,
   );
-  return `pbkdf2_sha256$210000$${salt}$${base64url(new Uint8Array(bits))}`;
+  return `pbkdf2_sha256$${iterations}$${salt}$${base64url(new Uint8Array(bits))}`;
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  const [, , salt] = stored.split('$');
-  if (!salt) return false;
-  return (await hashPassword(password, salt)) === stored;
+  const [scheme, iterations, salt] = stored.split('$');
+  if (scheme !== 'pbkdf2_sha256' || !salt) return false;
+  const count = Number(iterations);
+  if (!Number.isInteger(count) || count <= 0) return false;
+  try {
+    return (await hashPassword(password, salt, count)) === stored;
+  } catch {
+    // A hash above the Workers PBKDF2 cap cannot be recomputed here; treat it
+    // as a failed match instead of letting the login route return a 500.
+    return false;
+  }
 }
