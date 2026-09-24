@@ -3,7 +3,7 @@
 # advisories. 0.116.1 capped starlette <0.48, which is why it was bumped.
 fastapi==0.138.0
 uvicorn[standard]==0.35.0
-pydantic==2.11.7
+pydantic==2.13.5
 onnxruntime==1.28.0
 # Pillow 10.4.0 carries PYSEC-2026-165/2249/2250/2252/2253/2255/2874/345x/349x.
 Pillow==12.3.0
