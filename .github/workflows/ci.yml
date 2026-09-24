@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Build AI service (repo-root context, matches Render)
         run: docker build -f apps/ai-service/Dockerfile -t smart-farming-ai-svc .
 
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Build backend (repo-root context, matches Render)
         run: docker build -f backend/Dockerfile -t smart-farming-backend .
 
