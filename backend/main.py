@@ -14,12 +14,23 @@ from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 
+try:  # Optional: local runs read backend/.env; Render/K8s inject real env vars.
+    from dotenv import load_dotenv
+
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+except ImportError:
+    pass
+
 # Sentry initialization
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 if SENTRY_DSN:
     sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.1, environment=os.getenv("APP_ENV", "production"))
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'database', 'smart_farming.db')
+# Tests point this at a scratch copy so a run never mutates the repo database.
+DB_PATH = os.getenv(
+    "SMART_FARMING_DB",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'database', 'smart_farming.db'),
+)
 
 ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")).split(",")
 APP_ENV = os.getenv("APP_ENV", "production").lower()
@@ -182,14 +193,14 @@ def get_profile(authorization: str = Header(default="")):
 def list_districts():
     """Get all 64 districts of Bangladesh with soil and climate data."""
     with get_db() as db:
-        rows = db.execute("SELECT * FROM districts ORDER BY name").fetchall()
+        rows = db.execute("SELECT * FROM districts ORDER BY name_en").fetchall()
         return {"districts": [dict(r) for r in rows], "total": len(rows)}
 
 @app.get("/api/v1/districts/{name}", summary="Get district details by name")
 def get_district(name: str):
     """Get a single district by English or Bangla name."""
     with get_db() as db:
-        row = db.execute("SELECT * FROM districts WHERE name = ? OR name_bn = ?", (name, name)).fetchone()
+        row = db.execute("SELECT * FROM districts WHERE name_en = ? OR name_bn = ?", (name, name)).fetchone()
         if not row:
             raise HTTPException(404, "District not found")
         return dict(row)
@@ -227,18 +238,19 @@ def soil_nearest(lat: float, lng: float):
                 best = d
         if not best:
             raise HTTPException(404, "No district found")
-        soil_rows = db.execute("SELECT * FROM soil_report_data WHERE record_json LIKE ? LIMIT 200", (f"%{best['name']}%",)).fetchall()
-        return {"district": best["name"], "district_bn": best["name_bn"], "distance_km": round(best_dist * 111, 1), "soil_data": [dict(r) for r in soil_rows]}
+        soil_rows = db.execute("SELECT * FROM soil_report_data WHERE record_json LIKE ? LIMIT 200", (f"%{best['name_en']}%",)).fetchall()
+        return {"district": best["name_en"], "district_bn": best["name_bn"], "distance_km": round(best_dist * 111, 1), "soil_data": [dict(r) for r in soil_rows]}
 
 # ==================== WEATHER ====================
 @app.get("/api/v1/weather/{district}")
 def weather_by_district(district: str):
     with get_db() as db:
-        row = db.execute("SELECT * FROM districts WHERE name = ?", (district,)).fetchone()
+        row = db.execute("SELECT * FROM districts WHERE name_en = ? OR name_bn = ?", (district, district)).fetchone()
         if not row:
             raise HTTPException(404, "District not found")
         return {
-            "district": district, "lat": row["lat"], "lng": row["lng"],
+            "district": row["name_en"], "district_bn": row["name_bn"],
+            "lat": row["lat"], "lng": row["lng"],
             "soil_type": row["soil_type"], "climate": row["climate"],
             "message": "Use /api/weather endpoint on Node.js server for real-time weather data"
         }
@@ -248,14 +260,15 @@ def weather_by_district(district: str):
 def recommend_crops(req: CropRecommendRequest):
     """Get recommended crops based on district soil type and major crops."""
     with get_db() as db:
-        dist = db.execute("SELECT * FROM districts WHERE name = ?", (req.district,)).fetchone()
+        dist = db.execute("SELECT * FROM districts WHERE name_en = ? OR name_bn = ?", (req.district, req.district)).fetchone()
         if not dist:
             raise HTTPException(404, "District not found")
 
+        district_name = dist["name_en"]
         crops = []
         if dist["major_crops"]:
             for crop in dist["major_crops"].split(","):
-                crops.append({"name": crop.strip(), "confidence": 85, "reason": f"Major crop in {req.district} district"})
+                crops.append({"name": crop.strip(), "confidence": 85, "reason": f"Major crop in {district_name} district"})
 
         if dist["soil_type"] == "Alluvial":
             crops.append({"name": "ধান", "confidence": 90, "reason": "Alluvial soil is ideal for rice"})
@@ -264,7 +277,7 @@ def recommend_crops(req: CropRecommendRequest):
             crops.append({"name": "মরিচ", "confidence": 80, "reason": "Coastal soil suits chili"})
             crops.append({"name": "চা", "confidence": 70, "reason": "Coastal areas support tea"})
 
-        return {"district": req.district, "upazila": req.upazila, "recommended_crops": crops, "soil_type": dist["soil_type"]}
+        return {"district": district_name, "upazila": req.upazila, "recommended_crops": crops, "soil_type": dist["soil_type"]}
 
 # ==================== MARKET ====================
 @app.get("/api/v1/market/prices", summary="Get all current market prices")
@@ -287,18 +300,20 @@ def market_price(crop: str):
 @app.post("/api/v1/disease/detect", summary="Report a detected plant disease")
 def detect_disease(report: DiseaseReport, authorization: str = Header(default="")):
     """Log a disease detection result. Optionally attach to authenticated user."""
+    user = get_current_user(authorization)
+    user_id = user["id"] if user else None
     with get_db() as db:
-        user = get_current_user(authorization)
-        farmer_id = user["id"] if user else None
         try:
             db.execute(
-                "INSERT INTO disease_reports (farmer_id, disease_name, confidence, description, treatments) VALUES (?,?,?,?,?)",
-                (farmer_id, report.disease_name, report.confidence, report.description, json.dumps(report.treatments))
+                "INSERT INTO disease_reports (user_id, disease_name, confidence, description, treatments) VALUES (?,?,?,?,?)",
+                (user_id, report.disease_name, report.confidence, report.description, json.dumps(report.treatments))
             )
             db.commit()
-        except sqlite3.OperationalError:
-            pass
-        return {"success": True, "disease": report.disease_name, "confidence": report.confidence}
+        except sqlite3.Error:
+            # Never report success for a write that did not happen.
+            logger.exception("Failed to persist disease report")
+            raise HTTPException(500, "Failed to save disease report") from None
+    return {"success": True, "disease": report.disease_name, "confidence": report.confidence}
 
 # ==================== CHATBOT ====================
 @app.post("/api/v1/chatbot/chat", summary="Chat with AI agriculture assistant")
@@ -336,8 +351,9 @@ def chat(msg: ChatMessage, authorization: str = Header(default="")):
         with get_db() as db:
             db.execute("INSERT INTO chat_history (user_id, message, reply, lang) VALUES (NULL,?,?,?)", (msg.message, reply, msg.lang))
             db.commit()
-    except sqlite3.OperationalError:
-        pass
+    except sqlite3.Error:
+        # Chat still works without the audit trail; log instead of hiding it.
+        logger.exception("Failed to persist chat history")
 
     return {"reply": reply, "lang": msg.lang}
 
@@ -386,4 +402,6 @@ def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # 0.0.0.0 is required: Render/K8s health checks reach the pod over the
+    # container network. Binding to 127.0.0.1 would fail the health check.
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104

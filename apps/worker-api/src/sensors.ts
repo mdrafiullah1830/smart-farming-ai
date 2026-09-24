@@ -10,7 +10,7 @@
  *   - Storage helpers never fabricate data. If a value is absent it stays NULL.
  */
 import { currentUser } from './auth.ts';
-import { error, json } from './http.ts';
+import { error, json, isMissingRelation } from './http.ts';
 import type { Env } from './types.ts';
 import type { DeviceContext, ThresholdRow } from './sensors.types.ts';
 import { DEFAULT_THRESHOLDS } from './sensors.types.ts';
@@ -56,6 +56,9 @@ export async function authenticateDevice(request: Request, env: Env): Promise<De
   const user = await currentUser(request, env);
   return user ? { ownerId: user.id, deviceId: null, via: 'user' } : null;
 }
+
+/** A device counts as online when it has checked in within this window. */
+const ONLINE_WINDOW_MS = 15 * 60 * 1000;
 
 const VALIDATION_RANGES: Array<[string, number, number]> = [
   ['moisture_percent', 0, 100],
@@ -170,7 +173,20 @@ export async function registerDevice(request: Request, env: Env): Promise<Respon
 export async function listDevices(request: Request, env: Env): Promise<Response> {
   const context = await authenticateDevice(request, env);
   if (!context) return error(request, env, 401, 'Authentication required');
-  const result = await env.DB.prepare(`
+
+  const withState = `
+    SELECT d.id, d.name, d.firmware_version, d.created_at, d.last_seen_at,
+           r.moisture_percent, r.soil_temperature_c, r.battery_percent, r.recorded_at AS last_reading_at,
+           c.state, c.command AS last_command, c.issued_at AS command_issued_at
+    FROM sensor_devices d
+    LEFT JOIN sensor_readings r ON r.id = (
+      SELECT id FROM sensor_readings WHERE device_id = d.id ORDER BY recorded_at DESC LIMIT 1
+    )
+    LEFT JOIN device_commands c ON c.device_id = d.id
+    WHERE d.owner_id = ?
+    ORDER BY d.last_seen_at DESC NULLS LAST, d.created_at DESC
+  `;
+  const legacy = `
     SELECT d.id, d.name, d.firmware_version, d.created_at, d.last_seen_at,
            r.moisture_percent, r.soil_temperature_c, r.battery_percent, r.recorded_at AS last_reading_at
     FROM sensor_devices d
@@ -179,7 +195,16 @@ export async function listDevices(request: Request, env: Env): Promise<Response>
     )
     WHERE d.owner_id = ?
     ORDER BY d.last_seen_at DESC NULLS LAST, d.created_at DESC
-  `).bind(context.ownerId).all();
+  `;
+
+  let result;
+  try {
+    result = await env.DB.prepare(withState).bind(context.ownerId).all();
+  } catch (cause) {
+    // Migration 0007 not applied yet: serve devices without a desired state.
+    if (!isMissingRelation(cause)) throw cause;
+    result = await env.DB.prepare(legacy).bind(context.ownerId).all();
+  }
   return json(request, env, { success: true, devices: result.results });
 }
 
@@ -269,11 +294,23 @@ export async function sensorSummary(request: Request, env: Env): Promise<Respons
   const alerts = await env.DB.prepare(
     "SELECT COUNT(*) AS total FROM sensor_alerts WHERE owner_id = ? AND severity = 'critical' AND created_at > datetime('now', '-1 day')",
   ).bind(context.ownerId).first<{ total: number }>();
+
+  const devices = result.results;
+  // "Online" means the device has checked in within the last 15 minutes — the
+  // same cadence the firmware uses between deep-sleep cycles.
+  const onlineCutoff = Date.now() - ONLINE_WINDOW_MS;
+  const online = devices.filter((device) => {
+    const seen = device.last_seen_at ? Date.parse(String(device.last_seen_at)) : Number.NaN;
+    return Number.isFinite(seen) && seen >= onlineCutoff;
+  }).length;
+
   return json(request, env, {
     success: true,
-    device_count: result.results.length,
+    total: devices.length,
+    online,
+    device_count: devices.length,
     critical_alerts_24h: alerts?.total ?? 0,
-    devices: result.results,
+    devices,
   });
 }
 

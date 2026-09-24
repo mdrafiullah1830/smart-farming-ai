@@ -4,13 +4,14 @@ import os
 import re
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated, Optional
 from urllib.parse import urlparse
 
 import numpy as np
 from fastapi import FastAPI, Header, HTTPException, Request, Response
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from pydantic import BaseModel, Field
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 from app.routers import advisory, crop, market, travel, yield_
 
@@ -23,24 +24,16 @@ logger = logging.getLogger(__name__)
 
 # Prometheus metrics
 REQUEST_COUNT = Counter(
-    'http_requests_total',
-    'Total HTTP requests',
-    ['method', 'endpoint', 'status']
+    "http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"]
 )
 REQUEST_LATENCY = Histogram(
-    'http_request_duration_seconds',
-    'HTTP request latency in seconds',
-    ['method', 'endpoint']
+    "http_request_duration_seconds", "HTTP request latency in seconds", ["method", "endpoint"]
 )
 MODEL_INFERENCE_COUNT = Counter(
-    'model_inference_total',
-    'Total model inferences',
-    ['model', 'status']
+    "model_inference_total", "Total model inferences", ["model", "status"]
 )
 MODEL_INFERENCE_LATENCY = Histogram(
-    'model_inference_duration_seconds',
-    'Model inference latency in seconds',
-    ['model']
+    "model_inference_duration_seconds", "Model inference latency in seconds", ["model"]
 )
 
 # Global model session
@@ -49,6 +42,7 @@ model_loaded = False
 
 try:
     import onnxruntime as ort
+
     ORT_AVAILABLE = True
 except ImportError:
     ORT_AVAILABLE = False
@@ -63,18 +57,18 @@ def load_model() -> bool:
         logger.error("onnxruntime not installed")
         return False
 
-    if not os.path.exists(MODEL_PATH):
+    if not Path(MODEL_PATH).exists():
         logger.warning(f"Model file not found at {MODEL_PATH}")
         return False
 
     try:
-        model_session = ort.InferenceSession(MODEL_PATH, providers=['CPUExecutionProvider'])
-        model_loaded = True
-        logger.info(f"Model loaded successfully from {MODEL_PATH}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to load model: {e}")
+        model_session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
+    except Exception:
+        logger.exception(f"Failed to load model: {MODEL_PATH}")
         return False
+    model_loaded = True
+    logger.info(f"Model loaded successfully from {MODEL_PATH}")
+    return True
 
 
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
@@ -83,7 +77,7 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
 
     from PIL import Image
 
-    img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     img = img.resize((224, 224))
     img_array = np.array(img, dtype=np.float32) / 255.0
     # Normalize with ImageNet stats
@@ -93,22 +87,52 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
     # HWC to CHW
     img_array = np.transpose(img_array, (2, 0, 1))
     # Add batch dimension
-    img_array = np.expand_dims(img_array, axis=0)
-    return img_array
+    return np.expand_dims(img_array, axis=0)
 
 
 DISEASE_CLASSES = [
-    "Bacterial Leaf Blight", "Bacterial Leaf Streak", "Bacterial Panicle Blight",
-    "Blast", "Brown Spot", "Dead Heart", "Downy Mildew", "Hispa", "Healthy", "Tungro"
+    "Bacterial Leaf Blight",
+    "Bacterial Leaf Streak",
+    "Bacterial Panicle Blight",
+    "Blast",
+    "Brown Spot",
+    "Dead Heart",
+    "Downy Mildew",
+    "Hispa",
+    "Healthy",
+    "Tungro",
 ]
 
 DISEASE_CLASSES_BN = [
-    "ব্যাকটেরিয়াল লিফ ব্লাইট", "ব্যাকটেরিয়াল লিফ স্ট্রিক", "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
-    "ব্লাস্ট", "ব্রাউন স্পট", "ডেড হার্ট", "ডাউনি মিলডিউ", "হিসপা", "সুস্থ", "তুঙ্গরো",
+    "ব্যাকটেরিয়াল লিফ ব্লাইট",
+    "ব্যাকটেরিয়াল লিফ স্ট্রিক",
+    "ব্যাকটেরিয়াল প্যানিকল ব্লাইট",
+    "ব্লাস্ট",
+    "ব্রাউন স্পট",
+    "ডেড হার্ট",
+    "ডাউনি মিলডিউ",
+    "হিসপা",
+    "সুস্থ",
+    "তুঙ্গরো",
 ]
 
+# Softmax confidence cut-offs for the reported disease severity.
+SEVERITY_HIGH_THRESHOLD = 0.7
+SEVERITY_MEDIUM_THRESHOLD = 0.4
 
-BLOCKED_HOSTS = {"169.254.169.254", "metadata.google.internal", "localhost", "127.0.0.1", "0.0.0.0"}
+
+# `urlparse()` reports some malformed inputs as host "0.0.0.0", so it belongs in
+# the deny-list as well. Held in its own constant because Bandit's B104 reads the
+# literal "0.0.0.0" as a bind-to-all-interfaces call; this value is only ever
+# matched against, never bound to.
+_NON_ROUTE_HOST = "0.0.0.0"  # nosec B104
+BLOCKED_HOSTS = {
+    "169.254.169.254",
+    "metadata.google.internal",
+    "localhost",
+    "127.0.0.1",
+    _NON_ROUTE_HOST,
+}
 BLOCKED_SCHEMES = {"file", "ftp", "gopher", "dict"}
 
 
@@ -116,23 +140,19 @@ def _is_safe_url(url: str) -> bool:
     """Reject private / internal URLs to prevent SSRF."""
     try:
         parsed = urlparse(url)
+        hostname = parsed.hostname or ""
     except Exception:
         return False
-    if parsed.scheme not in ("https", "http"):
-        return False
-    if parsed.scheme in BLOCKED_SCHEMES:
-        return False
-    hostname = parsed.hostname or ""
-    if hostname in BLOCKED_HOSTS:
-        return False
-    if hostname.startswith("10.") or hostname.startswith("172.") or hostname.startswith("192.168."):
-        return False
-    if hostname == "169.254.":
-        return False
-    if re.match(r"^(0|\.)+$", hostname):
-        return False
-    return True
 
+    blocked = (
+        parsed.scheme not in ("https", "http")
+        or parsed.scheme in BLOCKED_SCHEMES
+        or hostname in BLOCKED_HOSTS
+        or hostname.startswith(("10.", "172.", "192.168."))
+        or hostname == "169.254."
+        or bool(re.match(r"^(0|\.)+$", hostname))
+    )
+    return not blocked
 
 
 @asynccontextmanager
@@ -164,14 +184,9 @@ async def metrics_middleware(request: Request, call_next):
     duration = time.time() - start_time
 
     REQUEST_COUNT.labels(
-        method=request.method,
-        endpoint=request.url.path,
-        status=response.status_code
+        method=request.method, endpoint=request.url.path, status=response.status_code
     ).inc()
-    REQUEST_LATENCY.labels(
-        method=request.method,
-        endpoint=request.url.path
-    ).observe(duration)
+    REQUEST_LATENCY.labels(method=request.method, endpoint=request.url.path).observe(duration)
 
     return response
 
@@ -180,7 +195,7 @@ async def metrics_middleware(request: Request, call_next):
 async def model_version_header(request: Request, call_next):
     """Add model version header to ML endpoints."""
     response = await call_next(request)
-    
+
     # Add model version headers for ML endpoints
     path = request.url.path
     if path.startswith("/v1/crop/"):
@@ -197,7 +212,7 @@ async def model_version_header(request: Request, call_next):
             response.headers["X-Model-Version"] = "1.0.0"  # Disease model version from metadata
     elif path.startswith("/v1/travel/"):
         response.headers["X-Model-Version"] = "1.0.0"  # Travel service version
-    
+
     return response
 
 
@@ -237,6 +252,38 @@ def require_service_token(authorization: Annotated[str | None, Header()] = None)
         raise HTTPException(status_code=401, detail="Invalid service token")
 
 
+MAX_IMAGE_BYTES = 5 * 1024 * 1024
+ERR_IMAGE_URL_UNSAFE = "image_url must be a public HTTPS URL (internal/private URLs are blocked)"
+ERR_IMAGE_SOURCE_MISSING = "image_url or image_base64 is required"
+ERR_IMAGE_TOO_LARGE = "image exceeds 5 MB"
+
+
+async def _extract_image_bytes(request: DiseaseRequest) -> bytes:
+    """Decode or download the image named by the request, enforcing the source policy.
+
+    Kept outside the inference `try` block on purpose: these validation failures
+    must not be folded into the generic inference handler (TRY301), and their
+    messages are referenced by name rather than spelled out at the `raise`
+    statements (TRY003).
+    """
+    if request.image_base64:
+        image_bytes = base64.b64decode(request.image_base64.split(",", 1)[-1], validate=True)
+    elif request.image_url:
+        if not _is_safe_url(request.image_url):
+            raise ValueError(ERR_IMAGE_URL_UNSAFE)
+        import httpx
+
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=False) as client:
+            response = await client.get(request.image_url)
+            response.raise_for_status()
+            image_bytes = response.content
+    else:
+        raise ValueError(ERR_IMAGE_SOURCE_MISSING)
+    if len(image_bytes) > MAX_IMAGE_BYTES:
+        raise ValueError(ERR_IMAGE_TOO_LARGE)
+    return image_bytes
+
+
 @app.get("/health")
 async def health() -> dict[str, object]:
     """Cheap endpoint for Render health checks and an uptime monitor.
@@ -247,6 +294,7 @@ async def health() -> dict[str, object]:
     """
     try:
         from app.travel.rag import TravelEmbedder
+
         embedder = TravelEmbedder()
         travel_ready = embedder.is_ready()
     except Exception:
@@ -274,8 +322,11 @@ async def analyze_disease(
 ) -> DiseaseResponse:
     require_service_token(authorization)
 
-    if not model_loaded:
-        MODEL_INFERENCE_COUNT.labels(model='disease', status='unavailable').inc()
+    # `load_model()` sets the session and the flag together, so a set flag
+    # guarantees a session; the local binding is what narrows the type.
+    session = model_session
+    if not model_loaded or session is None:
+        MODEL_INFERENCE_COUNT.labels(model="disease", status="unavailable").inc()
         return DiseaseResponse(
             job_id=request.job_id,
             status="model_unavailable",
@@ -283,30 +334,17 @@ async def analyze_disease(
         )
 
     try:
-        if request.image_base64:
-            image_bytes = base64.b64decode(request.image_base64.split(',', 1)[-1], validate=True)
-        elif request.image_url:
-            if not _is_safe_url(request.image_url):
-                raise ValueError("image_url must be a public HTTPS URL (internal/private URLs are blocked)")
-            import httpx
-            async with httpx.AsyncClient(timeout=30.0, follow_redirects=False) as client:
-                response = await client.get(request.image_url)
-                response.raise_for_status()
-                image_bytes = response.content
-        else:
-            raise ValueError("image_url or image_base64 is required")
-        if len(image_bytes) > 5 * 1024 * 1024:
-            raise ValueError("image exceeds 5 MB")
+        image_bytes = await _extract_image_bytes(request)
 
         # Preprocess
         input_tensor = preprocess_image(image_bytes)
 
         # Inference with metrics
         inference_start = time.time()
-        input_name = model_session.get_inputs()[0].name
-        outputs = model_session.run(None, {input_name: input_tensor})
+        input_name = session.get_inputs()[0].name
+        outputs = session.run(None, {input_name: input_tensor})
         inference_duration = time.time() - inference_start
-        MODEL_INFERENCE_LATENCY.labels(model='disease').observe(inference_duration)
+        MODEL_INFERENCE_LATENCY.labels(model="disease").observe(inference_duration)
         logits = outputs[0][0]
 
         # Softmax
@@ -317,23 +355,29 @@ async def analyze_disease(
         top_indices = np.argsort(probs)[::-1][:5]
         predictions = []
         for idx in top_indices:
-            predictions.append({
-                "disease_en": DISEASE_CLASSES[idx],
-                "disease_bn": DISEASE_CLASSES_BN[idx],
-                "confidence": float(probs[idx]),
-                "severity": "high" if probs[idx] > 0.7 else "medium" if probs[idx] > 0.4 else "low"
-            })
+            predictions.append(
+                {
+                    "disease_en": DISEASE_CLASSES[idx],
+                    "disease_bn": DISEASE_CLASSES_BN[idx],
+                    "confidence": float(probs[idx]),
+                    "severity": "high"
+                    if probs[idx] > SEVERITY_HIGH_THRESHOLD
+                    else "medium"
+                    if probs[idx] > SEVERITY_MEDIUM_THRESHOLD
+                    else "low",
+                }
+            )
 
-        MODEL_INFERENCE_COUNT.labels(model='disease', status='success').inc()
+        MODEL_INFERENCE_COUNT.labels(model="disease", status="success").inc()
         return DiseaseResponse(
             job_id=request.job_id,
             status="success",
             message="Disease analysis completed",
-            predictions=predictions
+            predictions=predictions,
         )
     except Exception as e:
-        logger.error(f"Disease analysis failed: {e}")
-        MODEL_INFERENCE_COUNT.labels(model='disease', status='error').inc()
+        logger.exception("Disease analysis failed")
+        MODEL_INFERENCE_COUNT.labels(model="disease", status="error").inc()
         return DiseaseResponse(
             job_id=request.job_id,
             status="error",

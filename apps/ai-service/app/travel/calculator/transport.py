@@ -2,17 +2,19 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Optional
 
 DATA_DIR = Path(__file__).parent.parent / "data" / "transport"
 
-_BUS_FARES: Optional[Dict] = None
-_TRAIN_FARES: Optional[Dict] = None
-_FLIGHT_ROUTES: Optional[Dict] = None
-_DISTANCES: Dict[str, float] = {}
+# Message lives at module level so `raise` sites stay message-free (TRY003).
+UNKNOWN_TRANSPORT_MODE_MSG = "Unknown transport mode: {mode}"
+
+_BUS_FARES: dict | None = None
+_TRAIN_FARES: dict | None = None
+_FLIGHT_ROUTES: dict | None = None
+_DISTANCES: dict[str, float] = {}
 
 
-def _load_bus_fares() -> Dict:
+def _load_bus_fares() -> dict:
     global _BUS_FARES
     if _BUS_FARES is None:
         path = DATA_DIR / "bus_fares.json"
@@ -20,7 +22,7 @@ def _load_bus_fares() -> Dict:
     return _BUS_FARES
 
 
-def _load_train_fares() -> Dict:
+def _load_train_fares() -> dict:
     global _TRAIN_FARES
     if _TRAIN_FARES is None:
         path = DATA_DIR / "train_fares.json"
@@ -28,7 +30,7 @@ def _load_train_fares() -> Dict:
     return _TRAIN_FARES
 
 
-def _load_flight_routes() -> Dict:
+def _load_flight_routes() -> dict:
     global _FLIGHT_ROUTES
     if _FLIGHT_ROUTES is None:
         path = DATA_DIR / "flight_routes.json"
@@ -36,7 +38,7 @@ def _load_flight_routes() -> Dict:
     return _FLIGHT_ROUTES
 
 
-def _load_distances() -> Dict[str, float]:
+def _load_distances() -> dict[str, float]:
     global _DISTANCES
     if not _DISTANCES:
         train_data = _load_train_fares()
@@ -82,10 +84,10 @@ def calculate_transport_cost(
         fare_info = fares.get(fare_key, {})
         base_fare_per_km = fare_info.get("base_fare_per_km", 2.0)
         class_multiplier = fare_info.get("class_multiplier", 1.0)
-        cost = distance * base_fare_per_km * class_multiplier * passengers
+        cost: float = distance * base_fare_per_km * class_multiplier * passengers
         return round(cost, 2)
 
-    elif mode in ("train_shovan", "train_ac_chair", "train_ac_berth"):
+    if mode in ("train_shovan", "train_ac_chair", "train_ac_berth"):
         fares = _load_train_fares()
         fare_info = fares.get(mode, {})
         base_fare_per_km = fare_info.get("base_fare_per_km", 1.0)
@@ -93,7 +95,7 @@ def calculate_transport_cost(
         cost = distance * base_fare_per_km * class_multiplier * passengers
         return round(cost, 2)
 
-    elif mode == "flight":
+    if mode == "flight":
         flight_data = _load_flight_routes()
         routes = flight_data.get("routes", {})
         key1 = f"{origin}_{destination}"
@@ -105,16 +107,14 @@ def calculate_transport_cost(
             airport_tax = flight_data.get("flight", {}).get("airport_tax", 500)
             cost = (base_fare + airport_tax) * passengers
             return round(cost, 2)
-        else:
-            flight_info = flight_data.get("flight", {})
-            base_fare_per_km = flight_info.get("base_fare_per_km", 12.0)
-            minimum_fare = flight_info.get("minimum_fare", 3500)
-            airport_tax = flight_info.get("airport_tax", 500)
-            cost = max(distance * base_fare_per_km, minimum_fare) + airport_tax
-            return round(cost * passengers, 2)
+        flight_info = flight_data.get("flight", {})
+        base_fare_per_km = flight_info.get("base_fare_per_km", 12.0)
+        minimum_fare = flight_info.get("minimum_fare", 3500)
+        airport_tax = flight_info.get("airport_tax", 500)
+        cost = max(distance * base_fare_per_km, minimum_fare) + airport_tax
+        return round(cost * passengers, 2)
 
-    else:
-        raise ValueError(f"Unknown transport mode: {mode}")
+    raise ValueError(UNKNOWN_TRANSPORT_MODE_MSG.format(mode=mode))
 
 
 def get_available_modes() -> list[str]:

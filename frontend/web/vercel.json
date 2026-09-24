@@ -4,7 +4,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://smart-farming-api.2251081204.workers.dev/api/v1/:path*" },
+    { "source": "/api/v1/:path*", "destination": "https://smart-farming-api.2251081204.workers.dev/api/v1/:path*" },
     { "source": "/", "destination": "/index.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/soil", "destination": "/soil.html" },

@@ -2,14 +2,13 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Optional
 
 DATA_DIR = Path(__file__).parent.parent / "data" / "food"
-_SEASONAL_DATA: Optional[Dict] = None
-_MEAL_COSTS: Optional[Dict] = None
+_SEASONAL_DATA: dict | None = None
+_MEAL_COSTS: dict | None = None
 
 
-def _load_meal_costs() -> Dict:
+def _load_meal_costs() -> dict:
     global _MEAL_COSTS
     if _MEAL_COSTS is None:
         path = DATA_DIR / "meal_costs.json"
@@ -17,7 +16,7 @@ def _load_meal_costs() -> Dict:
     return _MEAL_COSTS
 
 
-def _load_seasonal_multipliers() -> Dict:
+def _load_seasonal_multipliers() -> dict:
     global _SEASONAL_DATA
     if _SEASONAL_DATA is None:
         path = Path(__file__).parent.parent / "data" / "seasonal_multipliers.json"
@@ -28,7 +27,7 @@ def _load_seasonal_multipliers() -> Dict:
 def _get_seasonal_multiplier(month: int) -> float:
     """Get seasonal multiplier for a given month (1-12)."""
     data = _load_seasonal_multipliers()
-    monthly = data.get("monthly_multipliers", {})
+    monthly: dict[str, float] = data.get("monthly_multipliers", {})
     return monthly.get(str(month), 1.0)
 
 
@@ -54,7 +53,7 @@ def calculate_food_cost(
 
     costs = _load_meal_costs()
     tier_costs = costs.get(tier, costs.get("mid", {}))
-    daily_per_person = tier_costs.get("daily_total", 1300)
+    daily_per_person: float = tier_costs.get("daily_total", 1300)
 
     seasonal_multiplier = _get_seasonal_multiplier(month)
     cost = daily_per_person * days * people * seasonal_multiplier
@@ -66,7 +65,7 @@ def calculate_food_cost_detailed(
     people: int = 1,
     tier: str = "mid",
     month: int = 1,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Calculate detailed food cost breakdown.
 
@@ -99,4 +98,5 @@ def get_daily_cost(tier: str) -> float:
     tier = tier.lower().strip()
     costs = _load_meal_costs()
     tier_costs = costs.get(tier, costs.get("mid", {}))
-    return tier_costs.get("daily_total", 1300)
+    daily_total: float = tier_costs.get("daily_total", 1300)
+    return daily_total

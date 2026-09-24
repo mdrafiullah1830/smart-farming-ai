@@ -7,15 +7,16 @@ Model
     Class labels come from the same metadata file, so the ONNX output index maps
     back to a crop name without hardcoding it here.
 """
+
 from __future__ import annotations
 
 import logging
 from typing import Annotated
 
 import numpy as np
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header
 
-from app.models import OnnxModel, metadata_root, models_root
+from app.models import OnnxModel, models_root
 from app.schemas import CropCandidate, CropRecommendRequest, CropRecommendResponse
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,8 @@ FEATURE_ORDER = ["temperature", "humidity", "rainfall", "ph", "nitrogen", "phosp
 def _softmax(logits: np.ndarray) -> np.ndarray:
     shifted = logits - np.max(logits)
     exponentials = np.exp(shifted)
-    return exponentials / np.sum(exponentials)
+    normalized: np.ndarray = exponentials / np.sum(exponentials)
+    return normalized
 
 
 @router.post("/v1/crop/recommend", response_model=CropRecommendResponse)
@@ -69,7 +71,7 @@ async def recommend_crop(
     try:
         outputs = MODEL.session.run(None, {MODEL.input_name: features})
     except Exception as exc:  # noqa: BLE001 - report, never guess
-        logger.error("crop inference failed: %s", exc)
+        logger.exception("crop inference failed")
         return CropRecommendResponse(status="error", message=f"Inference failed: {exc}")
 
     # skl2onnx RandomForestClassifier with zipmap disabled emits:
@@ -78,7 +80,9 @@ async def recommend_crop(
     # Use the probability output for confidence scores.
     probabilities = np.asarray(outputs[1])[0]
 
-    labels: list[str] = MODEL.metadata.get("classes") or [f"class_{i}" for i in range(len(probabilities))]
+    labels: list[str] = MODEL.metadata.get("classes") or [
+        f"class_{i}" for i in range(len(probabilities))
+    ]
     order = np.argsort(probabilities)[::-1][: request.top_k]
 
     recommendations = [

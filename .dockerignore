@@ -17,7 +17,12 @@
 **/.env.*
 **/uploads/
 **/*.db
-**/datasets/
+# Datasets stay out of the build context except the soil survey JSON, which is
+# the seed for /api/v1/soil/*. Docker cannot re-include a file whose parent
+# directory was excluded, so direct children are matched with a single `*` and
+# the one required file is negated afterwards.
+datasets/*
+!datasets/soil_report_all.json
 **/ai_models/trained_models/
 **/frontend/
 **/report_build/
@@ -26,3 +31,5 @@
 **/*.docx
 **/*.pdf
 **/*.zip
+# Local agent worktrees are never part of the image.
+.kilo/

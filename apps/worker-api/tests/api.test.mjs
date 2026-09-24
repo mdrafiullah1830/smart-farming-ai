@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { describe, it, before } from 'node:test';
 import worker from '../src/index.ts';
+import { createToken } from '../src/auth.ts';
 
 const env = {
   JWT_SECRET: 'test-secret-key-min-32-chars-long',
@@ -19,6 +20,7 @@ const env = {
       first: async () => null,
       run: async () => ({ success: true }),
     }),
+    batch: async (_statements) => [{ success: true }],
   },
   UPLOADS: {
     put: async () => {},
@@ -28,6 +30,10 @@ const env = {
     put: async () => {},
   },
 };
+
+async function bearerToken() {
+  return createToken({ id: 'user-1', email: 'tester@example.com' }, env.JWT_SECRET);
+}
 
 function createRequest(path, options = {}) {
   return new Request(`http://localhost${path}`, {
@@ -152,5 +158,114 @@ describe('Worker API', () => {
     assert.ok(csp?.includes('market.dam.gov.bd'));
     assert.ok(csp?.includes('cap.bmd.gov.bd'));
     assert.ok(csp?.includes('raw.githubusercontent.com'));
+  });
+
+  it('client-errors accepts a telemetry batch without auth', async () => {
+    const req = createRequest('/api/v1/client-errors', {
+      method: 'POST',
+      body: JSON.stringify({
+        errors: [{ message: 'boom', page: '/dashboard', context: { component: 'dash' } }],
+      }),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 202);
+    const body = await res.json();
+    assert.equal(body.accepted, 1);
+  });
+
+  it('client-errors rejects a malformed body', async () => {
+    const req = createRequest('/api/v1/client-errors', {
+      method: 'POST',
+      body: JSON.stringify({ errors: 'nope' }),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 400);
+  });
+
+  it('client-errors rejects an oversized batch', async () => {
+    const req = createRequest('/api/v1/client-errors', {
+      method: 'POST',
+      body: JSON.stringify({ errors: Array.from({ length: 21 }, (_, i) => ({ message: `e${i}` })) }),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 400);
+  });
+
+  it('tasks require authentication', async () => {
+    const req = createRequest('/api/v1/tasks');
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 401);
+  });
+
+  it('tasks GET returns the signed-in user list', async () => {
+    const token = await bearerToken();
+    const req = createRequest('/api/v1/tasks', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.synced, true);
+    assert.deepEqual(body.tasks, []);
+  });
+
+  it('tasks POST validates the payload', async () => {
+    const token = await bearerToken();
+    const req = createRequest('/api/v1/tasks', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({}),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 400);
+  });
+
+  it('tasks POST upserts a task', async () => {
+    const token = await bearerToken();
+    const req = createRequest('/api/v1/tasks', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ task: { id: 't1', title: { bn: 'সেচ', en: 'Irrigate' }, done: true } }),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 201);
+    const body = await res.json();
+    assert.equal(body.synced, true);
+    assert.equal(body.success, true);
+  });
+
+  it('device command requires authentication', async () => {
+    const req = createRequest('/api/v1/devices/dev-1/command', {
+      method: 'POST',
+      body: JSON.stringify({ command: 'irrigation_on' }),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 401);
+  });
+
+  it('device command rejects unknown commands', async () => {
+    const token = await bearerToken();
+    const req = createRequest('/api/v1/devices/dev-1/command', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ command: 'explode' }),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 400);
+  });
+
+  it('device command 404s for a device the caller does not own', async () => {
+    const token = await bearerToken();
+    const req = createRequest('/api/v1/devices/dev-1/command', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ command: 'irrigation_on' }),
+    });
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 404);
+  });
+
+  it('notifications require authentication', async () => {
+    const req = createRequest('/api/v1/notifications');
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 401);
   });
 });

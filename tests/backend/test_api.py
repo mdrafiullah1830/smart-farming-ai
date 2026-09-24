@@ -13,7 +13,7 @@ class TestAuthEndpoints:
             "name_bn": "টেস্ট ইউজার",
             "email": unique_email,
             "phone": "01700000000",
-            "password": "password123",
+            "password": "Password123",
             "district": "Dhaka",
             "upazila": "Dhanmondi",
             "division": "Dhaka",
@@ -30,12 +30,12 @@ class TestAuthEndpoints:
         client.post("/api/v1/auth/register", json={
             "name_en": "Test User",
             "email": unique_email,
-            "password": "password123",
+            "password": "Password123",
         })
         # Then login
         response = client.post("/api/v1/auth/login", json={
             "email": unique_email,
-            "password": "password123",
+            "password": "Password123",
         })
         assert response.status_code == 200
         data = response.json()
@@ -48,15 +48,15 @@ class TestAuthEndpoints:
         client.post("/api/v1/auth/register", json={
             "name_en": "Test User",
             "email": unique_email,
-            "password": "password123",
+            "password": "Password123",
         })
         login_resp = client.post("/api/v1/auth/login", json={
             "email": unique_email,
-            "password": "password123",
+            "password": "Password123",
         })
         token = login_resp.json()["token"]
         
-        response = client.get("/api/v1/auth/profile", params={"authorization": f"Bearer {token}"})
+        response = client.get("/api/v1/auth/profile", headers={"Authorization": f"Bearer {token}"})
         assert response.status_code == 200
         data = response.json()
         assert "email" in data
@@ -133,15 +133,35 @@ class TestMarketEndpoints:
 
 
 class TestDiseaseEndpoints:
-    def test_detect_disease(self, client):
+    def _register(self, client):
+        email = f"disease_{uuid.uuid4().hex[:8]}@example.com"
+        client.post("/api/v1/auth/register", json={
+            "name_en": "Disease Tester",
+            "email": email,
+            "password": "Password123",
+        })
+        login = client.post("/api/v1/auth/login", json={"email": email, "password": "Password123"})
+        return login.json()["token"]
+
+    def test_detect_disease_persists_for_signed_in_user(self, client):
+        token = self._register(client)
         response = client.post("/api/v1/disease/detect", json={
             "disease_name": "Rice Blast",
             "confidence": 0.95,
             "description": "Test disease",
             "treatments": ["Treatment 1", "Treatment 2"],
-        }, params={"authorization": "Bearer invalid-token"})
-        # Should fail with 401 since token is invalid
-        assert response.status_code in [200, 401]
+        }, headers={"Authorization": f"Bearer {token}"})
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+
+    def test_detect_disease_accepts_anonymous_report(self, client):
+        response = client.post("/api/v1/disease/detect", json={
+            "disease_name": "Leaf Blight",
+            "confidence": 0.8,
+            "description": "Anonymous report",
+            "treatments": [],
+        })
+        assert response.status_code == 200
 
 
 class TestChatbotEndpoints:

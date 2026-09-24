@@ -246,7 +246,7 @@ def train_model():
 
     # Training loop
     best_val_acc = 0.0
-    history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
+    history: dict[str, list[float]] = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
 
     print("\nStarting training...")
     for epoch in range(1, EPOCHS + 1):
@@ -315,7 +315,7 @@ def train_model():
 
         torch.onnx.export(
             model,
-            dummy_input,
+            (dummy_input,),
             onnx_path,
             export_params=True,
             opset_version=13,

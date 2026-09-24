@@ -1,7 +1,7 @@
 """POST /v1/travel — Bangladesh Travel Assistant endpoints."""
 
 import logging
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -9,13 +9,10 @@ from pydantic import BaseModel, Field
 from app.travel.calculator import (
     TripParams,
     estimate_trip_cost,
-    validate_params,
-    get_available_modes,
     get_accom_tiers,
+    get_available_modes,
     get_food_tiers,
-    calculate_transport_cost,
-    calculate_hotel_cost,
-    calculate_food_cost,
+    validate_params,
 )
 from app.travel.rag import TravelEmbedder, TravelRetriever
 
@@ -24,8 +21,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Global instances (initialized on first use)
-_embedder: Optional[TravelEmbedder] = None
-_retriever: Optional[TravelRetriever] = None
+_embedder: TravelEmbedder | None = None
+_retriever: TravelRetriever | None = None
 
 
 def get_embedder() -> TravelEmbedder:
@@ -52,14 +49,20 @@ def load() -> None:
 
 
 class TravelAskRequest(BaseModel):
-    question: str = Field(..., min_length=1, max_length=1000, description="Travel question in Bangla or English")
-    language: str = Field(default="en", pattern="^(bn|en)$", description="Response language: bn (Bangla) or en (English)")
+    question: str = Field(
+        ..., min_length=1, max_length=1000, description="Travel question in Bangla or English"
+    )
+    language: str = Field(
+        default="en",
+        pattern="^(bn|en)$",
+        description="Response language: bn (Bangla) or en (English)",
+    )
 
 
 class TravelAskResponse(BaseModel):
     answer: str
-    answer_en: Optional[str] = None
-    answer_bn: Optional[str] = None
+    answer_en: str | None = None
+    answer_bn: str | None = None
     sources: list[dict]
     confidence: float
 
@@ -70,7 +73,10 @@ class TravelCostRequest(BaseModel):
     days: int = Field(..., ge=1, le=30)
     people: int = Field(default=1, ge=1, le=20)
     hotel_tier: str = Field(default="mid", pattern="^(budget|mid|luxury)$")
-    transport_mode: str = Field(default="bus_ac", pattern="^(bus_ac|bus_non_ac|train_shovan|train_ac_chair|train_ac_berth|flight)$")
+    transport_mode: str = Field(
+        default="bus_ac",
+        pattern="^(bus_ac|bus_non_ac|train_shovan|train_ac_chair|train_ac_berth|flight)$",
+    )
     food_tier: str = Field(default="mid", pattern="^(budget|mid|luxury)$")
     month: int = Field(default=1, ge=1, le=12)
     accommodation_type: str = Field(default="hotel", pattern="^(hotel|homestay)$")
@@ -102,8 +108,8 @@ class HistoricalSiteInfo(BaseModel):
     district: str
     category: str
     description: str
-    visiting_hours: Optional[str] = None
-    entry_fee_bdt: Optional[str] = None
+    visiting_hours: str | None = None
+    entry_fee_bdt: str | None = None
 
 
 class HealthResponse(BaseModel):
@@ -122,6 +128,7 @@ async def travel_ask(
     Ask a question about Bangladesh travel/history using RAG.
     """
     from app.main import require_service_token
+
     require_service_token(authorization)
 
     retriever = get_retriever()
@@ -178,6 +185,7 @@ async def travel_cost(
     Calculate estimated trip cost for Bangladesh travel.
     """
     from app.main import require_service_token
+
     require_service_token(authorization)
 
     params = TripParams(
@@ -210,86 +218,139 @@ async def travel_districts(
     List available districts with highlights.
     """
     from app.main import require_service_token
+
     require_service_token(authorization)
 
-    districts_data = [
+    return [
         DistrictInfo(
             name="Dhaka",
-            highlights=["Lalbagh Fort", "Ahsan Manzil", "National Museum", "Star Mosque", "Ramna Park"],
+            highlights=[
+                "Lalbagh Fort",
+                "Ahsan Manzil",
+                "National Museum",
+                "Star Mosque",
+                "Ramna Park",
+            ],
             estimated_daily_cost_budget=2500,
             estimated_daily_cost_mid=7000,
             estimated_daily_cost_luxury=20000,
         ),
         DistrictInfo(
             name="Sylhet",
-            highlights=["Shah Jalal Dargah", "Ratargul Swamp Forest", "Jaflong", "Srimangal Tea Gardens", "Lawachara National Park"],
+            highlights=[
+                "Shah Jalal Dargah",
+                "Ratargul Swamp Forest",
+                "Jaflong",
+                "Srimangal Tea Gardens",
+                "Lawachara National Park",
+            ],
             estimated_daily_cost_budget=2000,
             estimated_daily_cost_mid=5000,
             estimated_daily_cost_luxury=15000,
         ),
         DistrictInfo(
             name="Cox's Bazar",
-            highlights=["World's Longest Beach", "Himchari Waterfall", "Inani Beach", "St. Martin's Island", "Dulhazra Safari Park"],
+            highlights=[
+                "World's Longest Beach",
+                "Himchari Waterfall",
+                "Inani Beach",
+                "St. Martin's Island",
+                "Dulhazra Safari Park",
+            ],
             estimated_daily_cost_budget=3000,
             estimated_daily_cost_mid=8000,
             estimated_daily_cost_luxury=25000,
         ),
         DistrictInfo(
             name="Chittagong",
-            highlights=["Patenga Beach", "Foy's Lake", "Ethnological Museum", "Bayazid Bostami Shrine", "Karnaphuli River"],
+            highlights=[
+                "Patenga Beach",
+                "Foy's Lake",
+                "Ethnological Museum",
+                "Bayazid Bostami Shrine",
+                "Karnaphuli River",
+            ],
             estimated_daily_cost_budget=2500,
             estimated_daily_cost_mid=6000,
             estimated_daily_cost_luxury=18000,
         ),
         DistrictInfo(
             name="Rajshahi",
-            highlights=["Puthia Temple Complex", "Bagha Mosque", "Varendra Museum", "Mahasthangarh", "Mango Orchards"],
+            highlights=[
+                "Puthia Temple Complex",
+                "Bagha Mosque",
+                "Varendra Museum",
+                "Mahasthangarh",
+                "Mango Orchards",
+            ],
             estimated_daily_cost_budget=1500,
             estimated_daily_cost_mid=4000,
             estimated_daily_cost_luxury=12000,
         ),
         DistrictInfo(
             name="Khulna",
-            highlights=["Sundarbans Mangrove Forest", "Sixty Dome Mosque", "Khan Jahan Ali Tomb", "Karamjal Wildlife Center"],
+            highlights=[
+                "Sundarbans Mangrove Forest",
+                "Sixty Dome Mosque",
+                "Khan Jahan Ali Tomb",
+                "Karamjal Wildlife Center",
+            ],
             estimated_daily_cost_budget=2000,
             estimated_daily_cost_mid=5500,
             estimated_daily_cost_luxury=20000,
         ),
         DistrictInfo(
             name="Barisal",
-            highlights=["Kuakata Beach", "Durga Sagar", "Guthia Mosque", "Floating Guava Market", "River Cruises"],
+            highlights=[
+                "Kuakata Beach",
+                "Durga Sagar",
+                "Guthia Mosque",
+                "Floating Guava Market",
+                "River Cruises",
+            ],
             estimated_daily_cost_budget=1500,
             estimated_daily_cost_mid=4500,
             estimated_daily_cost_luxury=15000,
         ),
         DistrictInfo(
             name="Rangpur",
-            highlights=["Tajhat Palace", "Kellaband Mosque", "Ramsagar National Park", "Vinno Jogot", "Carmichael College"],
+            highlights=[
+                "Tajhat Palace",
+                "Kellaband Mosque",
+                "Ramsagar National Park",
+                "Vinno Jogot",
+                "Carmichael College",
+            ],
             estimated_daily_cost_budget=1200,
             estimated_daily_cost_mid=3500,
             estimated_daily_cost_luxury=10000,
         ),
         DistrictInfo(
             name="Mymensingh",
-            highlights=["Shashi Lodge", "Bangladesh Agricultural University", "Mymensingh Museum", "Brahmaputra River", "Muktagacha Palace"],
+            highlights=[
+                "Shashi Lodge",
+                "Bangladesh Agricultural University",
+                "Mymensingh Museum",
+                "Brahmaputra River",
+                "Muktagacha Palace",
+            ],
             estimated_daily_cost_budget=1200,
             estimated_daily_cost_mid=3500,
             estimated_daily_cost_luxury=10000,
         ),
     ]
 
-    return districts_data
-
 
 @router.get("/v1/travel/sites", response_model=list[HistoricalSiteInfo])
 async def travel_sites(
-    district: Annotated[Optional[str], Query(description="Filter by district")] = None,
+    district: Annotated[str | None, Query(description="Filter by district")] = None,
     authorization: Annotated[str | None, Header()] = None,
 ) -> list[HistoricalSiteInfo]:
     """
     List historical sites, optionally filtered by district.
     """
     from app.main import require_service_token
+
     require_service_token(authorization)
 
     sites_data = [
@@ -390,6 +451,7 @@ async def travel_health(
     Health check for travel service including RAG index status.
     """
     from app.main import require_service_token
+
     require_service_token(authorization)
 
     embedder = get_embedder()
@@ -406,11 +468,11 @@ async def travel_health(
 
     return HealthResponse(
         status="ok" if index_ready else "degraded",
-        rag_index="ready" if index_ready else ("index_only" if embedder.load_index() else "not_built"),
+        rag_index="ready"
+        if index_ready
+        else ("index_only" if embedder.load_index() else "not_built"),
         embedding_model=(
-            "sentence-transformers/all-MiniLM-L6-v2"
-            if embedding_available()
-            else "unavailable"
+            "sentence-transformers/all-MiniLM-L6-v2" if embedding_available() else "unavailable"
         ),
         data_files=data_files,
     )
@@ -422,6 +484,7 @@ async def travel_transport_modes(
 ) -> dict:
     """Get available transport modes."""
     from app.main import require_service_token
+
     require_service_token(authorization)
     return {"modes": get_available_modes()}
 
@@ -432,6 +495,7 @@ async def travel_tiers(
 ) -> dict:
     """Get available accommodation and food tiers."""
     from app.main import require_service_token
+
     require_service_token(authorization)
     return {
         "accommodation_tiers": get_accom_tiers(),

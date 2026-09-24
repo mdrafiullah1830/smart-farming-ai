@@ -2,16 +2,15 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Optional
 
 DATA_DIR = Path(__file__).parent.parent / "data" / "accommodation"
-_SEASONAL_DATA: Optional[Dict] = None
+_SEASONAL_DATA: dict | None = None
 
-_HOTEL_TIERS: Optional[Dict] = None
-_HOMESTAY_RATES: Optional[Dict] = None
+_HOTEL_TIERS: dict | None = None
+_HOMESTAY_RATES: dict | None = None
 
 
-def _load_hotel_tiers() -> Dict:
+def _load_hotel_tiers() -> dict:
     global _HOTEL_TIERS
     if _HOTEL_TIERS is None:
         path = DATA_DIR / "hotel_tiers.json"
@@ -19,7 +18,7 @@ def _load_hotel_tiers() -> Dict:
     return _HOTEL_TIERS
 
 
-def _load_homestay_rates() -> Dict:
+def _load_homestay_rates() -> dict:
     global _HOMESTAY_RATES
     if _HOMESTAY_RATES is None:
         path = DATA_DIR / "homestay_rates.json"
@@ -27,7 +26,7 @@ def _load_homestay_rates() -> Dict:
     return _HOMESTAY_RATES
 
 
-def _load_seasonal_multipliers() -> Dict:
+def _load_seasonal_multipliers() -> dict:
     global _SEASONAL_DATA
     if _SEASONAL_DATA is None:
         path = Path(__file__).parent.parent / "data" / "seasonal_multipliers.json"
@@ -38,7 +37,7 @@ def _load_seasonal_multipliers() -> Dict:
 def _get_seasonal_multiplier(month: int) -> float:
     """Get seasonal multiplier for a given month (1-12)."""
     data = _load_seasonal_multipliers()
-    monthly = data.get("monthly_multipliers", {})
+    monthly: dict[str, float] = data.get("monthly_multipliers", {})
     return monthly.get(str(month), 1.0)
 
 
@@ -67,7 +66,7 @@ def calculate_hotel_cost(
 
     tiers = _load_hotel_tiers()
     tier_rates = tiers.get(tier, tiers.get("mid", {}))
-    base_rate = tier_rates.get(district, tier_rates.get("default", 2500))
+    base_rate: float = tier_rates.get(district, tier_rates.get("default", 2500))
 
     seasonal_multiplier = _get_seasonal_multiplier(month)
     cost = base_rate * nights * rooms * seasonal_multiplier
@@ -99,7 +98,7 @@ def calculate_homestay_cost(
 
     rates = _load_homestay_rates()
     tier_rates = rates.get(tier, rates.get("mid", {}))
-    base_rate = tier_rates.get(district, tier_rates.get("default", 2000))
+    base_rate: float = tier_rates.get(district, tier_rates.get("default", 2000))
 
     seasonal_multiplier = _get_seasonal_multiplier(month)
     cost = base_rate * nights * rooms * seasonal_multiplier
@@ -116,10 +115,8 @@ def get_base_rate(district: str, tier: str, accommodation_type: str = "hotel") -
     district = district.lower().strip()
     tier = tier.lower().strip()
 
-    if accommodation_type == "hotel":
-        tiers = _load_hotel_tiers()
-    else:
-        tiers = _load_homestay_rates()
+    tiers = _load_hotel_tiers() if accommodation_type == "hotel" else _load_homestay_rates()
 
     tier_rates = tiers.get(tier, tiers.get("mid", {}))
-    return tier_rates.get(district, tier_rates.get("default", 2500))
+    base_rate: float = tier_rates.get(district, tier_rates.get("default", 2500))
+    return base_rate

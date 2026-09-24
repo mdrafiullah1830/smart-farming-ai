@@ -55,7 +55,7 @@ def sha256_file(path):
 
 def count_by_class(rice_dir):
     """Count images per class from the Paddy Doctor folder layout."""
-    counts = {}
+    counts: dict[str, int] = {}
     if not os.path.isdir(rice_dir):
         return counts
     for entry in sorted(os.listdir(rice_dir)):

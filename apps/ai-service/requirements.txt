@@ -1,12 +1,18 @@
-fastapi==0.116.1
+# fastapi 0.138.0 only requires starlette>=0.46.0 (no upper bound), so the
+# resolver can pick a starlette without the PYSEC-2026-161/248/249/1942/2280/2281
+# advisories. 0.116.1 capped starlette <0.48, which is why it was bumped.
+fastapi==0.138.0
 uvicorn[standard]==0.35.0
 pydantic==2.11.7
 onnxruntime==1.28.0
-Pillow==10.4.0
+# Pillow 10.4.0 carries PYSEC-2026-165/2249/2250/2252/2253/2255/2874/345x/349x.
+Pillow==12.3.0
 numpy
 httpx==0.28.1
 prometheus_client==0.21.1
 # Heavy RAG stack (sentence-transformers → torch) lives in requirements-rag.txt.
 # Render free tier (512 MB) cannot install torch; travel reports unavailable there.
 faiss-cpu==1.15.1
-langchain-text-splitters==0.3.4
+# 0.3.4 is affected by PYSEC-2026-77/1520 and drags langchain-core 0.3.86
+# (PYSEC-2026-2193/2562); 1.1.2 fixes both.
+langchain-text-splitters==1.1.2

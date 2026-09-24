@@ -1,0 +1,12 @@
+; Project-level Bandit configuration pointer.
+;
+; Bandit does not auto-discover pyproject.toml: it only reads a config file it
+; is pointed at. When no --ini/--configfile is passed, bandit walks the scan
+; targets looking for exactly one file named `.bandit`, so this file must live
+; inside a scanned target directory (scripts/ is one of them) and it must be
+; the only such file in the repo.
+;
+; `configfile` is resolved relative to the working directory, so Bandit has to
+; be invoked from the repository root (which is how the CI command runs it).
+[bandit]
+configfile = pyproject.toml

@@ -21,6 +21,15 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    // Same-origin API in dev: Vite proxies /api/* to the local Worker so the
+    // client can keep using relative URLs exactly as it does in production.
+    // Override with VITE_API_PROXY_TARGET to point at a remote Worker.
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8787',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     viteStaticCopy({

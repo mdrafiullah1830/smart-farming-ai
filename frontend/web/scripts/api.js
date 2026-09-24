@@ -21,8 +21,28 @@ const DEFAULT_TIMEOUT_MS = 12000;
 
 function resolveBaseUrl(base) {
   if (base) return String(base).replace(/\/$/, '');
+  // Optional absolute API origin (VITE_API_BASE_URL). When unset we stay
+  // same-origin and rely on the dev proxy / the Vercel rewrite.
+  const configured = import.meta.env?.VITE_API_BASE_URL;
+  if (configured) return String(configured).replace(/\/$/, '');
   if (typeof window !== 'undefined' && window.location) return window.location.origin;
   return '';
+}
+
+/**
+ * Canonical session token. `setCredentials()` stores `{token, user}` under
+ * `sfAuth`; older builds wrote a bare token under `sfAccessToken`, so that key
+ * is kept only as a read-through migration path.
+ */
+function readStoredToken() {
+  if (typeof window === 'undefined' || !window.localStorage) return null;
+  const current = getCredentials()?.token;
+  if (current) return current;
+  try {
+    return window.localStorage.getItem('sfAccessToken');
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -46,7 +66,7 @@ export async function apiFetch(path, options = {}) {
   if (!headers.has('Accept')) headers.set('Accept', 'application/json');
   headers.set('X-Request-Id', requestId);
 
-  const auth = token ?? (typeof window !== 'undefined' ? window.localStorage?.getItem('sfAccessToken') : null);
+  const auth = token ?? readStoredToken();
   if (auth && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${auth}`);
 
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;

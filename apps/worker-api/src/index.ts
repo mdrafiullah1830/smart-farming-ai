@@ -5,7 +5,7 @@ import { currentUser } from './auth.ts';
 
 // Import all route modules
 import { registerRoute, loginRoute, refreshRoute, logoutRoute, googleLoginRoute, profileRoute } from './routes/auth.ts';
-import { devicesRoute, deviceRotateKeyRoute, deviceThresholdsRoute } from './routes/devices.ts';
+import { devicesRoute, deviceRotateKeyRoute, deviceThresholdsRoute, deviceCommandRoute } from './routes/devices.ts';
 import { sensorsReadingsRoute, sensorsAlertsRoute, sensorsSummaryRoute } from './routes/sensors.ts';
 import { weatherRoute, weatherLocationRoute } from './routes/weather.ts';
 import { uploadsRoute, diseaseAnalyzeRoute } from './routes/uploads.ts';
@@ -24,6 +24,8 @@ import {
   districtsRoute, districtDetailRoute, divisionsRoute, zillasRoute, unionsRoute 
 } from './routes/locations.ts';
 import { aiHealthRoute, notificationsRoute } from './routes/integrations.ts';
+import { clientErrorsRoute } from './routes/telemetry.ts';
+import { tasksRoute } from './routes/tasks.ts';
 
 async function body<T>(request: Request): Promise<T | null> {
   try { return await request.json<T>(); } catch { return null; }
@@ -51,6 +53,9 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (path === '/api/v1/devices/rotate-key' && method === 'POST') return deviceRotateKeyRoute(request, env);
   if (path === '/api/v1/devices/thresholds' && method === 'GET') return deviceThresholdsRoute(request, env);
   if (path === '/api/v1/devices/thresholds' && method === 'PUT') return deviceThresholdsRoute(request, env);
+  if (path.startsWith('/api/v1/devices/') && path.endsWith('/command') && method === 'POST') {
+    return deviceCommandRoute(request, env, decodeURIComponent(path.slice('/api/v1/devices/'.length, -'/command'.length)));
+  }
 
   // Sensor routes
   if (path === '/api/v1/sensors/readings' && method === 'POST') return sensorsReadingsRoute(request, env);
@@ -126,6 +131,10 @@ async function route(request: Request, env: Env): Promise<Response> {
   // Integration routes
   if (path === '/api/v1/integrations/ai/health' && method === 'GET') return aiHealthRoute(request, env);
   if ((path === '/api/v1/db/notifications' || path === '/api/v1/notifications') && method === 'GET') return notificationsRoute(request, env);
+
+  // Client telemetry + dashboard task sync
+  if (path === '/api/v1/client-errors' && method === 'POST') return clientErrorsRoute(request, env);
+  if (path === '/api/v1/tasks' && (method === 'GET' || method === 'POST')) return tasksRoute(request, env);
 
   return error(request, env, 404, 'Route not found');
 }

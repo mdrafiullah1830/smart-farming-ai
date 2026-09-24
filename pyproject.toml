@@ -143,13 +143,9 @@ follow_imports = "silent"
 show_error_codes = true
 pretty = true
 
-[[tool.mypy.overrides]]
-module = ["apps.worker-api.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["ai_models.*"]
-ignore_missing_imports = true
+# `ignore_missing_imports` above already covers every module, so per-module
+# overrides for apps.worker-api.* / ai_models.* would be redundant (mypy
+# reports them as unused sections).
 
 [tool.black]
 line-length = 100
@@ -203,5 +199,18 @@ show_missing = true
 skip_covered = true
 
 [tool.bandit]
-exclude_dirs = ["tests", ".venv", "node_modules", "datasets", "ai_models/trained_models"]
+# This section is only read when Bandit is pointed at it, which is what the
+# project-level scripts/.bandit file (`configfile = pyproject.toml`) does.
+# Path exclusions are matched by glob and by substring, so ".venv" covers
+# backend/.venv and apps/ai-service/venv (vendored third-party code, not
+# project source).
+exclude_dirs = [
+    "tests",
+    ".venv",
+    "node_modules",
+    "datasets",
+    "ai_models/trained_models",
+]
+# B101 (assert) / B601 (shell=True) are raised in CLI-only helper code where
+# there is no untrusted input; kept skipped as declared previously.
 skips = ["B101", "B601"]

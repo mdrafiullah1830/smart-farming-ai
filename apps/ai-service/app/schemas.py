@@ -4,6 +4,7 @@ Field ranges mirror `apps/worker-api/src/sensors.ts` validation and the
 agronomic bounds used when the models were trained, so a request that passes
 the API layer cannot be silently clipped by the model.
 """
+
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
@@ -54,7 +55,9 @@ class YieldPredictResponse(BaseModel):
 
 class MarketForecastRequest(BaseModel):
     crop: str = Field(min_length=1, max_length=40)
-    history: list[float] = Field(min_length=7, max_length=180, description="Chronological prices, oldest first")
+    history: list[float] = Field(
+        min_length=7, max_length=180, description="Chronological prices, oldest first"
+    )
     days: int = Field(default=7, ge=1, le=30)
 
 

@@ -5,6 +5,7 @@ Train EfficientNetB0 on Paddy Doctor rice disease dataset and export to ONNX.
 import json
 import os
 from datetime import datetime
+from typing import Any
 from pathlib import Path
 
 import numpy as np
@@ -231,8 +232,8 @@ def train_model():
     print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}, Test Top-3: {test_top3:.4f}")
 
     # Detailed predictions
-    y_true = []
-    y_pred = []
+    y_true: list[Any] = []
+    y_pred: list[Any] = []
     for batch_x, batch_y in test_ds:
         preds = model.predict(batch_x, verbose=0)
         y_true.extend(np.argmax(batch_y, axis=1))

@@ -144,8 +144,8 @@ def parse_yearbook(year, pdf_name):
         print(f"  {year}: Table 2.1.1 not found")
         return {}, {}
 
-    production = {}   # crop -> {year: metric_tons}
-    yield_rate = {}   # crop -> {year: kg_per_acre}
+    production: dict[str, dict[int, float]] = {}   # crop -> {year: metric_tons}
+    yield_rate: dict[str, dict[int, float]] = {}   # crop -> {year: kg_per_acre}
 
     for pno, text in pages:
         lines = text.splitlines()
@@ -191,7 +191,8 @@ def parse_yearbook(year, pdf_name):
 
 
 def main():
-    all_prod, all_yield = {}, {}
+    all_prod: dict[str, dict[int, float]] = {}
+    all_yield: dict[str, dict[int, float]] = {}
     for year, pdf_name in YEARBOOKS.items():
         print(f"Parsing BBS {year} ({pdf_name}) ...", flush=True)
         prod, yld = parse_yearbook(year, pdf_name)

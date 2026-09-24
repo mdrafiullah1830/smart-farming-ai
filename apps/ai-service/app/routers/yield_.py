@@ -11,6 +11,7 @@ Model
     422 rather than mapped to a default, because silently predicting rice for an
     unrecognised crop would be worse than returning nothing.
 """
+
 from __future__ import annotations
 
 import logging
@@ -19,7 +20,7 @@ from typing import Annotated
 import numpy as np
 from fastapi import APIRouter, Header
 
-from app.models import OnnxModel, metadata_root, models_root
+from app.models import OnnxModel, models_root
 from app.schemas import YieldPredictRequest, YieldPredictResponse
 
 logger = logging.getLogger(__name__)
@@ -76,24 +77,26 @@ async def predict_yield(
     season_encoded = float(season_classes.index(season)) if season_classes else 0.0
 
     features = np.array(
-        [[
-            crop_encoded,
-            request.temperature,
-            request.humidity,
-            request.rainfall,
-            request.ph,
-            request.nitrogen,
-            request.area_acres,
-            1.0 if request.irrigation_used else 0.0,
-            season_encoded,
-        ]],
+        [
+            [
+                crop_encoded,
+                request.temperature,
+                request.humidity,
+                request.rainfall,
+                request.ph,
+                request.nitrogen,
+                request.area_acres,
+                1.0 if request.irrigation_used else 0.0,
+                season_encoded,
+            ]
+        ],
         dtype=np.float32,
     )
 
     try:
         outputs = MODEL.session.run(None, {MODEL.input_name: features})
     except Exception as exc:  # noqa: BLE001
-        logger.error("yield inference failed: %s", exc)
+        logger.exception("yield inference failed")
         return YieldPredictResponse(status="error", message=f"Inference failed: {exc}")
 
     per_acre = float(np.asarray(outputs[0]).reshape(-1)[0])

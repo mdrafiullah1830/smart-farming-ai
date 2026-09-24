@@ -37,6 +37,17 @@ export function createRequestId(request: Request): string {
   }
 }
 
+/**
+ * True when a D1 statement failed because a table from a newer migration has
+ * not been applied to this binding yet. Lets routes degrade to an explicit
+ * `synced: false` answer instead of a 500 while `wrangler d1 migrations apply`
+ * is still pending.
+ */
+export function isMissingRelation(cause: unknown): boolean {
+  const message = cause instanceof Error ? cause.message : String(cause ?? '');
+  return /no such table/i.test(message);
+}
+
 export function addSecurityHeaders(response: Response): Response {
   const headers = new Headers(response.headers);
   headers.set('X-Content-Type-Options', 'nosniff');

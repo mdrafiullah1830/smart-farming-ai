@@ -52,7 +52,7 @@ class AIInferencePipeline:
 
     def load_chatbot(self, path: str = "trained_models/chatbot.pkl"):
         if os.path.exists(path) and "chatbot" not in self._loaded_models:
-            from ai_models.chatbot.train_enhanced import EnhancedAgriculturalChatbot as AgriculturalChatbot
+            from ai_models.chatbot.train_enhanced import AgriculturalChatbot
             self.chatbot = AgriculturalChatbot.load(path)
             self._loaded_models.add("chatbot")
             print("Chatbot loaded")
@@ -67,32 +67,38 @@ class AIInferencePipeline:
     def predict_crop(self, features: dict[str, float]) -> dict[str, Any]:
         if self.crop_model is None:
             return {"error": "Crop model not loaded"}
-        return self.crop_model.predict(features)
+        result: dict[str, Any] = self.crop_model.predict(features)
+        return result
 
     def predict_yield(self, features: dict[str, Any]) -> dict[str, Any]:
         if self.yield_model is None:
             return {"error": "Yield model not loaded"}
-        return self.yield_model.predict(features)
+        result: dict[str, Any] = self.yield_model.predict(features)
+        return result
 
     def predict_market(self, crop_name: str, historical_prices: list, days: int = 7) -> dict[str, Any]:
         if self.market_model is None:
             return {"error": "Market model not loaded"}
-        return self.market_model.predict(crop_name, historical_prices, days)
+        result: dict[str, Any] = self.market_model.predict(crop_name, historical_prices, days)
+        return result
 
     def detect_disease(self, image: np.ndarray) -> dict[str, Any]:
         if self.disease_model is None:
             return {"error": "Disease model not loaded"}
-        return self.disease_model.predict(image)
+        result: dict[str, Any] = self.disease_model.predict(image)
+        return result
 
     def chat(self, query: str, language: str = "bn") -> dict[str, Any]:
         if self.chatbot is None:
             return {"error": "Chatbot not loaded"}
-        return self.chatbot.get_response(query, language)
+        result: dict[str, Any] = self.chatbot.get_response(query, language)
+        return result
 
-    def get_seasonal_advice(self, month: int, district: str = None) -> dict[str, Any]:
+    def get_seasonal_advice(self, month: int, district: str | None = None) -> dict[str, Any]:
         if self.chatbot is None:
             return {"error": "Chatbot not loaded"}
-        return self.chatbot.get_seasonal_advice(month, district)
+        result: dict[str, Any] = self.chatbot.get_seasonal_advice(month, district)
+        return result
 
     def get_model_status(self) -> dict[str, bool]:
         return {

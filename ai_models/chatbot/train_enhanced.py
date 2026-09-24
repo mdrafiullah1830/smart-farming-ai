@@ -22,14 +22,15 @@ class AgriculturalChatbot:
         data_path = os.path.join(os.path.dirname(__file__), "training_data.json")
         try:
             with open(data_path, encoding="utf-8") as f:
-                return json.load(f)
+                data: dict = json.load(f)
+            return data
         except FileNotFoundError:
             print(f"Training data not found at {data_path}")
             return {"qa_pairs": [], "greetings": {}, "fallback_responses": {}}
 
     def _build_knowledge_base(self) -> dict:
         """Build knowledge base from training data."""
-        kb = {}
+        kb: dict[str, list] = {}
         for qa in self.qa_pairs:
             topic = qa.get("topic", "general")
             if topic not in kb:
@@ -45,7 +46,7 @@ class AgriculturalChatbot:
         """Find the best matching QA pair for a query."""
         query_lower = query.lower().strip()
         best_match = None
-        best_score = 0
+        best_score: float = 0
 
         # Check greetings first
         if language == "bn":
@@ -62,7 +63,7 @@ class AgriculturalChatbot:
         # Search through QA pairs
         for qa in self.qa_pairs:
             keywords = qa.get(f"keywords_{language}", [])
-            score = 0
+            score: float = 0
 
             # Exact keyword match
             for keyword in keywords:
@@ -172,7 +173,7 @@ class AgriculturalChatbot:
         }
         return suggestions_map.get(language, suggestions_map["bn"]).get(topic, self._get_suggestions(language))
 
-    def get_seasonal_advice(self, month: int, district: str = None) -> dict:
+    def get_seasonal_advice(self, month: int, district: str | None = None) -> dict:
         """Get seasonal advice for a specific month."""
         seasonal_calendar = {
             1: {"season": "রবি", "activities": ["গম ও ডালের সেচ দিন", "আলুর রোগ পরীক্ষা করুন"], "crops": ["গম", "ডাল", "আলু"]},
@@ -228,7 +229,7 @@ class AgriculturalChatbot:
     def load(cls, path: str):
         """Load chatbot model."""
         with open(path, "rb") as f:
-            model_data = pickle.load(f)
+            model_data = pickle.load(f)  # nosec B301  # loads this repo's own trained chatbot artifact
         instance = cls()
         instance.training_data = model_data.get("training_data", instance.training_data)
         instance.knowledge_base = model_data.get("knowledge_base", instance.knowledge_base)

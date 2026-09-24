@@ -1,7 +1,7 @@
 """Retrieval module for travel RAG."""
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -13,11 +13,13 @@ logger = logging.getLogger(__name__)
 class TravelRetriever:
     """Handles query embedding and retrieval from FAISS index."""
 
-    def __init__(self, embedder: Optional[TravelEmbedder] = None, top_k: int = 5):
+    def __init__(self, embedder: TravelEmbedder | None = None, top_k: int = 5):
         self.embedder = embedder or TravelEmbedder()
         self.top_k = top_k
 
-    def retrieve(self, query: str, top_k: Optional[int] = None, filter_category: Optional[str] = None) -> List[Dict[str, Any]]:
+    def retrieve(
+        self, query: str, top_k: int | None = None, filter_category: str | None = None
+    ) -> list[dict[str, Any]]:
         """Retrieve top-k relevant chunks for a query."""
         if not self.embedder.is_ready():
             logger.warning("Index not ready, attempting to load...")
@@ -30,10 +32,13 @@ class TravelRetriever:
         query_embedding = query_embedding.astype(np.float32)
         faiss.normalize_L2(query_embedding)
 
-        scores, indices = self.embedder.index.search(query_embedding, k * 3)
+        index = self.embedder.index
+        if index is None:
+            return []
+        scores, indices = index.search(query_embedding, k * 3)
 
         results = []
-        for score, idx in zip(scores[0], indices[0]):
+        for score, idx in zip(scores[0], indices[0], strict=False):
             if idx >= len(self.embedder.metadata):
                 continue
 
@@ -41,18 +46,22 @@ class TravelRetriever:
             if filter_category and chunk["metadata"].get("category") != filter_category:
                 continue
 
-            results.append({
-                "text": chunk["text"],
-                "score": float(score),
-                "metadata": chunk["metadata"],
-            })
+            results.append(
+                {
+                    "text": chunk["text"],
+                    "score": float(score),
+                    "metadata": chunk["metadata"],
+                }
+            )
 
             if len(results) >= k:
                 break
 
         return results
 
-    def retrieve_by_district(self, query: str, district: str, top_k: Optional[int] = None) -> List[Dict[str, Any]]:
+    def retrieve_by_district(
+        self, query: str, district: str, top_k: int | None = None
+    ) -> list[dict[str, Any]]:
         """Retrieve chunks filtered by district."""
         if not self.embedder.is_ready():
             return []
@@ -63,11 +72,14 @@ class TravelRetriever:
         query_embedding = query_embedding.astype(np.float32)
         faiss.normalize_L2(query_embedding)
 
-        scores, indices = self.embedder.index.search(query_embedding, k * 5)
+        index = self.embedder.index
+        if index is None:
+            return []
+        scores, indices = index.search(query_embedding, k * 5)
 
         results = []
         district_lower = district.lower()
-        for score, idx in zip(scores[0], indices[0]):
+        for score, idx in zip(scores[0], indices[0], strict=False):
             if idx >= len(self.embedder.metadata):
                 continue
 
@@ -77,18 +89,20 @@ class TravelRetriever:
             title = meta.get("title", "").lower()
 
             if district_lower in source or district_lower in title:
-                results.append({
-                    "text": chunk["text"],
-                    "score": float(score),
-                    "metadata": meta,
-                })
+                results.append(
+                    {
+                        "text": chunk["text"],
+                        "score": float(score),
+                        "metadata": meta,
+                    }
+                )
 
                 if len(results) >= k:
                     break
 
         return results
 
-    def get_sources(self, results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def get_sources(self, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Extract unique sources from retrieval results."""
         seen = set()
         sources = []
@@ -97,10 +111,12 @@ class TravelRetriever:
             key = (meta.get("title"), meta.get("category"), meta.get("source"))
             if key not in seen:
                 seen.add(key)
-                sources.append({
-                    "title": meta.get("title", "Unknown"),
-                    "category": meta.get("category", "general"),
-                    "source": meta.get("source", ""),
-                    "district": meta.get("district"),
-                })
+                sources.append(
+                    {
+                        "title": meta.get("title", "Unknown"),
+                        "category": meta.get("category", "general"),
+                        "source": meta.get("source", ""),
+                        "district": meta.get("district"),
+                    }
+                )
         return sources

@@ -29,6 +29,26 @@ function saveTasks(tasks) {
   storageSet(TASKS_KEY, tasks);
 }
 
+/**
+ * Pull the server copy of the task list when there is a session. Local
+ * storage stays the source of truth for guests, so the widget never fails
+ * just because the API is unreachable.
+ */
+async function syncTasksFromServer() {
+  if (!isAuthenticated()) return;
+  try {
+    const { data } = await api.get('/api/v1/tasks', { timeoutMs: 6000 });
+    if (data?.synced === false) return;
+    const remote = Array.isArray(data?.tasks) ? data.tasks : [];
+    if (remote.length) {
+      saveTasks(remote);
+      renderTasks();
+    }
+  } catch (err) {
+    reportClientError(err, { component: 'task-sync', console: true });
+  }
+}
+
 function renderTasks() {
   const list = qs('#taskList');
   const counter = qs('#taskCount');
@@ -77,7 +97,8 @@ async function toggleTask(id, done, checkbox) {
       // Persist locally always; server sync when authenticated
       if (isAuthenticated()) {
         try {
-          await api.post('/api/v1/farms', { type: 'task', id, done }, { timeoutMs: 5000 });
+          const task = loadTasks().find((x) => x.id === id);
+          if (task) await api.post('/api/v1/tasks', { task: { ...task, done } }, { timeoutMs: 5000 });
         } catch (err) {
           // Local persistence already succeeded — surface soft error only
           reportClientError(err, { component: 'task-sync', console: true });
@@ -210,9 +231,10 @@ async function loadNotifications(_open = false) {
       return;
     }
     for (const item of items) {
+      const title = (lang === 'bn' && item.message_bn) || item.title || item.message || item.body || '—';
       panel.append(
         el('div', { className: 'activity-row' }, [
-          el('span', { text: item.title || item.body || '—' }),
+          el('span', { text: title }),
           el('time', { text: item.created_at || '' }),
         ]),
       );
@@ -346,7 +368,7 @@ async function loadFields() {
           el('div', { className: `field-outline ${classes[i] || 'a'}` }, [
             document.createTextNode(`${farm.name || farm.id} `),
             el('br'),
-            el('small', { text: `${farm.area_ha ?? '—'} ha · ${farm.crop || '—'}` }),
+            el('small', { text: `${farm.area_acres ?? '—'} ac · ${farm.crop || '—'}` }),
           ]),
         );
       });
@@ -433,6 +455,7 @@ export function initDashboard() {
   void loadIrrigation();
   void loadSensors();
   void loadNotifications(false);
+  void syncTasksFromServer();
 
   document.addEventListener('sf:langchange', () => {
     applyI18n();
@@ -446,6 +469,7 @@ export function initDashboard() {
     void loadIrrigation();
     void loadSensors();
     void loadNotifications(false);
+    void syncTasksFromServer();
     setUserChip();
     const guest = storageGet('user', null);
     setText(qs('#greetName'), guest?.name || guest?.email || (getLang() === 'bn' ? 'কৃষক' : 'Farmer'));

@@ -43,7 +43,7 @@ def search_items(lat, lng, days, max_cloud=30):
     # Sentinel-2 tile (the 10 m bands are on a 100 km tile grid).
     half = 0.045  # ~5 km at this latitude
     bbox = [lng - half, lat - half, lng + half, lat + half]
-    params = {
+    params: dict[str, str | int] = {
         "collections": COLLECTION,
         "bbox": ",".join(str(b) for b in bbox),
         "datetime": f"{start.isoformat()}T00:00:00Z/{end.isoformat()}T23:59:59Z",

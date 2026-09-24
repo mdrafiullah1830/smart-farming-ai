@@ -185,7 +185,7 @@ class MarketForecastingModel:
     @classmethod
     def load(cls, path: str):
         with open(path, 'rb') as f:
-            model_data = pickle.load(f)
+            model_data = pickle.load(f)  # nosec B301  # loads this repo's own trained market model
         instance = cls()
         instance.model = model_data['model']
         instance.scalers = model_data.get('scalers', {})

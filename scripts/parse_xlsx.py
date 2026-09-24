@@ -2,6 +2,7 @@
 """Parse all 88+ xlsx files from soil report/ into unified JSON."""
 import json
 import os
+from typing import Any
 
 from openpyxl import load_workbook
 
@@ -38,7 +39,7 @@ def parse_xlsx(filepath):
 def parse_all():
     """Parse all xlsx files organized by category."""
     result = {}
-    categories = {}
+    categories: dict[str, dict[str, list[dict[str, Any]]]] = {}
 
     for root, dirs, files in os.walk(SOIL_REPORT_DIR):
         for f in files:
@@ -67,16 +68,16 @@ def parse_all():
         json.dump(categories, fp, ensure_ascii=False, indent=2, default=str)
 
     # Create summary
-    summary = {}
+    summary: dict[str, dict[str, dict[str, int]]] = {}
     for cat, subs in categories.items():
         summary[cat] = {}
-        for sub, files in subs.items():
+        for sub, entries in subs.items():
             total_records = 0
-            for f in files:
-                for sheet_name, records in f['data'].items():
+            for entry in entries:
+                for sheet_name, records in entry['data'].items():
                     if isinstance(records, list):
                         total_records += len(records)
-            summary[cat][sub] = {'files': len(files), 'total_records': total_records}
+            summary[cat][sub] = {'files': len(entries), 'total_records': total_records}
 
     summary_file = os.path.join(OUTPUT_DIR, 'soil_report_summary.json')
     with open(summary_file, 'w', encoding='utf-8') as fp:

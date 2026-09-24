@@ -6,6 +6,7 @@ import json
 import os
 import pickle
 from datetime import datetime
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -141,7 +142,7 @@ class CropRecommendationModel:
         if HAS_XGBOOST:
             models['xgboost'] = xgb.XGBClassifier(n_estimators=200, max_depth=8, learning_rate=0.1, random_state=42)
 
-        best_model = None
+        best_model: Any = None
         best_score = 0
         best_name = ""
 
@@ -210,7 +211,7 @@ class CropRecommendationModel:
     @classmethod
     def load(cls, path: str):
         with open(path, 'rb') as f:
-            model_data = pickle.load(f)
+            model_data = pickle.load(f)  # nosec B301  # loads this repo's own trained crop model
         instance = cls()
         instance.model = model_data['model']
         instance.scaler = model_data['scaler']

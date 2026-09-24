@@ -117,7 +117,8 @@ def json_schema_to_ts(schema: dict[str, Any]) -> str:
     if "$ref" in schema:
         # Reference to another schema
         ref = schema["$ref"]
-        return ref.split("/")[-1]
+        ref_name: str = ref.split("/")[-1]
+        return ref_name
     
     return "unknown"
 

@@ -1,9 +1,18 @@
 # Backend API only — no ML training libraries
-# The full ML stack (tensorflow, torch, xgboost) lives in ai_models/requirements.txt
-fastapi==0.109.2
-uvicorn[standard]==0.27.1
-pydantic==2.6.1
-python-multipart==0.0.9
+# Deployed by backend/Dockerfile on Render (Python 3.12).
+# Kept deliberately small: main.py only needs FastAPI, JWT, bcrypt and SQLite.
+#
+# Security: fastapi is pinned to a release whose starlette dependency is
+# outside the PYSEC-2026-161/248/249/1942/2280/2281 advisories (same fix as
+# apps/ai-service/requirements.txt). pydantic and uvicorn use compatible-release
+# ranges so a Python 3.13/3.14 dev machine can still resolve wheels.
+fastapi==0.138.0
+uvicorn[standard]>=0.35.0,<1
+pydantic>=2.11.7,<3
+python-multipart==0.0.31
+python-dotenv==1.2.2
 bcrypt==4.1.2
-PyJWT==2.8.0
-sentry-sdk[fastapi]==1.40.5
+PyJWT==2.13.0
+sentry-sdk[fastapi]==1.45.1
+# Required by fastapi.testclient.TestClient used in tests/backend/.
+httpx==0.28.1

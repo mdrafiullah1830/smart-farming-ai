@@ -8,6 +8,7 @@ model would overstate what the platform knows.
 The rules mirror `apps/worker-api/src/sensors.rules.ts` so the dashboard and the
 service agree about what counts as "too dry".
 """
+
 from __future__ import annotations
 
 import logging
@@ -39,6 +40,10 @@ class SensorAdvisoryResponse(BaseModel):
     reasons: list[str]
 
 
+# BARC guide: 24h rainfall at or above this postpones irrigation.
+RAINFALL_DELAY_THRESHOLD_MM = 15
+
+
 def decide(request: SensorAdvisoryRequest) -> tuple[str, str, str, list[str]]:
     """Return (action, message_en, message_bn, reasons)."""
     reasons: list[str] = []
@@ -53,7 +58,7 @@ def decide(request: SensorAdvisoryRequest) -> tuple[str, str, str, list[str]]:
             ["moisture reading missing"],
         )
 
-    if rainfall is not None and rainfall >= 15:
+    if rainfall is not None and rainfall >= RAINFALL_DELAY_THRESHOLD_MM:
         reasons.append(f"{rainfall:.0f} mm rain expected within 24 hours")
         return (
             "wait",
@@ -63,7 +68,9 @@ def decide(request: SensorAdvisoryRequest) -> tuple[str, str, str, list[str]]:
         )
 
     if moisture < request.moisture_min_percent:
-        reasons.append(f"moisture {moisture:.1f}% is below the {request.moisture_min_percent:.0f}% threshold")
+        reasons.append(
+            f"moisture {moisture:.1f}% is below the {request.moisture_min_percent:.0f}% threshold"
+        )
         urgency = "critical" if moisture < request.moisture_min_percent / 2 else "warning"
         return (
             "irrigate_now",
@@ -73,7 +80,9 @@ def decide(request: SensorAdvisoryRequest) -> tuple[str, str, str, list[str]]:
         )
 
     if moisture > request.moisture_max_percent:
-        reasons.append(f"moisture {moisture:.1f}% is above the {request.moisture_max_percent:.0f}% threshold")
+        reasons.append(
+            f"moisture {moisture:.1f}% is above the {request.moisture_max_percent:.0f}% threshold"
+        )
         return (
             "improve_drainage",
             f"Soil moisture is {moisture:.1f}%, higher than the {request.moisture_max_percent:.0f}% threshold. Open drainage channels and avoid further irrigation.",
@@ -81,7 +90,9 @@ def decide(request: SensorAdvisoryRequest) -> tuple[str, str, str, list[str]]:
             reasons,
         )
 
-    reasons.append(f"moisture {moisture:.1f}% is inside the {request.moisture_min_percent:.0f}-{request.moisture_max_percent:.0f}% band")
+    reasons.append(
+        f"moisture {moisture:.1f}% is inside the {request.moisture_min_percent:.0f}-{request.moisture_max_percent:.0f}% band"
+    )
     return (
         "no_action",
         f"Soil moisture is {moisture:.1f}%, within the target band. No irrigation is needed now; keep monitoring.",

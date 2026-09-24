@@ -1,16 +1,25 @@
 """Trip cost aggregation for Bangladesh travel."""
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Any
 
+from .accommodation import (
+    calculate_homestay_cost,
+    calculate_hotel_cost,
+    get_available_tiers as get_accom_tiers,
+)
+from .food import (
+    calculate_food_cost,
+    calculate_food_cost_detailed,
+    get_available_tiers as get_food_tiers,
+)
 from .transport import calculate_transport_cost, get_available_modes
-from .accommodation import calculate_hotel_cost, calculate_homestay_cost, get_available_tiers as get_accom_tiers
-from .food import calculate_food_cost, calculate_food_cost_detailed, get_available_tiers as get_food_tiers
 
 
 @dataclass
 class TripParams:
     """Parameters for trip cost estimation."""
+
     origin: str
     destination: str
     days: int
@@ -27,16 +36,17 @@ class TripParams:
 @dataclass
 class TripCostBreakdown:
     """Detailed trip cost breakdown."""
+
     transport: float
     accommodation: float
     food: float
-    food_breakdown: Dict[str, float]
+    food_breakdown: dict[str, float]
     misc_buffer: float
     total: float
     currency: str = "BDT"
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "transport": self.transport,
             "accommodation": self.accommodation,
@@ -134,7 +144,10 @@ def estimate_trip_cost(params: TripParams) -> TripCostBreakdown:
     )
 
 
-def validate_params(params: TripParams) -> List[str]:
+MONTHS_PER_YEAR = 12
+
+
+def validate_params(params: TripParams) -> list[str]:
     """Validate trip parameters and return list of errors."""
     errors = []
 
@@ -142,7 +155,7 @@ def validate_params(params: TripParams) -> List[str]:
         errors.append("days must be at least 1")
     if params.people < 1:
         errors.append("people must be at least 1")
-    if params.month < 1 or params.month > 12:
+    if params.month < 1 or params.month > MONTHS_PER_YEAR:
         errors.append("month must be between 1 and 12")
     if params.rooms < 1:
         errors.append("rooms must be at least 1")

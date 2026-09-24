@@ -91,7 +91,8 @@ def _to_onnx_bytes(model, sample: np.ndarray, options: dict | None = None) -> by
     from skl2onnx import to_onnx
 
     converted = to_onnx(model, X=sample, options=options, target_opset=17)
-    return converted.SerializeToString()
+    onnx_bytes: bytes = converted.SerializeToString()
+    return onnx_bytes
 
 
 def save_bundle(onnx_bytes: bytes, metadata: dict, out_dir: Path, stem: str) -> Path:
@@ -116,7 +117,7 @@ def export_crop(out_dir: Path):
     if not pkl_path.exists():
         die(f"missing {pkl_path}. Train the crop model first (ai_models/crop_prediction/train.py).")
     with open(pkl_path, "rb") as fh:
-        bundle = pickle.load(fh)
+        bundle = pickle.load(fh)  # nosec B301  # reads the locally trained crop model bundle
 
     scaler = bundle["scaler"]
     classes = [str(c) for c in bundle["label_encoder"].classes_]
@@ -150,7 +151,7 @@ def export_yield(out_dir: Path):
     if not pkl_path.exists():
         die(f"missing {pkl_path}. Train the yield model first (ai_models/yield_prediction/train.py).")
     with open(pkl_path, "rb") as fh:
-        bundle = pickle.load(fh)
+        bundle = pickle.load(fh)  # nosec B301  # reads the locally trained yield model bundle
 
     info = bundle["model_info"]
     feature_names = list(info["feature_names"])
@@ -208,12 +209,12 @@ def export_market(out_dir: Path):
         y_parts.append(np.asarray(y, dtype=np.float32))
         per_crop_bounds[crop_name] = {"min": round(low, 2), "max": round(high, 2)}
 
-    X = np.concatenate(X_parts)
-    y = np.concatenate(y_parts)
+    X_arr = np.concatenate(X_parts)
+    y_arr = np.concatenate(y_parts)
     # train.py fits on X.reshape(n, -1); the service feeds (1, window, 1) and
     # flattens equivalently, so a 2-D input graph is the contract.
     model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X.reshape(X.shape[0], -1), y)
+    model.fit(X_arr.reshape(X_arr.shape[0], -1), y_arr)
 
     sample = np.zeros((1, MARKET_SEQUENCE_LENGTH), dtype=np.float32)
     onnx_bytes = _to_onnx_bytes(model, sample)
@@ -222,7 +223,7 @@ def export_market(out_dir: Path):
         "model_name": "random_forest_fallback",
         "crops": sorted(MARKET_CROPS),
         "sequence_length": MARKET_SEQUENCE_LENGTH,
-        "n_samples": int(X.shape[0]),
+        "n_samples": int(X_arr.shape[0]),
         "scaler_bounds": per_crop_bounds,
         "trained_at": datetime.now().isoformat(),
         "exported_at": datetime.now().isoformat(),
@@ -291,7 +292,7 @@ def verify_crop(path: Path, metadata: dict) -> None:
     from sklearn.pipeline import Pipeline
 
     with open(CROP_DIR / "crop_recommendation.pkl", "rb") as fh:
-        bundle = pickle.load(fh)
+        bundle = pickle.load(fh)  # nosec B301  # reads the locally trained crop model bundle
     pipeline = Pipeline([("scaler", bundle["scaler"]), ("forest", bundle["model"])])
     session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
     name = session.get_inputs()[0].name
@@ -311,7 +312,7 @@ def verify_yield(path: Path, metadata: dict) -> None:
     from sklearn.pipeline import Pipeline
 
     with open(YIELD_DIR / "yield_prediction.pkl", "rb") as fh:
-        bundle = pickle.load(fh)
+        bundle = pickle.load(fh)  # nosec B301  # reads the locally trained yield model bundle
     pipeline = Pipeline([("scaler", bundle["scaler"]), ("gbr", bundle["model"])])
     session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
     name = session.get_inputs()[0].name

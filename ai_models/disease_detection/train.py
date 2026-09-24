@@ -7,13 +7,14 @@ import json
 import os
 import pickle
 from datetime import datetime
+from typing import Any
 
 import numpy as np
 
 
 class DiseaseDetectionModel:
     def __init__(self):
-        self.model = None
+        self.model: Any = None
         self.class_names = [
             'Bacterial Leaf Blight', 'Bacterial Leaf Streak', 'Bacterial Panicle Blight',
             'Blast', 'Brown Spot', 'Dead Heart', 'Downy Mildew', 'Hispa', 'Healthy', 'Tungro'
@@ -165,11 +166,11 @@ class DiseaseDetectionModel:
             import tensorflow as tf
             if len(image.shape) == 3:
                 image = np.expand_dims(image, axis=0)
-            image = tf.image.resize(image, self.image_size)
-            if image.dtype == tf.uint8 or image.numpy().max() > 1.0:
-                image = image / 255.0
+            resized = tf.image.resize(image, self.image_size)
+            if resized.dtype == tf.uint8 or resized.numpy().max() > 1.0:
+                resized = resized / 255.0
 
-            predictions = self.model.predict(image, verbose=0)
+            predictions = self.model.predict(resized, verbose=0)
             class_idx = np.argmax(predictions[0])
             confidence = float(predictions[0][class_idx])
 
@@ -234,7 +235,7 @@ class DiseaseDetectionModel:
         except Exception:
             pkl_path = path + '.pkl' if not path.endswith('.pkl') else path
             with open(pkl_path, 'rb') as f:
-                model_data = pickle.load(f)
+                model_data = pickle.load(f)  # nosec B301  # loads this repo's own trained disease model
             instance.model = model_data['model']
             instance.model_info = model_data.get('model_info', {})
 

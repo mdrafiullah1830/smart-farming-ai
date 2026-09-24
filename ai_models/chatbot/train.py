@@ -100,7 +100,7 @@ class AgriculturalChatbot:
 
     def _find_best_match(self, query: str) -> str | None:
         query_lower = query.lower()
-        best_match = None
+        best_match: str | None = None
         best_score = 0
 
         for keyword in self.knowledge_base:
@@ -172,7 +172,7 @@ class AgriculturalChatbot:
             ],
         }
 
-    def get_seasonal_advice(self, month: int, district: str = None) -> dict:
+    def get_seasonal_advice(self, month: int, district: str | None = None) -> dict:
         seasonal_calendar = {
             1: {"season": "রবি", "activities": ["গম ও ডালের সেচ দিন", "আলুর রোগ পরীক্ষা করুন"], "crops": ["গম", "ডাল", "আলু"]},
             2: {"season": "রবি", "activities": ["ফসল পরিপক্ব হচ্ছে", "বাজার মূল্য জানুন"], "crops": ["গম", "সরিষা"]},
@@ -210,7 +210,7 @@ class AgriculturalChatbot:
     @classmethod
     def load(cls, path: str):
         with open(path, 'rb') as f:
-            model_data = pickle.load(f)
+            model_data = pickle.load(f)  # nosec B301  # loads this repo's own trained chatbot artifact
         instance = cls()
         instance.knowledge_base = model_data.get('knowledge_base', instance.knowledge_base)
         instance.model_info = model_data.get('model_info', {})

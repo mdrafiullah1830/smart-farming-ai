@@ -6,6 +6,7 @@ import json
 import os
 import pickle
 from datetime import datetime
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -35,7 +36,7 @@ class YieldPredictionModel:
     def generate_training_data(self, n_samples: int = 5000, use_real_data: bool = True) -> pd.DataFrame:
         np.random.seed(42)
 
-        crops = {
+        crops: dict[str, dict[str, Any]] = {
             'rice': {'base_yield': 2.5, 'temp_opt': (22, 32), 'rain_opt': (150, 250)},
             'wheat': {'base_yield': 1.8, 'temp_opt': (12, 22), 'rain_opt': (40, 80)},
             'jute': {'base_yield': 8.0, 'temp_opt': (25, 35), 'rain_opt': (180, 250)},
@@ -85,10 +86,10 @@ class YieldPredictionModel:
             # Use real soil data if available
             if real_soil and np.random.random() < 0.3:
                 sv = np.random.choice(len(real_soil))
-                vals = real_soil[sv]
-                if len(vals) >= 2:
-                    ph = np.clip(vals[0], 4.0, 9.0)
-                    nitrogen = np.clip(vals[1], 5, 100)
+                soil_vals = real_soil[sv]
+                if len(soil_vals) >= 2:
+                    ph = np.clip(soil_vals[0], 4.0, 9.0)
+                    nitrogen = np.clip(soil_vals[1], 5, 100)
 
             base = crop['base_yield']
             factor = 1.0
@@ -232,7 +233,7 @@ class YieldPredictionModel:
     @classmethod
     def load(cls, path: str):
         with open(path, 'rb') as f:
-            model_data = pickle.load(f)
+            model_data = pickle.load(f)  # nosec B301  # loads this repo's own trained yield model
         instance = cls()
         instance.model = model_data['model']
         instance.scaler = model_data['scaler']

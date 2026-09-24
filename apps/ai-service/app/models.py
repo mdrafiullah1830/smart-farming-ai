@@ -12,6 +12,7 @@ Design notes
     That is deliberate: the platform must never fabricate a prediction just to
     return a 200.
 """
+
 from __future__ import annotations
 
 import json
@@ -19,8 +20,6 @@ import logging
 import os
 from pathlib import Path
 from typing import Any
-
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ except ImportError:  # pragma: no cover
 class OnnxModel:
     """Thin wrapper that pairs an ONNX graph with its feature/label metadata."""
 
-    def __init__(self, session: "ort.InferenceSession", metadata: dict[str, Any]) -> None:
+    def __init__(self, session: ort.InferenceSession, metadata: dict[str, Any]) -> None:
         self.session = session
         self.metadata = metadata
         self.input_name = session.get_inputs()[0].name
@@ -44,10 +43,12 @@ class OnnxModel:
     @property
     def model_version(self) -> str:
         """Get model version from metadata."""
-        return self.metadata.get("model_version", self.metadata.get("exported_at", "unknown")[:10])
+        exported_at = self.metadata.get("exported_at", "unknown")
+        version: str = self.metadata.get("model_version", exported_at[:10])
+        return version
 
     @classmethod
-    def load(cls, onnx_path: Path, metadata_path: Path) -> "OnnxModel | None":
+    def load(cls, onnx_path: Path, metadata_path: Path) -> OnnxModel | None:
         if not ORT_AVAILABLE or not onnx_path.exists():
             return None
         metadata: dict[str, Any] = {}
@@ -55,8 +56,8 @@ class OnnxModel:
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         try:
             session = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
-        except Exception as exc:  # noqa: BLE001 - any load failure means "unavailable"
-            logger.error("failed to load %s: %s", onnx_path, exc)
+        except Exception:  # noqa: BLE001 - any load failure means "unavailable"
+            logger.exception("failed to load %s", onnx_path)
             return None
         logger.info("loaded %s", onnx_path.name)
         return cls(session, metadata)

@@ -16,9 +16,10 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
 # Copy backend code
 COPY backend/main.py /app/backend/main.py
 
-# Copy database setup script and seeds
+# Copy database setup script, seeds and the soil survey JSON it ingests
 COPY scripts/setup_db.py /app/scripts/setup_db.py
 COPY database/seeds/ /app/database/seeds/
+COPY datasets/soil_report_all.json /app/datasets/soil_report_all.json
 
 # Create SQLite database at build time
 RUN cd /app && python scripts/setup_db.py

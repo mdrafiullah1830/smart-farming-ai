@@ -3,6 +3,7 @@
 line-length = 100
 target-version = "py312"
 
+[lint]
 # Enable/disable rules
 select = [
     "E",   # pycodestyle errors
@@ -38,6 +39,18 @@ ignore = [
 "tests/*" = ["S101", "T201"]  # allow assert and print in tests
 "ai_models/*/train.py" = ["C901", "T201", "B008"]  # training scripts
 "scripts/*.py" = ["T201"]  # scripts
+# The AI service deliberately keeps imports function-local for two reasons:
+#   * PLC0415 — heavy optional deps (faiss, sentence-transformers/torch,
+#     langchain, Pillow) are imported at first use so the Render free-tier
+#     cold start never pays for them, and `from app.main import
+#     require_service_token` inside route handlers is what breaks the
+#     app.main <-> app.routers import cycle (a module-level import would be
+#     circular).
+#   * PLW0603 — the `global` statements are lazy-init singletons: one ONNX
+#     session/model per router plus JSON fare/cost tables loaded exactly once
+#     on first use. The module-level name is the cache; refactoring it into a
+#     mutable holder would only rename the same pattern.
+"apps/ai-service/**" = ["PLC0415", "PLW0603"]
 
 [format]
 quote-style = "double"
@@ -53,7 +66,12 @@ combine-as-imports = true
 convention = "google"
 
 [lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+# Only parent-relative imports (`from ..pkg import x`) are banned: they reach
+# outside the current package and break when files move. Single-dot imports
+# (`from .embedder import TravelEmbedder`) are the idiomatic way to reference a
+# sibling module inside `app.routers`, `app.travel.calculator` and
+# `app.travel.rag`, and this tree contains no `from ..` imports at all.
+ban-relative-imports = "parents"
 
 [lint.mccabe]
 max-complexity = 15

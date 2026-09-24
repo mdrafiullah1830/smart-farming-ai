@@ -22,9 +22,9 @@ import csv
 import datetime as dt
 import os
 import re
-import xml.etree.ElementTree as ET
 
 import requests
+from defusedxml import ElementTree as ET
 
 OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "datasets", "disaster")
 os.makedirs(OUT_DIR, exist_ok=True)
