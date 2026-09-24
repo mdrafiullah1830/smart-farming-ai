@@ -34,6 +34,8 @@ env:
   MYPY_VERSION: '2.3.1'
   BANDIT_VERSION: '1.9.4'
   PIP_AUDIT_VERSION: '2.10.1'
+  # Keep in sync with apps/ai-service/requirements-dev.txt.
+  PYTEST_VERSION: '9.1.1'
 
 jobs:
   lint:
@@ -61,8 +63,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install mypy
-        run: pip install "mypy==${MYPY_VERSION}"
+          cache: 'pip'
+          cache-dependency-path: |
+            backend/requirements-api.txt
+            apps/ai-service/requirements.txt
+      - name: Install dependencies
+        # mypy needs the runtime packages installed: without bcrypt/PyJWT
+        # (both py.typed) every call in backend/main.py degrades to Any and
+        # warn_return_any reports phantom no-any-return errors.
+        run: |
+          pip install "mypy==${MYPY_VERSION}"
+          pip install -r backend/requirements-api.txt -r apps/ai-service/requirements.txt
       - name: Run mypy
         run: mypy apps/ai-service/app ai_models backend scripts --ignore-missing-imports
 
@@ -99,7 +110,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r backend/requirements-api.txt
-          pip install pytest
+          pip install "pytest==${PYTEST_VERSION}"
       - name: Run pytest
         # The suite lives in tests/backend (see pyproject testpaths), not in
         # backend/tests — running from backend/ silently skipped every test.
