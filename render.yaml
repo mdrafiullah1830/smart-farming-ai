@@ -6,7 +6,6 @@ services:
     plan: free
     dockerfilePath: ./apps/ai-service/Dockerfile
     healthCheckPath: /health
-    healthCheckPolicy: strict
     autoDeployTrigger: commit
     envVars:
       - key: SERVICE_TOKEN
@@ -15,9 +14,7 @@ services:
         value: production
       - key: MODEL_PATH
         value: /app/models/disease_model.onnx
-      # Render injects PORT; keep it aligned with EXPOSE / default CMD.
-      - key: PORT
-        value: "10000"
+      # Render injects PORT; the image CMD reads ${PORT:-10000}.
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: HF_HOME
@@ -34,16 +31,16 @@ services:
     plan: free
     dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /api/v1/health
-    healthCheckPolicy: strict
     autoDeployTrigger: commit
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: APP_ENV
         value: production
-      - key: PORT
-        value: "10000"
       - key: PYTHONUNBUFFERED
         value: "1"
+      # Browser origins that may call this API directly. The production site
+      # is served by Vercel and reaches the Cloudflare Worker, so this list
+      # only needs the service hostnames plus local development.
       - key: CORS_ORIGINS
-        value: https://smart-farming-ai.onrender.com,http://localhost:3000
+        value: https://smart-farming-ai-service.onrender.com,https://smart-farming-ai-backend.onrender.com,https://smart-farming-ai.onrender.com,http://localhost:3000

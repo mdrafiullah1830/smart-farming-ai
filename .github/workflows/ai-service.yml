@@ -7,16 +7,31 @@ on:
       - 'apps/ai-service/**'
       - 'scripts/export_models_to_onnx.py'
       - 'pyproject.toml'
+      - '.github/workflows/ai-service.yml'
   pull_request:
     branches: [main]
     paths:
       - 'apps/ai-service/**'
       - 'scripts/export_models_to_onnx.py'
       - 'pyproject.toml'
+      - '.github/workflows/ai-service.yml'
+  # Publishing to GHCR needs `packages: write`, which org policy can withhold
+  # from the default GITHUB_TOKEN. Keep it an explicit, permissioned action so
+  # the automatic pipeline can never fail on registry permissions.
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Push the image to ghcr.io'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/ai-service
+  RUFF_VERSION: '0.16.6'
 
 jobs:
   lint-and-typecheck:
@@ -30,12 +45,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
 
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install ruff
+          pip install "ruff==${RUFF_VERSION}"
 
       - name: Run Ruff linting (deployable app)
         run: ruff check apps/ai-service/app
@@ -71,7 +85,31 @@ jobs:
     name: Build Docker Image
     needs: [test]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (validation only)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/ai-service/Dockerfile
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  publish-image:
+    name: Publish Docker Image
+    needs: [build-docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    if: github.event_name == 'workflow_dispatch' && inputs.push_image
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -93,7 +131,6 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
             type=sha,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
 
