@@ -1,7 +1,7 @@
 # fastapi 0.138.0 only requires starlette>=0.46.0 (no upper bound), so the
 # resolver can pick a starlette without the PYSEC-2026-161/248/249/1942/2280/2281
 # advisories. 0.116.1 capped starlette <0.48, which is why it was bumped.
-fastapi==0.138.0
+fastapi==0.141.1
 uvicorn[standard]==0.35.0
 pydantic==2.11.7
 onnxruntime==1.28.0
