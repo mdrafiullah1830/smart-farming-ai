@@ -57,7 +57,17 @@ export async function soilSummaryRoute(request: Request, env: Env): Promise<Resp
 
 export async function soilDistrictsRoute(request: Request, env: Env): Promise<Response> {
   const result = await env.DB.prepare('SELECT DISTINCT district_name FROM soil_features ORDER BY district_name').all<{ district_name: string }>();
-  return json(request, env, { success: true, districts: result.results.map((row) => row.district_name) });
+  const districts = result.results.map((row) => row.district_name);
+  let locations: Array<{ name: string; division: string | null }> = [];
+  try {
+    const joined = await env.DB.prepare(
+      "SELECT name_en AS name, division FROM districts WHERE EXISTS (SELECT 1 FROM soil_features WHERE soil_features.district_name = districts.name_en) ORDER BY name_en",
+    ).all<{ name: string; division: string | null }>();
+    locations = joined.results;
+  } catch (cause) {
+    console.warn('soil_districts_division_join_failed', cause);
+  }
+  return json(request, env, { success: true, districts, locations });
 }
 
 export async function soilUpazilasRoute(request: Request, env: Env, district: string): Promise<Response> {

@@ -61,19 +61,62 @@ function flattenFeatures(grouped) {
   return out;
 }
 
+const FALLBACK_DIVISIONS = ['Barisal', 'Chittagong', 'Dhaka', 'Khulna', 'Mymensingh', 'Rajshahi', 'Rangpur', 'Sylhet'];
+let districtLocations = [];
+
+function renderDivisionOptions() {
+  const division = qs('#divisionSelect');
+  if (!division || division.dataset.loaded) return;
+  const fromData = [...new Set(districtLocations.map((loc) => loc.division).filter(Boolean))].sort();
+  const divisions = fromData.length ? fromData : FALLBACK_DIVISIONS;
+  clear(division);
+  division.append(el('option', { value: '', text: getLang() === 'bn' ? 'সব বিভাগ' : 'All divisions' }));
+  for (const d of divisions) division.append(el('option', { value: d, text: d }));
+  division.dataset.loaded = '1';
+  division.addEventListener('change', () => {
+    renderDistrictOptions();
+    const upazila = qs('#upazilaSelect');
+    if (upazila) {
+      clear(upazila);
+      upazila.append(el('option', { value: '', text: getLang() === 'bn' ? 'উপজেলা' : 'Upazila' }));
+    }
+    const error = qs('#filterError');
+    if (error) error.hidden = true;
+  });
+}
+
+function renderDistrictOptions() {
+  const select = qs('#districtSelect');
+  if (!select) return;
+  const division = qs('#divisionSelect')?.value || '';
+  const current = select.value;
+  clear(select);
+  select.append(el('option', { value: '', text: getLang() === 'bn' ? 'জেলা বাছাই' : 'Select district' }));
+  for (const loc of districtLocations) {
+    if (division && loc.division && loc.division !== division) continue;
+    select.append(el('option', { value: loc.name, text: loc.name }));
+  }
+  if (current && [...select.options].some((option) => option.value === current)) {
+    select.value = current;
+  }
+}
+
 async function loadDistricts() {
   const select = qs('#districtSelect');
-  const division = qs('#divisionSelect');
   if (!select) return;
   try {
     const { data } = await api.get('/api/v1/soil/districts', { timeoutMs: 9000 });
     const districts = data.districts || [];
-    clear(select);
-    select.append(el('option', { value: '', text: getLang() === 'bn' ? 'জেলা বাছাই' : 'Select district' }));
-    for (const d of districts) {
-      select.append(el('option', { value: d, text: d }));
+    districtLocations = Array.isArray(data.locations) && data.locations.length
+      ? data.locations.filter((loc) => loc && loc.name)
+      : districts.map((name) => ({ name, division: '' }));
+    renderDistrictOptions();
+    const node = select.closest('.panel') || select;
+    if (districts.length) {
+      setState(node, State.READY, { lang: getLang() });
+    } else {
+      setState(node, State.EMPTY, { lang: getLang() });
     }
-    if (!districts.length) setState(select.closest('.panel') || select, State.EMPTY, { lang: getLang() });
   } catch (err) {
     reportClientError(err, { component: 'soil-districts' });
     setState(select.closest('.panel') || select, State.ERROR, {
@@ -82,14 +125,8 @@ async function loadDistricts() {
       retry: loadDistricts,
     });
   }
-  // divisions from a static set used by BARC data
-  if (division && !division.dataset.loaded) {
-    const divisions = ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'];
-    clear(division);
-    division.append(el('option', { value: '', text: getLang() === 'bn' ? 'বিভাগ' : 'Division' }));
-    for (const d of divisions) division.append(el('option', { value: d, text: d }));
-    division.dataset.loaded = '1';
-  }
+  // divisions come from the districts table (fallback: static BARC set)
+  renderDivisionOptions();
 }
 
 async function loadUpazilas(district) {

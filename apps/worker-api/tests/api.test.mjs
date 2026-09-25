@@ -78,6 +78,15 @@ describe('Worker API', () => {
     assert.ok(Array.isArray(body.districts));
   });
 
+  it('soil districts endpoint returns districts and division locations', async () => {
+    const req = createRequest('/api/v1/soil/districts');
+    const res = await worker.fetch(req, env);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.ok(Array.isArray(body.districts));
+    assert.ok(Array.isArray(body.locations));
+  });
+
   it('weather endpoint accepts lat/lng', async () => {
     const req = createRequest('/api/v1/weather?lat=23.81&lng=90.41');
     const res = await worker.fetch(req, env);
