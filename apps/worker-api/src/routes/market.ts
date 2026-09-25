@@ -132,7 +132,7 @@ export async function cropCalendarRoute(request: Request, env: Env): Promise<Res
   }
 
   try {
-    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/crop_calendar/crop_calendar.json");
+    const data = await fetchJson("https://raw.githubusercontent.com/mdrafiullah1830/smart-farming-ai/main/datasets/crop_calendar/crop_calendar.json");
     let rows: unknown[] = Array.isArray(data) ? data : ((data as { rows?: unknown[] }).rows ?? []);
     if (crop) rows = (rows as { crop: string }[]).filter((r) => r.crop === crop);
     if (region) rows = (rows as { region: string }[]).filter((r) => r.region === region);
@@ -164,7 +164,7 @@ export async function fertilizerRoute(request: Request, env: Env): Promise<Respo
   }
 
   try {
-    const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/fertilizer/barc_fertilizer_recommendation.csv"))
+    const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart-farming-ai/main/datasets/fertilizer/barc_fertilizer_recommendation.csv"))
       .filter((r) => !crop || r.crop === crop)
       .filter((r) => !soilType || r.soil_type === soilType);
     return json(request, env, { success: true, source: "github-fallback", rows: out });
@@ -188,7 +188,7 @@ export async function groundwaterRoute(request: Request, env: Env): Promise<Resp
   }
 
   try {
-    const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart_farming_ai/main/datasets/irrigation/groundwater_depth.csv"))
+    const out = csvRows(await fetchText("https://raw.githubusercontent.com/mdrafiullah1830/smart-farming-ai/main/datasets/irrigation/groundwater_depth.csv"))
       .map((r): Record<string, string | number> => ({ ...r, depth_m: Number(r.depth_m) }))
       .filter((r) => !district || String(r.district).toLowerCase() === district.toLowerCase());
     return json(request, env, { success: true, source: "github-fallback", rows: out });
