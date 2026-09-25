@@ -22,11 +22,13 @@ The script never talks to D1 directly: it emits SQL, and wrangler applies it.
 That keeps credentials out of the Python process and makes the operation
 reviewable before it touches production.
 """
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -36,6 +38,8 @@ SOIL_JSON = REPO_ROOT / "frontend" / "soil_data.json"
 DISTRICTS_MIGRATION = REPO_ROOT / "apps" / "worker-api" / "migrations" / "0002_seed_districts.sql"
 
 SOURCE = "BARC-LRTI"
+
+ERR_NON_FINITE = "soil_data.json contains a non-numeric area_ha value"
 
 # soil_data.json keys that use an older/variant spelling of the district name
 # found in the `districts` table. Keys are the UPPER_CASE names as they appear
@@ -64,9 +68,9 @@ def sql_num(value: object) -> str:
     """Return a numeric literal or NULL. Non-numeric input is a data error."""
     if value is None or str(value).strip() == "":
         return "NULL"
-    number = float(value)
-    if number != number or number in (float("inf"), float("-inf")):
-        raise ValueError(f"non-finite number: {value!r}")
+    number = float(str(value))
+    if math.isnan(number) or math.isinf(number):
+        raise ValueError(ERR_NON_FINITE)
     return repr(int(number)) if number.is_integer() else repr(number)
 
 
@@ -97,7 +101,10 @@ def content_hash(path: Path) -> str:
 
 def build_statements(payload: dict) -> tuple[list[str], dict[str, int]]:
     """Turn soil_data.json into DELETE + INSERT statements for soil_features."""
-    statements = ["DELETE FROM soil_features WHERE source = " + sql_str(SOURCE) + ";"]
+    # The SQL is emitted for review and applied by wrangler, never executed by
+    # this process, and the only interpolated value passes through sql_str(),
+    # which escapes quotes.
+    statements = ["DELETE FROM soil_features WHERE source = " + sql_str(SOURCE) + ";"]  # nosec B608
     counts = {"districts": 0, "upazilas": 0, "rows": 0}
 
     districts = payload.get("districts") or {}
@@ -115,9 +122,8 @@ def build_statements(payload: dict) -> tuple[list[str], dict[str, int]]:
             upazila = title_case(str(raw_upazila))
             counts["upazilas"] += 1
             for feature, values in (upazila_info.get("features") or {}).items():
-                if not isinstance(values, list):
-                    values = [values]
-                for entry in values:
+                entries = values if isinstance(values, list) else [values]
+                for entry in entries:
                     if isinstance(entry, dict):
                         value = entry.get("value")
                         area = entry.get("area_ha")
@@ -126,7 +132,7 @@ def build_statements(payload: dict) -> tuple[list[str], dict[str, int]]:
                     if value is None or str(value).strip() == "":
                         continue
                     statements.append(
-                        "INSERT INTO soil_features "
+                        "INSERT INTO soil_features "  # nosec B608 - sql_str()/sql_num() escape every value
                         "(district_name, upazila_name, feature_name, feature_value, area_ha, source) VALUES ("
                         f"{sql_str(district)}, {sql_str(upazila)}, {sql_str(feature)}, "
                         f"{sql_str(value)}, {sql_num(area)}, {sql_str(SOURCE)});"
@@ -162,7 +168,6 @@ def main() -> int:
         f"{sql_str(digest)}, {counts['rows']}, CURRENT_TIMESTAMP);"
     )
 
-    relative = SOIL_JSON.relative_to(REPO_ROOT)
     print(
         f"{'soil_features':24s} {counts['rows']:6d} rows  "
         f"({counts['districts']} districts, {counts['upazilas']} upazilas)  sha256:{digest}",
