@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123d31">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Soil Intelligence — Smart Farming AI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/favicon.svg">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body class="app-body">
+
+  <header class="m-appbar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><span class="material-icons-round">sprout</span></span>
+      <span class="brand-copy">Smart Farming AI<small data-i18n="brandTag">Bangladesh</small></span>
+    </a>
+    <div class="m-appbar-actions">
+      <button class="btn icon-btn" type="button" data-open-search data-i18n-aria="search" aria-label="Search"><span class="material-icons-round">search</span></button>
+      <span class="avatar" data-user-avatar>—</span>
+      <button class="btn icon-btn" type="button" data-open-more aria-label="More"><span class="material-icons-round">menu</span></button>
+    </div>
+  </header>
+
+  <div class="m-searchbar">
+    <div class="command-search">
+      <span class="material-icons-round">search</span>
+      <input id="commandSearch" placeholder="Search fields, crops, soil data…" data-i18n-placeholder="searchPlaceholder" aria-label="Search">
+      <span class="command-kbd">⌘K</span>
+    </div>
+  </div>
+
+  <main class="app-main">
+    <div class="page-wrap">
+      <div class="page-heading">
+        <div><h1 data-i18n="soilTitle">Soil Intelligence</h1><p data-i18n="soilLead">Understand your land. Apply the right dose.</p></div>
+        <div class="soil-context">
+          <label class="context-box">🌿 <select id="fieldSelect" aria-label="Field"></select></label>
+          <label class="context-box"><span data-i18n="division">Division</span> <select id="divisionSelect" aria-label="Division"></select></label>
+          <label class="context-box"><span data-i18n="district">District</span> <select id="districtSelect" data-i18n-aria="selectDistrict" aria-label="Select district"></select></label>
+          <label class="context-box"><span data-i18n="upazila">Upazila</span> <select id="upazilaSelect" data-i18n-aria="selectUpazila" aria-label="Select upazila"></select></label>
+          <p class="form-error" id="filterError" role="alert" hidden></p>
+          <button class="btn location-btn" type="button" id="locationBtn">📍 <span data-i18n="useMyLocation">Use my location</span></button>
+          <p class="form-error location-btn" id="locationError" role="alert" hidden></p>
+          <button class="btn" type="button" id="compareBtn" aria-expanded="false" data-i18n="compareFields">Compare Fields</button>
+          <button class="btn" type="button" id="viewReportBtn" data-i18n="viewReport">View Report</button>
+        </div>
+        <button class="btn btn-primary btn-block" type="button" id="downloadReportBtn"><span class="material-icons-round">cloud_download</span> <span data-i18n="downloadReport">Download Report</span></button>
+      </div>
+
+      <section class="soil-kpis" id="soilReport" data-state="loading">
+        <article class="panel soil-card health-card">
+          <h3 data-i18n="soilHealth">Soil Health Score</h3>
+          <div class="health-ring" id="healthRing" style="--ring-value:0%"><strong id="healthScore">—</strong></div>
+          <div class="mini-list" style="width:100%;margin-top:10px">
+            <div><span data-i18n="reportSource">Source</span><b id="reportSource">—</b></div>
+            <div><span data-i18n="lastTested">Last tested</span><b id="lastTested">—</b></div>
+          </div>
+        </article>
+
+        <article class="panel soil-card" id="gaugeN">
+          <h3>N</h3>
+          <div class="half-gauge" style="--gauge-color:#e7a437;--gauge-value:0%"><strong>—</strong></div>
+          <span class="soil-status" id="gaugeNStatus">—</span>
+          <p class="muted" style="font-size:11px;text-align:center" id="gaugeNOptimal">—</p>
+        </article>
+
+        <article class="panel soil-card" id="gaugeP">
+          <h3>P</h3>
+          <div class="half-gauge" style="--gauge-color:#e8534f;--gauge-value:0%"><strong>—</strong></div>
+          <span class="soil-status" id="gaugePStatus">—</span>
+          <p class="muted" style="font-size:11px;text-align:center" id="gaugePOptimal">—</p>
+        </article>
+
+        <article class="panel soil-card" id="gaugeK">
+          <h3>K</h3>
+          <div class="half-gauge" style="--gauge-color:#39a24a;--gauge-value:0%"><strong>—</strong></div>
+          <span class="soil-status" id="gaugeKStatus">—</span>
+          <p class="muted" style="font-size:11px;text-align:center" id="gaugeKOptimal">—</p>
+        </article>
+
+        <article class="panel soil-card" id="gaugePh">
+          <h3>pH</h3>
+          <div class="half-gauge" style="--gauge-color:#45ae55;--gauge-value:0%"><strong>—</strong></div>
+          <span class="soil-status" id="gaugePhStatus">—</span>
+          <p class="muted" style="font-size:11px;text-align:center" id="gaugePhOptimal">—</p>
+        </article>
+
+        <article class="panel soil-card radar">
+          <h3 data-i18n="soilHealth">Soil Health</h3>
+          <p class="muted" id="reportTitle">—</p>
+          <p class="muted" id="locationContext">—</p>
+
+      <section class="soil-grid">
+        <article class="panel soil-map">
+          <div class="panel-title"><h2 data-i18n="fieldMap">Field Map & Sample Points</h2></div>
+          <div class="soil-map-image">
+            <span class="sample-pin" style="left:24%;top:19%">S1</span>
+            <span class="sample-pin" style="left:66%;top:22%">S2</span>
+            <span class="sample-pin" style="left:47%;top:48%">S3</span>
+            <span class="sample-pin" style="left:29%;top:68%">S4</span>
+          </div>
+        </article>
+
+        <article class="panel table-panel" id="comparePanel" hidden>
+          <div class="panel-title"><h2 data-i18n="compareFields">Field Comparison</h2></div>
+          <table><thead><tr id="compareHead"></tr></thead><tbody id="compareBody"></tbody></table>
+        </article>
+
+        <article class="panel table-panel">
+          <div class="panel-title"><h2 data-i18n="fertilizerPlan">Fertilizer Dose Plan</h2></div>
+          <div class="dose-list" id="doseList"></div>
+          <p class="muted" id="doseCaveat" style="font-size:11px"></p>
+        </article>
+
+        <article class="panel table-panel">
+          <div class="panel-title"><h2 data-i18n="recommendedCrops">Recommended Crops</h2></div>
+          <div class="crop-row" id="cropRow"><p class="muted" data-i18n="empty">No data yet</p></div>
+          <p class="muted" id="cropSource" style="font-size:11px"></p>
+        </article>
+
+        <article class="panel table-panel">
+          <div class="panel-title"><h2 data-i18n="nextSoilTest">Next Soil Test</h2></div>
+          <div id="reminderBox"></div>
+          <button class="btn btn-soft btn-block" type="button" id="setReminderBtn" style="margin-top:12px" data-i18n="setReminder">Set Reminder</button>
+        </article>
+      </section>
+
+      <div class="soil-profile" role="img" aria-label="Agricultural soil layers"></div>
+    </div>
+  </main>
+
+  <nav class="m-tabbar" aria-label="Main navigation">
+    <a class="m-tab" href="index.html" data-tab><span class="material-icons-round">home</span><span data-i18n="tabHome">Home</span></a>
+    <a class="m-tab" href="dashboard.html" data-tab><span class="material-icons-round">sprout</span><span data-i18n="tabFarm">Farm</span></a>
+    <a class="m-tab" href="market.html" data-tab><span class="material-icons-round">show_chart</span><span data-i18n="tabMarket">Market</span></a>
+    <a class="m-tab active" href="soil.html" data-tab aria-current="page"><span class="material-icons-round">soil</span><span data-i18n="tabSoil">Soil</span></a>
+    <button class="m-tab" type="button" data-open-more><span class="material-icons-round">menu</span><span data-i18n="tabMore">More</span></button>
+  </nav>
+
+  <div class="modal-overlay" id="reminderModal" hidden role="dialog" aria-modal="true" aria-labelledby="reminderModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="reminderModalTitle" data-i18n="setReminder">Set Reminder</h2>
+        <button class="btn icon-btn" type="button" id="reminderCancel" aria-label="Close">×</button>
+      </div>
+      <form id="reminderForm">
+        <label for="reminderDate" data-i18n="lastTested">Date</label>
+        <input id="reminderDate" name="date" type="date" required>
+        <p class="form-error" id="reminderError" role="alert" hidden></p>
+        <button class="btn btn-primary" type="submit" data-i18n="setReminder">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/icons.js"></script>
+  <script type="module" src="scripts/pages/soil.js"></script>
+</body>
+</html>
+
+        </article>
+      </section>

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:mobile": "vite build --config vite.config.mobile.js",
     "preview": "vite preview",
     "lint": "eslint . --ext js",
     "format": "prettier --write ."

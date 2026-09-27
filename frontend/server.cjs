@@ -11,8 +11,28 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from web directory
+// Serve static files from web directory (desktop)
 app.use(express.static(path.join(__dirname, 'web')));
+
+// Serve mobile frontend
+app.use('/mobile', express.static(path.join(__dirname, 'mobile')));
+
+// SPA fallback for mobile
+app.get('/mobile', (req, res) => {
+  res.sendFile(path.join(__dirname, 'mobile', 'index.html'));
+});
+app.get('/mobile/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'mobile', 'dashboard.html'));
+});
+app.get('/mobile/soil', (req, res) => {
+  res.sendFile(path.join(__dirname, 'mobile', 'soil.html'));
+});
+app.get('/mobile/market', (req, res) => {
+  res.sendFile(path.join(__dirname, 'mobile', 'market.html'));
+});
+app.get('/mobile/ai-search', (req, res) => {
+  res.sendFile(path.join(__dirname, 'mobile', 'ai-search.html'));
+});
 
 // ==================== API ROUTES ====================
 const https = require('https');

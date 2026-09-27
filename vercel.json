@@ -1,0 +1,58 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build --prefix frontend",
+  "devCommand": "npm run dev --prefix frontend",
+  "installCommand": "npm install --prefix frontend",
+  "framework": "vite",
+  "regions": ["sin1", "hnd1"],
+  "functions": {
+    "frontend/server.cjs": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/mobile/(.*)",
+      "destination": "/mobile/$1"
+    },
+    {
+      "source": "/mobile",
+      "destination": "/mobile/index.html"
+    },
+    {
+      "source": "/mobile/dashboard",
+      "destination": "/mobile/dashboard.html"
+    },
+    {
+      "source": "/mobile/soil",
+      "destination": "/mobile/soil.html"
+    },
+    {
+      "source": "/mobile/market",
+      "destination": "/mobile/market.html"
+    },
+    {
+      "source": "/mobile/ai-search",
+      "destination": "/mobile/ai-search.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/mobile/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}

@@ -8,9 +8,9 @@ on:
 
 jobs:
   e2e:
-    name: Playwright E2E
+    name: Playwright E2E (Desktop + Mobile)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -22,13 +22,53 @@ jobs:
       - name: Install Playwright
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium firefox webkit
 
-      - name: Run Playwright tests
+      - name: Build frontend
+        run: npm run build --prefix frontend
+        working-directory: .
+
+      - name: Start Express server
+        run: |
+          cd frontend
+          node server.cjs &
+          SERVER_PID=$!
+          sleep 5
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/ > /dev/null; then
+              echo "Server ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Server failed to start"
+          exit 1
+
+      - name: Run Desktop E2E tests
         run: |
           npx playwright test tests/e2e.spec.ts --project=chromium --reporter=github
         env:
           E2E_BASE_URL: http://localhost:3000
+
+      - name: Run Mobile smoke tests
+        run: |
+          npx playwright test tests/mobile-smoke.spec.ts --reporter=github
+        env:
+          MOBILE_BASE_URL: http://localhost:3000/mobile
+
+      - name: Run Mobile screenshot tests
+        run: |
+          npx playwright test tests/mobile-screenshots.spec.ts --reporter=github
+        env:
+          MOBILE_BASE_URL: http://localhost:3000/mobile
+
+      - name: Kill server
+        if: always()
+        run: kill $SERVER_PID || true
 
       - name: Upload Playwright report
         if: always()

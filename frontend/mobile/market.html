@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123d31">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Market Intelligence — Smart Farming AI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/favicon.svg">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body class="app-body market-page">
+
+  <header class="m-appbar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><span class="material-icons-round">sprout</span></span>
+      <span class="brand-copy">Smart Farming AI<small data-i18n="brandTag">Bangladesh</small></span>
+    </a>
+    <div class="m-appbar-actions">
+      <button class="btn icon-btn" type="button" data-open-search data-i18n-aria="search" aria-label="Search"><span class="material-icons-round">search</span></button>
+      <span class="avatar" data-user-avatar>—</span>
+      <button class="btn icon-btn" type="button" data-open-more aria-label="More"><span class="material-icons-round">menu</span></button>
+    </div>
+  </header>
+
+  <div class="m-searchbar">
+    <div class="command-search">
+      <span class="material-icons-round">search</span>
+      <input id="commandSearch" placeholder="Search commodities, markets, or districts…" data-i18n-placeholder="searchPlaceholder" aria-label="Search market">
+      <span class="command-kbd">⌘K</span>
+    </div>
+  </div>
+
+  <div class="price-ticker">
+    <b>● <span data-i18n="liveMarketPrices">Live Market Prices</span></b>
+    <span id="tickerPrices" class="ticker-prices">…</span>
+  </div>
+
+  <main class="app-main">
+    <div class="page-wrap">
+      <div class="page-heading">
+        <div><h1 data-i18n="marketTitle">Market Intelligence</h1><p data-i18n="marketLead">Live prices and smarter selling decisions</p></div>
+        <div class="toolbar">
+          <button class="btn" type="button" id="createAlertBtn"><span class="material-icons-round">notifications_none</span> <span data-i18n="createAlert">Create Alert</span></button>
+          <button class="btn btn-dark" type="button" id="exportBtn"><span class="material-icons-round">cloud_download</span> <span data-i18n="exportReport">Export Report</span></button>
+        </div>
+      </div>
+
+      <section class="commodity-strip" id="commodities" data-state="loading" aria-label="Commodities"></section>
+
+      <section class="market-grid">
+        <article class="panel chart-panel">
+          <div class="panel-title"><h2 data-i18n="priceTrend">Price Trend</h2><span class="chip" id="chartCropLabel">—</span></div>
+          <div class="price-summary" id="priceSummary" data-state="loading">
+            <div><small class="muted" data-i18n="currentPrice">Current Price</small><br><strong id="currentPrice">—</strong></div>
+            <span class="chip" id="priceChange">—</span>
+            <div><small class="muted" data-i18n="weeklyHigh">Weekly High</small><br><b id="priceHigh">—</b></div>
+            <div><small class="muted" data-i18n="weeklyLow">Weekly Low</small><br><b id="priceLow">—</b></div>
+          </div>
+          <div class="range-tabs" id="rangeTabs" role="tablist">
+            <button type="button" class="active" data-range="7" aria-selected="true">7 Days</button>
+            <button type="button" data-range="30" aria-selected="false">30 Days</button>
+            <button type="button" data-range="90" aria-selected="false">90 Days</button>
+          </div>
+          <div class="chart-wrap" id="chartWrap" data-state="loading">
+            <svg id="priceChart" viewBox="0 0 700 230" role="img" aria-label="Price history chart"></svg>
+          </div>
+          <button class="btn btn-soft btn-block" type="button" id="watchlistAdd" style="margin-top:10px" data-i18n="watchlist">Add to watchlist</button>
+        </article>
+
+        <article class="panel recommend-panel">
+          <div class="panel-title"><h2>✨ <span data-i18n="aiRecommendation">AI Recommendation</span></h2></div>
+          <div id="aiRecommend"><p class="muted" data-i18n="loading">Loading…</p></div>
+        </article>
+
+        <article class="panel nearest-panel">
+          <div class="panel-title"><h2 data-i18n="nearestMarket">Nearest Market</h2></div>
+          <b id="nearestMarketName">—</b>
+          <small class="muted" style="display:block" id="nearestMarketMeta">—</small>
+          <div class="mini-list">
+            <div><span data-i18n="district">District</span><b id="nearestMarketDistrict">—</b></div>
+          </div>
+          <button class="btn btn-block" type="button" id="directionsBtn" style="margin-top:12px" data-i18n="directions">Get Directions</button>
+        </article>
+      </section>
+
+
+      <section class="market-lower">
+        <article class="panel table-panel">
+          <div class="panel-title"><h2 data-i18n="watchlist">Watchlist</h2></div>
+          <table>
+            <thead><tr><th data-i18n="commodities">Commodity</th><th data-i18n="currentPrice">Price</th><th data-i18n="lastTested">Updated</th><th></th></tr></thead>
+            <tbody id="watchlistBody"></tbody>
+          </table>
+        </article>
+
+        <article class="panel table-panel">
+          <div class="panel-title"><h2 data-i18n="districtCompare">District Price Comparison</h2><span class="chip" id="districtCompareCrop">—</span></div>
+          <table>
+            <thead><tr><th data-i18n="district">District</th><th data-i18n="currentPrice">Price</th><th>vs. avg</th><th></th></tr></thead>
+            <tbody id="districtCompareBody"></tbody>
+          </table>
+        </article>
+
+        <article class="panel insights-panel">
+          <div class="panel-title"><h2 data-i18n="marketInsights">Market Insights</h2></div>
+          <div id="insightsList"><p class="muted" data-i18n="loading">Loading…</p></div>
+          <div class="panel-title" style="margin-top:14px"><h3 data-i18n="createAlert">Alerts</h3></div>
+          <div id="alertsList"></div>
+        </article>
+      </section>
+
+      <div class="market-panorama" role="img" aria-label="Bangladesh farm landscape"></div>
+    </div>
+  </main>
+
+  <nav class="m-tabbar" aria-label="Main navigation">
+    <a class="m-tab" href="index.html" data-tab><span class="material-icons-round">home</span><span data-i18n="tabHome">Home</span></a>
+    <a class="m-tab" href="dashboard.html" data-tab><span class="material-icons-round">sprout</span><span data-i18n="tabFarm">Farm</span></a>
+    <a class="m-tab active" href="market.html" data-tab aria-current="page"><span class="material-icons-round">show_chart</span><span data-i18n="tabMarket">Market</span></a>
+    <a class="m-tab" href="soil.html" data-tab><span class="material-icons-round">soil</span><span data-i18n="tabSoil">Soil</span></a>
+    <button class="m-tab" type="button" data-open-more><span class="material-icons-round">menu</span><span data-i18n="tabMore">More</span></button>
+  </nav>
+
+  <div class="modal-overlay" id="alertModal" hidden role="dialog" aria-modal="true" aria-labelledby="alertModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="alertModalTitle" data-i18n="createAlert">Create Alert</h2>
+        <button class="btn icon-btn" type="button" id="alertCancel" aria-label="Close">×</button>
+      </div>
+      <form id="alertForm">
+        <label for="alertCrop" data-i18n="commodities">Crop</label>
+        <input id="alertCrop" name="crop" required autocomplete="off">
+        <label for="alertPrice" data-i18n="currentPrice">Target price (৳)</label>
+        <input id="alertPrice" name="price" type="number" min="0.01" step="0.01" required>
+        <p class="form-error" id="alertError" role="alert" hidden></p>
+        <button class="btn btn-primary" type="submit" data-i18n="createAlert">Create Alert</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/icons.js"></script>
+  <script type="module" src="scripts/pages/market.js"></script>
+</body>
+</html>

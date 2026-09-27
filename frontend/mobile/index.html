@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123d31">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Smart Farming AI — Bangladesh</title>
+  <meta name="description" content="Weather, soil, market and AI guidance for farmers in Bangladesh.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/favicon.svg">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body class="landing-body">
+
+  <!-- Top app bar -->
+  <header class="m-appbar">
+    <a class="brand" href="index.html" aria-label="Smart Farming AI home">
+      <span class="brand-mark"><span class="material-icons-round">sprout</span></span>
+      <span class="brand-copy">Smart Farming AI<small data-i18n="brandTag">Bangladesh</small></span>
+    </a>
+    <div class="m-appbar-actions">
+      <button class="btn icon-btn" type="button" data-open-search data-i18n-aria="search" aria-label="Search"><span class="material-icons-round">search</span></button>
+      <a class="btn btn-primary" href="dashboard.html"><span data-i18n="openDashboard">Open Dashboard</span></a>
+    </div>
+  </header>
+
+  <!-- Persistent search field (kept in DOM so search + Ctrl/Cmd+K work everywhere) -->
+  <div class="m-searchbar">
+    <div class="command-search">
+      <span class="material-icons-round">search</span>
+      <input id="commandSearch" aria-label="Search" data-i18n-placeholder="searchPlaceholder" placeholder="Search fields, crops, prices, weather…">
+      <span class="command-kbd">⌘K</span>
+    </div>
+  </div>
+
+  <main class="app-main">
+    <div class="page-wrap">
+
+      <section class="home-hero">
+        <div class="hero-copy">
+          <div class="eyebrow" data-i18n="heroEyebrow">Healthy soil · Thriving crops · A greener Bangladesh</div>
+          <h1 data-i18n="heroTitle">Smarter decisions for every field</h1>
+          <p data-i18n="heroLead">Weather, soil, market and AI guidance for Bangladesh—designed to help every farmer act with confidence.</p>
+          <div class="hero-buttons">
+            <a class="btn btn-primary" href="dashboard.html"><span data-i18n="getStarted">Get Started</span> <span class="material-icons-round">arrow_forward</span></a>
+            <a class="btn" href="#solutions"><span class="material-icons-round">play_circle</span> <span data-i18n="explore">Explore Platform</span></a>
+          </div>
+          <div class="hero-proof" aria-label="Platform outcomes">
+            <div class="proof-item">🌱 <span><b>—</b><span class="muted" data-i18n="cropIntel">Crop intelligence</span></span></div>
+            <div class="proof-item">👥 <span><b>—</b><span class="muted" data-i18n="trustedData">Trusted data</span></span></div>
+            <div class="proof-item">📈 <span><b>—</b><span class="muted" data-i18n="liveUpdates">Live updates</span></span></div>
+          </div>
+        </div>
+
+        <div class="hero-image" role="img" aria-label="Aerial view of rural Bangladesh farmland">
+          <div class="metric-float weather" id="heroWeather">
+            <small data-i18n="weather">Weather</small>
+            <strong id="heroWeatherIcon">—</strong>
+            <strong id="heroWeatherTemp">—</strong>
+            <small id="heroWeatherDesc" class="muted">—</small>
+          </div>
+          <div class="metric-float soil" id="heroSoil">
+            <small data-i18n="soilHealth">Soil Health</small>
+            <strong id="heroSoilPh">—</strong>
+            <span class="chip" id="heroSoilStatus">—</span>
+          </div>
+          <div class="metric-float market" id="heroMarket">
+            <small data-i18n="marketPrices">Market</small>
+            <strong id="heroMarketPrice">—</strong>
+            <small id="heroMarketName" class="muted">—</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="home-bento" id="solutions">
+        <article class="panel home-card">
+          <div class="panel-title"><h2>🌾 <span data-i18n="calendar">Seasonal Calendar</span></h2></div>
+          <p class="muted" style="margin-top:-4px;font-size:12px" data-i18n="calendarDesc">Key activities for major crops</p>
+          <div class="calendar-tabs" role="tablist">
+            <button type="button" class="active" data-crop="Rice" aria-selected="true">Rice</button>
+            <button type="button" data-crop="Jute" aria-selected="false">Jute</button>
+            <button type="button" data-crop="Maize" aria-selected="false">Maize</button>
+            <button type="button" data-crop="Vegetables" aria-selected="false">Vegetables</button>
+          </div>
+          <div class="timeline" id="calendarTimeline" aria-live="polite"><span>—</span></div>
+        </article>
+
+        <article class="panel home-card alert" id="weatherAlertCard">
+          <div class="panel-title"><h2>⚠️ <span data-i18n="weatherAlert">Weather Alert</span></h2><a href="dashboard.html" data-i18n="viewAll">View all</a></div>
+          <div class="alert-copy" id="weatherAlertBody" data-state="loading"><p class="muted">…</p></div>
+        </article>
+
+        <article class="panel home-card support" id="resources">
+          <div class="panel-title"><h2>🏛 <span data-i18n="govtSupport">Government Support</span></h2><a href="dashboard.html" data-i18n="viewAll">View all</a></div>
+          <p class="muted" style="margin-top:-6px;font-size:12px" data-i18n="calendarDesc">Schemes and services available to farmers</p>
+          <div class="support-list">
+            <div class="support-row"><span class="section-icon">🌿</span><span><b data-i18n="supportRow1">Krishi Incentive Program</b><small data-i18n="supportRow1s">Subsidy for seeds, fertilizer and equipment</small></span><span>›</span></div>
+            <div class="support-row"><span class="section-icon">৳</span><span><b data-i18n="supportRow2">Low-Interest Agricultural Loan</b><small data-i18n="supportRow2s">For small and marginal farmers</small></span><span>›</span></div>
+            <div class="support-row"><span class="section-icon">🛡</span><span><b data-i18n="supportRow3">Crop Insurance Scheme</b><small data-i18n="supportRow3s">Financial support against natural disasters</small></span><span>›</span></div>
+          </div>
+        </article>
+
+        <article class="panel home-card intelligence" id="insights">
+          <div class="panel-title"><h2>🌿 <span data-i18n="cropIntel">Crop Intelligence</span></h2><a href="ai-search.html" data-i18n="viewAll">View all</a></div>
+          <div class="crop-insight">
+            <img src="assets/images/home-hero-bangladesh.webp" alt="Rice field">
+            <div>
+              <b>Rice (Aman)</b>
+              <p class="muted" data-i18n="cropRiceAdvice">Keep field drainage clear before expected rainfall.</p>
+              <span class="chip" data-i18n="goodCondition">Good condition</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel home-card intelligence">
+          <div class="panel-title"><h2>✓ <span data-i18n="trustedData">Trusted Data</span></h2><a href="https://www.bmd.gov.bd/" target="_blank" rel="noopener noreferrer">BMD ↗</a></div>
+          <p class="muted" style="margin-top:-6px;font-size:12px" data-i18n="calendarDesc">Real-time, reliable and local sources</p>
+          <div class="trusted-grid">
+            <div>☁️<br><span data-i18n="trustedBmd">BMD</span></div>
+            <div>🌱<br><span data-i18n="trustedSrdd">SRDI</span></div>
+            <div>📊<br><span data-i18n="trustedDam">DAM</span></div>
+            <div>🛰<br><span data-i18n="trustedSat">Satellite</span></div>
+          </div>
+        </article>
+      </section>
+
+      <div class="live-ticker">
+        <div class="ticker-title">◉ <span data-i18n="liveUpdates">Live Agriculture Updates</span></div>
+        <div class="ticker-items" id="tickerItems"><span class="muted">…</span></div>
+      </div>
+
+      <footer class="site-footer">
+        <p class="muted" data-i18n="footerNote">Verify information before use</p>
+        <p class="muted" data-i18n="footerRights">© Smart Farming AI · Bangladesh</p>
+      </footer>
+    </div>
+  </main>
+
+  <nav class="m-tabbar" aria-label="Main navigation">
+    <a class="m-tab active" href="index.html" data-tab aria-current="page"><span class="material-icons-round">home</span><span data-i18n="tabHome">Home</span></a>
+    <a class="m-tab" href="dashboard.html" data-tab><span class="material-icons-round">sprout</span><span data-i18n="tabFarm">Farm</span></a>
+    <a class="m-tab" href="market.html" data-tab><span class="material-icons-round">show_chart</span><span data-i18n="tabMarket">Market</span></a>
+    <a class="m-tab" href="soil.html" data-tab><span class="material-icons-round">soil</span><span data-i18n="tabSoil">Soil</span></a>
+    <button class="m-tab" type="button" data-open-more><span class="material-icons-round">menu</span><span data-i18n="tabMore">More</span></button>
+  </nav>
+
+  <script src="assets/icons.js"></script>
+  <script type="module" src="scripts/pages/home.js"></script>
+</body>
+</html>
+
