@@ -11,9 +11,9 @@
 | AI service | `apps/ai-service/` | **Production (stub)** | Deployed on Render; honest `model_unavailable` until a real ONNX model is loaded |
 | Frontend SPA | `frontend/web/` | **Production** | Deployed on Vercel; 5 HTML pages, vanilla JS |
 | Mobile | `frontend/ios/` + `frontend/lib/` | In progress | Flutter shell, not shipped |
-| Legacy monolith | `frontend/server.js` | **Dev only** | SQLite-backed feature playground; not the production backend |
+| Legacy monolith | `frontend/server.cjs` | **Dev only** | SQLite-backed feature playground; not the production backend |
 | Modular FastAPI | `backend/app/` | **DEPRECATED** | Not wired to the deployed Worker; not the source of truth for any schema |
-| Local FastAPI | `backend/main.py` | **Dev only** | Simple FastAPI over SQLite, parallel to `frontend/server.js` |
+| Local FastAPI | `backend/main.py` | **Dev only** | Simple FastAPI over SQLite, parallel to `frontend/server.cjs` |
 
 ## Runtime topology
 
@@ -37,7 +37,7 @@ Cloudflare Worker (apps/worker-api) ──► Cloudflare D1 (users, market)
 - **Cloudflare D1** (`apps/worker-api/migrations/`) — users, uploaded_files, market
   prices, district metadata. The Worker is the only writer.
 - **SQLite** (`database/smart_farming.db`) — bundled soil & market demo data
-  used by the **legacy** `frontend/server.js` for the dev-only `/api/soil/*`
+  used by the **legacy** `frontend/server.cjs` for the dev-only `/api/soil/*`
   and `/api/market/*` routes. Read-only at runtime in the Worker topology.
 - **PostgreSQL** (`database/schema.sql`) — the schema FastAPI was meant to
   own. Unused while `backend/app/` is deprecated. Keep the file as design
@@ -52,7 +52,7 @@ Cloudflare Worker (apps/worker-api) ──► Cloudflare D1 (users, market)
 | Market prices (current + history) | `apps/worker-api/src/index.ts` + D1 |
 | Disease detection (image upload) | Browser → R2 → `apps/ai-service` |
 | Crop / yield / market forecast ML | **Not deployed.** Code in `ai_models/`; service stub returns `model_unavailable` |
-| Soil lookup, 86K BARC records | `frontend/server.js` reads `database/smart_farming.db` (dev) |
+| Soil lookup, 86K BARC records | `frontend/server.cjs` reads `database/smart_farming.db` (dev) |
 | Interactive map, dashboard SPA | `frontend/web/*.html` + `bd_districts.js` |
 
 ## Deprecation of `backend/app/`

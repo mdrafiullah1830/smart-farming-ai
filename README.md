@@ -330,7 +330,7 @@ smart_farming_ai/
 │   ├── bangladesh_locations.csv     # 128 locations
 │   ├── scripts/
 │   │   └── parse_soil_data.py       # Soil data parser
-│   ├── server.js                    # Legacy Node.js server (dev only)
+│   ├── server.cjs                   # Legacy Node.js server (dev only)
 │   ├── package.json                 # Dependencies
 │   └── ios/                         # Flutter mobile app (in progress)
 │
@@ -734,7 +734,7 @@ Crop Selection → Price Data (BBS/DAM/FAO)
 |-------|----------|--------|
 | Python backend (`backend/main.py`) uses legacy SQLite — not connected to production D1 | Medium | 🟡 Dev-only; production uses Worker + D1 |
 | No automated model training/evaluation pipeline | Medium | 🟡 Training scripts exist in `ai_models/` but no CI/CD |
-| Legacy `frontend/server.js` (Node.js) still used for dev — not deployed | Low | 🟢 Worker is production API; Node.js is dev convenience |
+| Legacy `frontend/server.cjs` (Node.js) still used for dev — not deployed | Low | 🟢 Worker is production API; Node.js is dev convenience |
 
 ### Resolved (v1.1)
 | Issue | Resolution |

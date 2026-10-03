@@ -10,7 +10,19 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  ignorePatterns: ['dist/**', 'node_modules/**', 'public/**', 'server.js', 'server.cjs', 'web/bd_districts.js'],
+  // `bd_districts.js` is a generated shared data bundle in both the desktop and
+// mobile trees. Its top-level helper functions are consumed by page scripts
+// loaded as plain <script> tags, so ESLint cannot see the references and would
+// otherwise report every helper as unused.
+ignorePatterns: [
+    'dist/**',
+    'node_modules/**',
+    'public/**',
+    'server.js',
+    'server.cjs',
+    'web/bd_districts.js',
+    'mobile/bd_districts.js',
+  ],
   rules: {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     'no-console': 'off',

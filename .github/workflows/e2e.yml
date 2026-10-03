@@ -19,9 +19,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install Playwright
+      - name: Install Playwright and frontend dependencies
         run: |
           npm ci
+          # `vite` lives in frontend/package.json, not the root lockfile, so
+          # `npm run build --prefix frontend` fails with "vite: not found"
+          # unless the frontend workspace is installed explicitly.
+          npm ci --prefix frontend
           npx playwright install --with-deps chromium firefox webkit
 
       - name: Build frontend

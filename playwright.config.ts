@@ -33,10 +33,15 @@ export default defineConfig({
       use: { ...devices['iPhone 12'] },
     },
   ],
+  // CI starts `frontend/server.cjs` itself (it serves both `web/` and the
+  // `/mobile` SPA routes, which a plain static server cannot), so Playwright
+  // must not try to claim port 3000 a second time. `reuseExistingServer` is
+  // true unconditionally; when nothing is listening Playwright still boots the
+  // server below, so local `npx playwright test` keeps working unchanged.
   webServer: {
-    command: 'npx serve frontend/web -p 3000',
+    command: 'node frontend/server.cjs',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120000,
   },
 });

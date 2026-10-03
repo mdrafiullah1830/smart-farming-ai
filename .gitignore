@@ -10,10 +10,18 @@
 .DS_Store
 
 # Playwright
+# Unanchored: Playwright writes into whichever package ran it, so the
+# root-only "/test-results/" form left frontend/test-results/ untracked noise.
 /test-results/
 /playwright-report/
 /blob-report/
+/frontend/test-results/
+/frontend/playwright-report/
 /playwright/.cache/
+**/test-results/
+**/playwright-report/
+**/blob-report/
+**/playwright/.cache/
 
 # Secrets — never commit
 .env
@@ -35,7 +43,10 @@
 **/build/
 **/.flutter-plugins-dependencies
 **/.flutter-plugins
+# Everything the Flutter tool regenerates on `flutter build`/`flutter run`.
 **/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
 **/ios/Pods/
 **/android/.gradle/
 **/android/local.properties
