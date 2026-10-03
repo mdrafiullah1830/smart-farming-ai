@@ -9,18 +9,29 @@ import { createToken } from '../src/auth.ts';
 // routes only sign and verify with it, so the value has no security meaning.
 const TEST_SECRET = 'unit-test-signing-key';
 
-function dbReturning(row, allRows = []) {
+// district_id carries a foreign key to `districts`, so the create route
+// resolves it before inserting. Tests that create a listing need the lookup to
+// succeed, so the default mock resolves it; tests that assert a genuine
+// "not found" pass an explicit row and keep it.
+const DISTRICT_ROW = { id: '1' };
+
+function dbReturning(row, allRows = [], districtRow = DISTRICT_ROW) {
   const stmt = {
     bind: () => ({
-      first: async () => row,
+      first: async () => row ?? districtRow,
       all: async () => ({ results: allRows }),
       run: async () => ({ success: true, meta: { changes: 1 } }),
     }),
-    first: async () => row,
+    first: async () => row ?? districtRow,
     all: async () => ({ results: allRows }),
     run: async () => ({ success: true, meta: { changes: 1 } }),
   };
   return { prepare: () => stmt, batch: async () => [{ success: true }] };
+}
+
+// For tests that must not resolve any row (404 paths).
+function dbEmpty() {
+  return dbReturning(null, [], null);
 }
 
 function makeEnv(overrides = {}) {
@@ -29,7 +40,9 @@ function makeEnv(overrides = {}) {
     ALLOWED_ORIGINS: 'http://localhost:3000',
     AI_SERVICE_URL: 'https://ai.example.com',
     AI_SERVICE_TOKEN: 'test-ai-token',
-    DB: dbReturning(null),
+    // Default is a DB that resolves nothing: most tests assert a 404/401 path.
+// Tests that create a listing pass a mock whose district lookup succeeds.
+DB: dbEmpty(),
     UPLOADS: { put: async () => {} },
     RATE_LIMIT_KV: { get: async () => null, put: async () => {}, delete: async () => {} },
     ...overrides,
@@ -62,7 +75,7 @@ const validListing = {
   price_per_kg: 40,
   contact: '01700000000',
   upazila: 'Dhanmondi',
-  district_id: 'dhaka',
+  district_id: '1',
 };
 
 const OWNED = dbReturning({ id: 'l1' });
@@ -121,9 +134,11 @@ describe('Marketplace listings', () => {
   });
 
   it('creates a listing with 201 and echoes the stored values', async () => {
+    // The default env resolves nothing, so this one supplies the district row
+    // the create route looks up before inserting.
     const res = await worker.fetch(await request('/api/v1/marketplace/listings', {
       method: 'POST', token: sellerToken(), body: validListing,
-    }), makeEnv());
+    }), makeEnv({ DB: dbReturning(null, [], DISTRICT_ROW) }));
     assert.equal(res.status, 201);
     const { listing } = await res.json();
     assert.equal(listing.status, 'open');
@@ -221,6 +236,26 @@ describe('Marketplace listings', () => {
       method: 'PATCH', token: otherToken(), body: { price_per_kg: 45 },
     }), makeEnv());
     assert.equal(denied.status, 404);
+  });
+
+  it('rejects an unknown district_id with a 400, not an opaque 500', async () => {
+    // district_id is a foreign key. An unknown id must be reported as a client
+    // error; letting it reach the INSERT would surface as a 500.
+    const noDistricts = {
+      prepare: () => ({
+        bind: () => ({ first: async () => null, all: async () => ({ results: [] }), run: async () => ({ success: true, meta: { changes: 1 } }) }),
+        first: async () => null,
+        all: async () => ({ results: [] }),
+        run: async () => ({ success: true, meta: { changes: 1 } }),
+      }),
+      batch: async () => [{ success: true }],
+    };
+    const res = await worker.fetch(await request('/api/v1/marketplace/listings', {
+      method: 'POST', token: sellerToken(),
+      body: { ...validListing, district_id: 'not-a-real-district' },
+    }), makeEnv({ DB: noDistricts }));
+    assert.equal(res.status, 400);
+    assert.match((await res.json()).error, /Unknown district_id/);
   });
 
   it('rejects an invalid status value', async () => {

@@ -82,6 +82,25 @@ export async function createListingRoute(request: Request, env: Env): Promise<Re
     harvestDate = data.harvest_date.trim();
   }
 
+  // district_id carries a foreign key to `districts`. Letting an unknown id
+  // reach the INSERT turns a client mistake into an opaque 500, so it is
+  // resolved up front and reported as a 400 naming the ids that do exist.
+  const districtId = cleanText(data.district_id, 64);
+  let resolvedDistrictId: string | null = null;
+  if (districtId) {
+    try {
+      const district = await env.DB.prepare('SELECT id FROM districts WHERE id = ?')
+        .bind(districtId).first<{ id: string }>();
+      resolvedDistrictId = district?.id ?? null;
+    } catch (cause) {
+      console.error('marketplace_district_lookup_failed', cause);
+      return error(request, env, 500, 'Could not verify district');
+    }
+    if (!resolvedDistrictId) {
+      return error(request, env, 400, `Unknown district_id. Use an id from /api/v1/locations/zillas`);
+    }
+  }
+
   const id = crypto.randomUUID();
   await env.DB.prepare(
     `INSERT INTO produce_listings
@@ -94,7 +113,7 @@ export async function createListingRoute(request: Request, env: Env): Promise<Re
     cleanText(data.crop_id, 64) || null,
     cropNameEn,
     cleanText(data.crop_name_bn, 100),
-    cleanText(data.district_id, 64) || null,
+    resolvedDistrictId,
     cleanText(data.upazila, 100),
     cleanText(data.area, 160),
     quantity, price,
