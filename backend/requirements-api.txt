@@ -12,7 +12,10 @@ pydantic>=2.11.7,<3
 python-multipart==0.0.31
 python-dotenv==1.2.2
 bcrypt==4.1.2
-PyJWT==2.13.0
+# 2.13.0 carries PYSEC-2026-4140/4141/4142/4143/4144/4145/4147/4148/4149/
+# 4150/4151/4152 across the JWS/JWT code paths this service uses to issue and
+# verify auth tokens. All are resolved by 2.15.0.
+PyJWT==2.15.0
 sentry-sdk[fastapi]==1.45.1
 # Required by fastapi.testclient.TestClient used in tests/backend/.
 httpx==0.28.1

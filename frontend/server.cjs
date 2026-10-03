@@ -1218,7 +1218,24 @@ app.get('/api/notifications', (req, res) => {
 });
 
 // ==================== SOIL ANALYSIS API ====================
-const SOIL_DATA = JSON.parse(require('fs').readFileSync(path.join(__dirname, 'soil_data.json'), 'utf8'));
+// `soil_data.json` is gitignored (it is a 1.9MB regenerable artifact), so it is
+// absent on a clean CI checkout and on Vercel. Loading it at module scope with a
+// bare readFileSync aborted the whole process with ENOENT and took the server
+// down before any route could answer. Fall back to an empty shape instead: the
+// static pages still serve, and the /api/soil/* routes report honestly that the
+// dataset is missing rather than inventing soil readings.
+function loadSoilData() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'soil_data.json'), 'utf8'));
+  } catch (err) {
+    console.warn(
+      '[server] soil_data.json unavailable (%s); /api/soil/* will report no data',
+      err.code || err.message
+    );
+    return { districts: {} };
+  }
+}
+const SOIL_DATA = loadSoilData();
 
 // Get all districts list
 app.get('/api/soil/districts', (req, res) => {
