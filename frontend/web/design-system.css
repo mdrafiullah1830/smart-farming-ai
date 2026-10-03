@@ -138,3 +138,25 @@
   table{display:block;width:100%;overflow-x:auto}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Marketplace (direct farmer-to-buyer) */
+.marketplace{margin-top:26px}
+.marketplace .page-heading h2{font-size:20px;margin:0 0 4px}
+.marketplace .page-heading p{margin:0;color:var(--muted);font-size:13px}
+.marketplace-tabs{display:flex;gap:8px;margin:16px 0 12px;flex-wrap:wrap}
+.marketplace-tabs .btn[aria-selected="true"]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.marketplace-toolbar{margin-bottom:12px}
+.marketplace-toolbar input{width:100%;max-width:340px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel,#fff)}
+.marketplace-list{display:grid;gap:12px}
+.marketplace-card{padding:16px;display:grid;gap:12px}
+.marketplace-card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.marketplace-card-head h3{margin:0;font-size:16px}
+.marketplace-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:0}
+.marketplace-facts div{display:grid;gap:2px}
+.marketplace-facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.marketplace-facts dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.marketplace-note{margin:0;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.marketplace-contact{margin:0;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.marketplace-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.marketplace-qty{width:110px;padding:9px 12px;border:1px solid var(--line);border-radius:12px}
+@media(max-width:640px){.marketplace-qty{width:100%}.marketplace-actions .btn{flex:1 1 auto}}

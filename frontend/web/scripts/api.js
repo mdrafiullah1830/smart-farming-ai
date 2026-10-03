@@ -149,7 +149,45 @@ export const api = {
       headers: { 'Content-Type': 'application/json', ...(options?.headers || {}) },
       body: JSON.stringify(body ?? {}),
     }),
+  patch: (path, body, options) =>
+    apiFetch(path, {
+      ...options,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...(options?.headers || {}) },
+      body: JSON.stringify(body ?? {}),
+    }),
   del: (path, options) => apiFetch(path, { ...options, method: 'DELETE' }),
+};
+
+/**
+ * Direct farmer-to-buyer marketplace.
+ *
+ * Kept in one place so the market page never hand-builds a marketplace URL.
+ * `listings` is public and carries no seller contact; `myListings` and the order
+ * routes need the session token that apiFetch already attaches.
+ */
+export const marketplace = {
+  listings: (params = {}) => {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null && value !== '') query.set(key, String(value));
+    }
+    const suffix = query.toString() ? `?${query}` : '';
+    return api.get(`/api/v1/marketplace/listings${suffix}`);
+  },
+  listing: (id) => api.get(`/api/v1/marketplace/listings/${encodeURIComponent(id)}`),
+  createListing: (body) => api.post('/api/v1/marketplace/listings', body),
+  updateListing: (id, body) => api.patch(`/api/v1/marketplace/listings/${encodeURIComponent(id)}`, body),
+  deleteListing: (id) => api.del(`/api/v1/marketplace/listings/${encodeURIComponent(id)}`),
+  myListings: () => api.get('/api/v1/marketplace/listings?mine=true'),
+
+  orders: (role) => api.get(`/api/v1/marketplace/orders${role === 'seller' ? '?role=seller' : ''}`),
+  createOrder: (body) => api.post('/api/v1/marketplace/orders', body),
+  updateOrder: (id, action) => api.patch(`/api/v1/marketplace/orders/${encodeURIComponent(id)}`, { action }),
+
+  messages: (orderId) => api.get(`/api/v1/marketplace/orders/${encodeURIComponent(orderId)}/messages`),
+  sendMessage: (orderId, body) =>
+    api.post(`/api/v1/marketplace/orders/${encodeURIComponent(orderId)}/messages`, { body }),
 };
 
 export function getCredentials() {

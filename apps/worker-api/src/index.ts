@@ -26,6 +26,12 @@ import {
 import { aiHealthRoute, notificationsRoute } from './routes/integrations.ts';
 import { clientErrorsRoute } from './routes/telemetry.ts';
 import { tasksRoute } from './routes/tasks.ts';
+import {
+  createListingRoute, listListingsRoute, getListingRoute,
+  updateListingRoute, deleteListingRoute,
+  createOrderRoute, listOrdersRoute, updateOrderRoute,
+  createOrderMessageRoute, listOrderMessagesRoute
+} from './routes/marketplace.ts';
 
 async function body<T>(request: Request): Promise<T | null> {
   try { return await request.json<T>(); } catch { return null; }
@@ -118,6 +124,32 @@ async function route(request: Request, env: Env): Promise<Response> {
 
   // Disaster alerts
   if (path === '/api/v1/disaster/alerts' && method === 'GET') return disasterAlertsRoute(request, env);
+
+  // Direct farmer-to-buyer marketplace
+  if (path === '/api/v1/marketplace/listings' && method === 'GET') return listListingsRoute(request, env);
+  if (path === '/api/v1/marketplace/listings' && method === 'POST') return createListingRoute(request, env);
+  if (path.startsWith('/api/v1/marketplace/listings/') && method === 'GET') {
+    return getListingRoute(request, env, decodeURIComponent(path.slice('/api/v1/marketplace/listings/'.length)));
+  }
+  if (path.startsWith('/api/v1/marketplace/listings/') && method === 'PATCH') {
+    return updateListingRoute(request, env, decodeURIComponent(path.slice('/api/v1/marketplace/listings/'.length)));
+  }
+  if (path.startsWith('/api/v1/marketplace/listings/') && method === 'DELETE') {
+    return deleteListingRoute(request, env, decodeURIComponent(path.slice('/api/v1/marketplace/listings/'.length)));
+  }
+  if (path === '/api/v1/marketplace/orders' && method === 'GET') return listOrdersRoute(request, env);
+  if (path === '/api/v1/marketplace/orders' && method === 'POST') return createOrderRoute(request, env);
+  if (path.startsWith('/api/v1/marketplace/orders/') && path.endsWith('/messages') && method === 'POST') {
+    const orderId = decodeURIComponent(path.slice('/api/v1/marketplace/orders/'.length, -'/messages'.length));
+    return createOrderMessageRoute(request, env, orderId);
+  }
+  if (path.startsWith('/api/v1/marketplace/orders/') && path.endsWith('/messages') && method === 'GET') {
+    const orderId = decodeURIComponent(path.slice('/api/v1/marketplace/orders/'.length, -'/messages'.length));
+    return listOrderMessagesRoute(request, env, orderId);
+  }
+  if (path.startsWith('/api/v1/marketplace/orders/') && method === 'PATCH') {
+    return updateOrderRoute(request, env, decodeURIComponent(path.slice('/api/v1/marketplace/orders/'.length)));
+  }
 
   // Location routes
   if (path === '/api/v1/districts' && method === 'GET') return districtsRoute(request, env);

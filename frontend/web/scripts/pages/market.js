@@ -8,6 +8,7 @@ import { storageGet, storageSet } from '../storage.js';
 import { formatCurrencyBdt, formatPercent, round } from '../format.js';
 import { reportClientError } from '../telemetry.js';
 import { bindShell, requireAuth } from '../shell.js';
+import { initMarketplace } from './marketplace.js';
 
 const WATCHLIST_KEY = 'market.watchlist';
 const ALERTS_KEY = 'market.alerts';
@@ -580,6 +581,9 @@ export function initMarket() {
     .catch(() => {})
     .finally(() => renderAIRecommend());
   void loadDistricts();
+
+  // Direct farmer-to-buyer marketplace panel.
+  initMarketplace();
 
   document.addEventListener('sf:langchange', () => {
     applyI18n();

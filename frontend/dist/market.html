@@ -4,10 +4,10 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Market Intelligence — Smart Farming AI</title>
   <link rel="icon" href="/assets/favicon-BjCjT3Mi.svg" type="image/svg+xml">
-  <script type="module" crossorigin src="/assets/market-fzdDR77K.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/shell-BgTTe6_a.js">
+  <script type="module" crossorigin src="/assets/market-BF-TxpR0.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/shell-39B_okP0.js">
   <link rel="modulepreload" crossorigin href="/assets/format-DTb7NFZd.js">
-  <link rel="stylesheet" crossorigin href="/assets/shell-BMfCajH_.css">
+  <link rel="stylesheet" crossorigin href="/assets/shell-Mxv67Wyz.css">
 </head>
 <body class="app-body market-page">
   <aside class="sidebar">
@@ -104,6 +104,35 @@
       </article>
     </section>
     <div class="market-panorama" role="img" aria-label="Bangladesh farm landscape"></div>
+
+    <!-- Marketplace: direct farmer-to-buyer selling. Rendered by scripts/pages/marketplace.js -->
+    <section class="marketplace" aria-labelledby="marketplaceTitle">
+      <div class="page-heading">
+        <div>
+          <h2 id="marketplaceTitle" data-i18n="marketplaceTitle">Sell Direct</h2>
+          <p data-i18n="marketplaceLead">No middleman — talk to buyers yourself</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn" type="button" id="marketplacePostBtn">
+            <span class="material-icons-round">add_circle</span>
+            <span data-i18n="postListing">New listing</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="marketplace-tabs" role="tablist" aria-label="Marketplace sections">
+        <button class="btn" type="button" role="tab" data-mp-tab="browse" aria-selected="true" data-i18n="marketplaceBrowse">For buyers</button>
+        <button class="btn" type="button" role="tab" data-mp-tab="mine" aria-selected="false" data-i18n="myListings">My listings</button>
+        <button class="btn" type="button" role="tab" data-mp-tab="orders" aria-selected="false" data-i18n="myOrders">My orders</button>
+      </div>
+
+      <div class="marketplace-toolbar">
+        <label class="sr-only" for="marketplaceSearch" data-i18n="search">Search</label>
+        <input id="marketplaceSearch" type="search" placeholder="ধান, গম, মরিচ…" data-i18n-placeholder="marketplaceSearch" autocomplete="off">
+      </div>
+
+      <div class="marketplace-list" id="marketplaceList" data-state="loading" aria-live="polite"></div>
+    </section>
   </div></main>
 
   <div class="modal-overlay" id="alertModal" hidden role="dialog" aria-modal="true" aria-labelledby="alertModalTitle">
