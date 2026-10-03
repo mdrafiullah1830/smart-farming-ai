@@ -3,10 +3,11 @@ import { describe, it } from 'node:test';
 import worker from '../src/index.ts';
 import { createToken } from '../src/auth.ts';
 
-// Matches the value api.test.mjs uses. Gitleaks treats a bare
-// `const NAME = '<high entropy string>'` as a generic API key, so keep this
-// assigned to a JWT_SECRET-shaped field instead of a standalone constant.
-const TEST_SECRET = { JWT_SECRET: 'test-secret-key-min-32-chars-long' }.JWT_SECRET;
+// Test-only HMAC secret. Deliberately low entropy and obviously fake: gitleaks
+// flags high-entropy strings assigned to a bare constant as generic API keys,
+// and a realistic-looking key here would keep redrawing that finding. The
+// routes only sign and verify with it, so the value has no security meaning.
+const TEST_SECRET = 'unit-test-signing-key';
 
 function dbReturning(row, allRows = []) {
   const stmt = {
