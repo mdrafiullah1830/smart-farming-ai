@@ -1,0 +1,5 @@
+# Fingerprint: marketplace.test.mjs:generic-api-key:6
+# The value is a hard-coded fixture shared with api.test.mjs, not a credential.
+# Gitleaks flags it only because the file binds it to a bare constant; binding
+# it to a JWT_SECRET-shaped field keeps the scan meaningful for real secrets.
+apps/worker-api/tests/marketplace.test.mjs:generic-api-key:6

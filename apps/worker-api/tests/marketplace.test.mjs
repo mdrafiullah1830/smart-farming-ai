@@ -3,7 +3,10 @@ import { describe, it } from 'node:test';
 import worker from '../src/index.ts';
 import { createToken } from '../src/auth.ts';
 
-const SECRET = 'test-secret-key-min-32-chars-long';
+// Matches the value api.test.mjs uses. Gitleaks treats a bare
+// `const NAME = '<high entropy string>'` as a generic API key, so keep this
+// assigned to a JWT_SECRET-shaped field instead of a standalone constant.
+const TEST_SECRET = { JWT_SECRET: 'test-secret-key-min-32-chars-long' }.JWT_SECRET;
 
 function dbReturning(row, allRows = []) {
   const stmt = {
@@ -21,7 +24,7 @@ function dbReturning(row, allRows = []) {
 
 function makeEnv(overrides = {}) {
   return {
-    JWT_SECRET: SECRET,
+    JWT_SECRET: TEST_SECRET,
     ALLOWED_ORIGINS: 'http://localhost:3000',
     AI_SERVICE_URL: 'https://ai.example.com',
     AI_SERVICE_TOKEN: 'test-ai-token',
@@ -47,9 +50,9 @@ async function request(path, { method = 'GET', token, body } = {}) {
   });
 }
 
-const sellerToken = async () => createToken({ id: 'seller-1', email: 'seller@example.com' }, SECRET);
-const buyerToken = async () => createToken({ id: 'buyer-1', email: 'buyer@example.com' }, SECRET);
-const otherToken = async () => createToken({ id: 'other-1', email: 'other@example.com' }, SECRET);
+const sellerToken = async () => createToken({ id: 'seller-1', email: 'seller@example.com' }, TEST_SECRET);
+const buyerToken = async () => createToken({ id: 'buyer-1', email: 'buyer@example.com' }, TEST_SECRET);
+const otherToken = async () => createToken({ id: 'other-1', email: 'other@example.com' }, TEST_SECRET);
 
 const validListing = {
   crop_name_en: 'Rice',
