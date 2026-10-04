@@ -301,6 +301,102 @@ Create government advisory.
 
 ---
 
+## Worker API — Flood & Climate Resilience
+
+Risk is computed per request from the stored exposure plus the live Open-Meteo
+forecast, and is never persisted. A stored risk number outlives the forecast it
+came from. Every assessment returns a level, the reasons behind it, and a
+decision window, because a bare score is not actionable.
+
+### GET /api/v1/flood/zones
+Public. Known flood basins, deepest first. `?district_id=` filters.
+
+```json
+{
+  "success": true,
+  "zones": [
+    {
+      "id": "fz-sun-takabil",
+      "district_id": "45",
+      "name_en": "Takabil haor",
+      "name_bn": "তাকাবিল হাওর",
+      "flood_depth_m": 2.8,
+      "flood_duration_days": 25,
+      "flood_seasons": "boro,aman",
+      "district_name_bn": "সুনামগঞ্জ"
+    }
+  ]
+}
+```
+
+### GET /api/v1/flood/districts/{districtId}
+Public. District headline risk, derived from its worst zone in the current
+season. An unknown id answers **400** naming `/api/v1/locations/zillas`.
+
+### GET /api/v1/flood/assessment
+**Requires auth.** The signed-in farmer's exposures, worst first.
+
+```json
+{
+  "success": true,
+  "season": "aman",
+  "highestLevel": "severe",
+  "totalAtRiskTaka": 180000,
+  "forecastAvailable": true,
+  "exposures": [
+    {
+      "exposureId": "e1",
+      "level": "severe",
+      "score": 0.8,
+      "reasons_bn": ["এই এলাকায় পানির গভীরতা সাধারণত 2.8 মিটার বেশি"],
+      "reasons_en": ["Typical flood depth here is 2.8 m"],
+      "actionDays": 2,
+      "actionWindowBn": "২ দিনের মধ্যে ফসল তোলার সিদ্ধান্ত নিন",
+      "actionWindowEn": "Decide on harvest within 2 days",
+      "atRiskTaka": 180000
+    }
+  ]
+}
+```
+
+`forecastAvailable: false` means the upstream forecast failed. The static half
+of the assessment still stands; the UI says so rather than showing a clean bill
+of health.
+
+`atRiskTaka` is a fraction of the standing crop's value, not the whole year's:
+full at `severe`, half at `high`, a fifth at `moderate`, zero at `low`. Whole
+taka only — D1 has no decimal type.
+
+### POST /api/v1/flood/exposures
+**Requires auth.** `zone_id` is resolved before insert, so an unknown one is a
+**400** naming `/api/v1/flood/zones` rather than a foreign-key 500.
+
+```json
+{
+  "zone_id": "fz-sun-takabil",
+  "crop_name_en": "Boro rice",
+  "crop_name_bn": "বোরো ধান",
+  "area_acres": 3.5,
+  "seasons": "boro,aman",
+  "crop_value_taka": 180000,
+  "drainage_class": 1
+}
+```
+
+### DELETE /api/v1/flood/exposures/{id}
+**Requires auth.** Scoped to the caller, so a stranger's id answers **404**.
+
+### POST /api/v1/flood/actions
+**Requires auth.** Records what the farmer actually did. Append-only; the risk
+level is snapshotted onto the row so hit-rate analysis stays honest.
+`action` ∈ `none`, `early`, `relocated`, `drained`, `lost`.
+
+### GET /api/v1/flood/actions
+**Requires auth.** History plus the loss ledger
+(`{ claimCount, totalClaimedTaka }`) for an insurance claim.
+
+---
+
 ## Error Responses
 
 ```json

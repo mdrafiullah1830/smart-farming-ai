@@ -4,10 +4,10 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Farm Dashboard — Smart Farming AI</title>
   <link rel="icon" href="/assets/favicon-BjCjT3Mi.svg" type="image/svg+xml">
-  <script type="module" crossorigin src="/assets/dashboard-DR46AYyr.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/shell-DJfMCee2.js">
+  <script type="module" crossorigin src="/assets/dashboard-DQgWS4Oc.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/shell-JAo2-9fA.js">
   <link rel="modulepreload" crossorigin href="/assets/format-C0CBNkl6.js">
-  <link rel="stylesheet" crossorigin href="/assets/shell-v3rc68l1.css">
+  <link rel="stylesheet" crossorigin href="/assets/shell-DoZUWO0P.css">
 </head>
 <body class="app-body">
   <aside class="sidebar">
@@ -55,6 +55,20 @@
       <div><strong data-i18n="weatherAlertTitle">Heavy rain expected tomorrow</strong><small data-i18n="weatherAlertBody">Up to 60–90 mm in Mymensingh. Complete field activities today and ensure proper drainage.</small></div>
       <a class="btn" href="ai-search.html"><span data-i18n="viewDetails">View details</span> <span class="material-icons-round">arrow_forward</span></a>
     </section>
+
+    <!--
+      Flood resilience. Sits directly under the weather alert because that is
+      where a farmer looks first when rain is forecast, and a flood warning that
+      is one scroll further down is a warning that arrives too late.
+    -->
+    <article class="panel" id="floodPanel" data-state="loading" aria-live="polite">
+      <div class="panel-title">
+        <h2>🌊 <span data-i18n="floodTitle">Flood risk</span></h2>
+        <span class="muted" id="floodSeason"></span>
+      </div>
+      <div id="floodSummary"><p class="muted" data-i18n="loading">Loading…</p></div>
+      <div id="floodExposureList"></div>
+    </article>
 
     <section class="summary-grid">
       <article class="panel summary-card health-card" id="healthCard">

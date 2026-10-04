@@ -32,6 +32,10 @@ import {
   createOrderRoute, listOrdersRoute, updateOrderRoute,
   createOrderMessageRoute, listOrderMessagesRoute
 } from './routes/marketplace.ts';
+import {
+  floodAssessmentRoute, floodExposureRoute, floodActionRoute,
+  floodZonesRoute, floodDistrictRoute
+} from './routes/flood.ts';
 
 async function body<T>(request: Request): Promise<T | null> {
   try { return await request.json<T>(); } catch { return null; }
@@ -149,6 +153,22 @@ async function route(request: Request, env: Env): Promise<Response> {
   }
   if (path.startsWith('/api/v1/marketplace/orders/') && method === 'PATCH') {
     return updateOrderRoute(request, env, decodeURIComponent(path.slice('/api/v1/marketplace/orders/'.length)));
+  }
+
+  // Flood & Climate Resilience
+  // `/flood/districts/:id` is checked before `/flood/exposures/:id` style
+  // patterns would be, because the two prefixes cannot collide.
+  if (path === '/api/v1/flood/assessment' && method === 'GET') return floodAssessmentRoute(request, env);
+  if (path === '/api/v1/flood/zones' && method === 'GET') return floodZonesRoute(request, env);
+  if (path === '/api/v1/flood/exposures' && method === 'GET') return floodExposureRoute(request, env);
+  if (path === '/api/v1/flood/exposures' && method === 'POST') return floodExposureRoute(request, env);
+  if (path.startsWith('/api/v1/flood/exposures/') && method === 'DELETE') {
+    return floodExposureRoute(request, env, decodeURIComponent(path.slice('/api/v1/flood/exposures/'.length)));
+  }
+  if (path === '/api/v1/flood/actions' && method === 'GET') return floodActionRoute(request, env);
+  if (path === '/api/v1/flood/actions' && method === 'POST') return floodActionRoute(request, env);
+  if (path.startsWith('/api/v1/flood/districts/') && method === 'GET') {
+    return floodDistrictRoute(request, env, decodeURIComponent(path.slice('/api/v1/flood/districts/'.length)));
   }
 
   // Location routes

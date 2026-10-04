@@ -8,6 +8,7 @@ import { storageGet, storageSet } from '../storage.js';
 import { formatTemp, formatPercent, formatCurrencyBdt, formatDateForLang } from '../format.js';
 import { reportClientError } from '../telemetry.js';
 import { bindShell, requireAuth, isAuthenticated, openAuthModal, setUserChip } from '../shell.js';
+import { loadFloodPanel } from './flood.js';
 import { withOptimistic } from '../optimistic.js';
 
 const TASKS_KEY = 'dashboard.tasks';
@@ -456,6 +457,10 @@ export function initDashboard() {
   void loadSensors();
   void loadNotifications(false);
   void syncTasksFromServer();
+  // Flood risk sits high on the dashboard, so it loads with the rest rather
+  // than on demand; it is one request and it is the panel a farmer checks first
+  // when rain is forecast.
+  void loadFloodPanel();
 
   document.addEventListener('sf:langchange', () => {
     applyI18n();
@@ -463,11 +468,17 @@ export function initDashboard() {
     void loadWeather();
     void loadIrrigation();
     void loadSensors();
+    // The API sends both languages, so the panel has to be re-rendered rather
+    // than merely re-translated.
+    void loadFloodPanel();
   });
   document.addEventListener('sf:auth', () => {
     void loadFields();
     void loadIrrigation();
     void loadSensors();
+    // Signing in is what reveals the farmer's own exposures, so the panel has
+    // to be reloaded on the auth event rather than left on its signed-out state.
+    void loadFloodPanel();
     void loadNotifications(false);
     void syncTasksFromServer();
     setUserChip();

@@ -190,6 +190,25 @@ export const marketplace = {
     api.post(`/api/v1/marketplace/orders/${encodeURIComponent(orderId)}/messages`, { body }),
 };
 
+/**
+ * Flood & Climate Resilience.
+ *
+ * Kept in one place so the dashboard never hand-builds a flood URL. The zone
+ * list and the district view are public; the assessment and everything under
+ * exposures/actions belong to the signed-in farmer.
+ */
+export const flood = {
+  zones: (districtId) =>
+    api.get(`/api/v1/flood/zones${districtId ? `?district_id=${encodeURIComponent(districtId)}` : ''}`),
+  district: (districtId) => api.get(`/api/v1/flood/districts/${encodeURIComponent(districtId)}`),
+  assessment: () => api.get('/api/v1/flood/assessment'),
+  exposures: () => api.get('/api/v1/flood/exposures'),
+  createExposure: (body) => api.post('/api/v1/flood/exposures', { body }),
+  deleteExposure: (id) => api.del(`/api/v1/flood/exposures/${encodeURIComponent(id)}`),
+  actions: () => api.get('/api/v1/flood/actions'),
+  recordAction: (body) => api.post('/api/v1/flood/actions', { body }),
+};
+
 export function getCredentials() {
   try {
     const raw = typeof window !== 'undefined' ? window.localStorage?.getItem('sfAuth') : null;
