@@ -286,7 +286,7 @@ function renderComparison(activeFlat) {
   for (const [label, key, unit] of rows) {
     const tr = el('tr', {}, [el('td', { text: label })]);
     for (const f of fields) {
-      let value = null;
+      let value;
       if (key === '__score') {
         const feats = f.id === (storageGet('soil.lastMeta', {})?.fieldId || '') ? activeFlat : storageGet(`soil.fieldFeatures.${f.id}`, activeFlat);
         value = healthScore(feats || activeFlat);
