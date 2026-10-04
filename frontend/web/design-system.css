@@ -180,4 +180,30 @@
 .flood-reasons li{margin:3px 0}
 .flood-forecast-missing{margin:0 0 8px}
 @media(max-width:640px){.flood-headline-icon{font-size:22px}}
+/* ─── Voice-first assistant ───────────────────────────────────────────────
+   The microphone is the primary control, so it gets a large target: a farmer
+   using this is likely on a phone, possibly with soil on their hands. */
+.voice-panel{margin-top:18px}
+.voice-mic-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn-voice{display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 24px;font-size:16px;border-radius:999px;background:var(--brand,#1a6b3c);color:#fff;border:0;cursor:pointer}
+.btn-voice[disabled]{opacity:.45;cursor:not-allowed}
+.btn-voice[aria-pressed="true"]{background:#b3261e}
+.voice-mic-icon{font-size:24px;line-height:1}
+.voice-status{margin:0;font-size:14px;min-height:20px}
+.voice-status[data-level="warn"]{color:#b15c00}
+.voice-status[data-level="error"]{color:#b3261e}
+.voice-unsupported{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:rgba(177,92,0,.09);color:#b15c00;font-size:14px}
+.voice-transcript{margin:10px 0 0;font-size:14px;min-height:20px;color:var(--muted)}
+.voice-transcript:empty{margin:0}
+.voice-form{margin:16px 0 0}
+.voice-form-label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.voice-form-row{display:flex;gap:8px;flex-wrap:wrap}
+.voice-input{flex:1 1 220px;min-height:44px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font-size:15px}
+.voice-answer{margin-top:14px;padding:14px;border-radius:12px;background:rgba(26,107,60,.06);min-height:56px}
+.voice-answer[data-state="error"]{background:rgba(179,38,30,.07)}
+.voice-understood{margin:0 0 8px;font-size:14px}
+.voice-reply{margin:0;font-size:15px;line-height:1.6}
+.voice-tools{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+@media(max-width:640px){.btn-voice{width:100%;justify-content:center}.voice-form-row{flex-direction:column}.voice-form-row .btn{width:100%}}
+@media(prefers-reduced-motion:reduce){.btn-voice{transition:none!important}}
 @media(max-width:640px){.marketplace-qty{width:100%}.marketplace-actions .btn{flex:1 1 auto}}

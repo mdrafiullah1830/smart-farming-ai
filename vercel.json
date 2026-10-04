@@ -12,6 +12,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://smart-farming-api.2251081204.workers.dev/api/:path*"
+    },
+    {
       "source": "/mobile/(.*)",
       "destination": "/mobile/$1"
     },

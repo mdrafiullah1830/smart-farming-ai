@@ -7,6 +7,7 @@ import { setState, State } from '../states.js';
 import { storageGet, storageSet } from '../storage.js';
 import { reportClientError } from '../telemetry.js';
 import { bindShell, requireAuth } from '../shell.js';
+import { initVoice } from './voice.js';
 
 const CONVOS_KEY = 'ai.conversations';
 const SAVED_KEY = 'ai.saved';
@@ -463,40 +464,20 @@ function bindAsk() {
   });
 }
 
-function bindVoice() {
-  const btn = qs('#voiceStart');
-  const out = qs('#voiceTranscript');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      if (out) out.textContent = getLang() === 'bn' ? 'ভয়েস ইনপুট সমর্থিত নয়' : 'Voice input not supported in this browser';
-      btn.disabled = true;
-      return;
-    }
-    const rec = new SR();
-    rec.lang = getLang() === 'bn' ? 'bn-BD' : 'en-US';
-    rec.interimResults = false;
-    if (out) out.textContent = getLang() === 'bn' ? 'শুনছি…' : 'Listening…';
-    rec.onresult = (ev) => {
-      const textResult = ev.results[0][0].transcript;
-      if (out) out.textContent = textResult;
-      const input = qs('#question');
-      if (input) input.value = textResult;
-    };
-    rec.onerror = () => {
-      if (out) out.textContent = getLang() === 'bn' ? 'ভয়েস ত্রুটি' : 'Voice error';
-    };
-    rec.start();
-  });
-}
+// bindVoice() was removed: it bound a #voiceStart button that the voice
+// assistant panel now owns, and it had no Bangla TTS, no follow-up context and
+// no honest fallback for browsers without SpeechRecognition. initVoice() in
+// voice.js replaces all of it.
 
 export function initAI() {
   bindShell();
   bindModes();
   bindAsk();
   bindUpload();
-  bindVoice();
+  // The old #voiceStart button in the mode panel is superseded by the voice
+  // assistant panel below, which owns the same id. initVoice() binds the new
+  // one; bindVoice() is removed so two handlers cannot fight over one button.
+  initVoice();
   qsa('a[href="#"]').forEach((a) => a.setAttribute('href', 'index.html'));
 
   renderConversationList(null);

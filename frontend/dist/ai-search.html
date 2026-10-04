@@ -4,9 +4,9 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AI Farming Assistant — Smart Farming AI</title>
   <link rel="icon" href="/assets/favicon-BjCjT3Mi.svg" type="image/svg+xml">
-  <script type="module" crossorigin src="/assets/ai-search-_kJgRhDs.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/shell-JAo2-9fA.js">
-  <link rel="stylesheet" crossorigin href="/assets/shell-DoZUWO0P.css">
+  <script type="module" crossorigin src="/assets/ai-search-Bv66fq6Z.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/shell-BzpkvN85.js">
+  <link rel="stylesheet" crossorigin href="/assets/shell-CHfD8dIC.css">
 </head>
 <body class="app-body">
   <aside class="sidebar">
@@ -77,14 +77,14 @@
             </div>
           </div>
 
-          <div id="voicePanel" hidden>
-            <div class="question-box">
-              <p class="muted" id="voiceTranscript" aria-live="polite">—</p>
-              <div class="composer-actions">
-                <button class="btn btn-primary" type="button" id="voiceStart" data-i18n="startListening">Start listening</button>
-              </div>
-            </div>
-          </div>
+          <!--
+  The old mode-panel voice block was removed entirely. Its #voiceStart button
+  duplicated the id owned by the voice assistant panel below, so
+  `qs('#voiceStart')` resolved to two elements and two handlers bound to one
+  logical control. The assistant panel covers both the voice and text paths and
+  is reachable from the page directly, so this mode's voice affordance is gone
+  rather than left as a second, hidden way in.
+-->
         </article>
 
         <article class="panel answer-card" id="answerCard" data-state="empty">
@@ -94,6 +94,50 @@
           </div>
           <div id="answerBody"><p class="muted" data-i18n="empty">Ask a question to see the answer</p></div>
           <div class="answer-tools" id="answerTools" hidden></div>
+        </article>
+
+        <!--
+          Voice-first assistant. A big touch target and a typing field that is
+          always present: the microphone is Chromium-only, so the fallback has to
+          be a real part of the layout, not a hidden escape hatch.
+        -->
+        <article class="panel voice-panel" id="voicePanelBody" aria-live="polite">
+          <div class="panel-title">
+            <h2>🎙 <span data-i18n="voiceTitle">Voice farming assistant</span></h2>
+          </div>
+
+          <div class="voice-mic-row">
+            <button class="btn btn-voice" type="button" id="voiceStart" aria-pressed="false">
+              <span class="voice-mic-icon" aria-hidden="true">🎤</span>
+              <span data-i18n="voiceTapToSpeak">Tap to speak</span>
+            </button>
+            <p class="muted voice-status" id="voiceStatus" role="status"></p>
+          </div>
+
+          <!-- Live transcript, so a misheard word is visible while it is being
+               corrected rather than only in the final answer. -->
+          <p class="voice-transcript" id="voiceTranscript" aria-live="polite"></p>
+
+          <p class="voice-unsupported" id="voiceUnsupported" hidden></p>
+
+          <form class="voice-form" id="voiceForm">
+            <label class="voice-form-label" for="voiceInput" data-i18n="voiceTypeInstead">Or type it</label>
+            <div class="voice-form-row">
+              <input class="voice-input" id="voiceInput" type="text" autocomplete="off"
+                     data-i18n-placeholder="voiceAskPlaceholder"
+                     placeholder="Type or speak what you want to know…">
+              <button class="btn btn-soft" type="submit" data-i18n="voiceSend">Send</button>
+            </div>
+          </form>
+
+          <div class="voice-answer" id="voiceAnswer" data-state="empty">
+            <p class="muted" data-i18n="voiceIdle">Tap the button and speak, or type below</p>
+          </div>
+
+          <div class="voice-tools">
+            <button class="btn btn-soft" type="button" id="voiceRepeat" data-i18n="voiceRepeat">Read it again</button>
+            <button class="btn btn-soft" type="button" id="voiceClear" data-i18n="voiceClear">Start over</button>
+          </div>
         </article>
       </div>
 

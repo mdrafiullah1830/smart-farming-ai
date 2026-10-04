@@ -36,6 +36,7 @@ import {
   floodAssessmentRoute, floodExposureRoute, floodActionRoute,
   floodZonesRoute, floodDistrictRoute
 } from './routes/flood.ts';
+import { voiceAskRoute, voiceCapabilitiesRoute } from './routes/voice.ts';
 
 async function body<T>(request: Request): Promise<T | null> {
   try { return await request.json<T>(); } catch { return null; }
@@ -170,6 +171,11 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (path.startsWith('/api/v1/flood/districts/') && method === 'GET') {
     return floodDistrictRoute(request, env, decodeURIComponent(path.slice('/api/v1/flood/districts/'.length)));
   }
+
+  // Voice-first assistant. `voice/ask` is public because the curated guidance
+  // needs no account; the client holds the conversation context.
+  if (path === '/api/v1/voice/ask' && method === 'POST') return voiceAskRoute(request, env);
+  if (path === '/api/v1/voice/capabilities' && method === 'GET') return voiceCapabilitiesRoute(request, env);
 
   // Location routes
   if (path === '/api/v1/districts' && method === 'GET') return districtsRoute(request, env);

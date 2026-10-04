@@ -397,6 +397,65 @@ level is snapshotted onto the row so hit-rate analysis stays honest.
 
 ---
 
+## Worker API — Voice-first assistant
+
+Speech is handled by the browser; the server matches text. `capabilities` says
+so explicitly rather than implying a server-side STT model.
+
+### GET /api/v1/voice/capabilities
+Public. What the server and browser each contribute.
+
+```json
+{
+  "success": true,
+  "capabilities": {
+    "serverTranscription": false,
+    "banglishNormalisation": true,
+    "conversationContext": true,
+    "languages": ["bn", "en"]
+  },
+  "browserResponsibility": ["SpeechRecognition", "speechSynthesis"]
+}
+```
+
+### POST /api/v1/voice/ask
+Public — the curated guidance needs no account, and the client holds the
+conversation.
+
+```json
+{
+  "transcript": "boro ta kete aishen, koto sar lagbe",
+  "lang": "bn",
+  "context": [{ "role": "user", "text": "সার কবে দিব" }]
+}
+```
+
+```json
+{
+  "success": true,
+  "transcript": "boro ta kete aishen, koto sar lagbe",
+  "understood": "বোরো করে করবেন, কত সার লাগবে",
+  "wasBanglish": true,
+  "usedContext": false,
+  "reply": "মাটি পরীক্ষা ও ফসলের বৃদ্ধির ধাপ অনুযায়ী সার দিন…",
+  "source": "curated-voice-guidance"
+}
+```
+
+`understood` is what the engine actually matched on. The UI shows it whenever
+`wasBanglish` or `usedContext` is true, so a misrecognised word can be corrected
+before the farmer acts on it.
+
+`context` is capped at 4 turns of 400 characters each, and roles are coerced —
+a caller cannot push an arbitrary payload into the matching rules. An empty
+transcript is a **400**, and so is one over 1000 characters, which is a stuck
+microphone rather than a question.
+
+The guidance is the curated set `/api/v1/chat` already serves, plus a season
+branch. Nothing here invents an answer.
+
+---
+
 ## Error Responses
 
 ```json
