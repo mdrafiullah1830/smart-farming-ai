@@ -96,6 +96,12 @@ output/
 tmp/
 Final_Project_Report_*
 *.docx
+
+# Throwaway live-E2E scripts and local dev overrides. These hold machine-specific
+# ports and secrets, and are deleted after each verification run.
+*.tmp.mjs
+wrangler.dev.jsonc
+
 *.pdf
 audit/_raw/
 

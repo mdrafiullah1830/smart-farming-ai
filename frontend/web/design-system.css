@@ -180,6 +180,20 @@
 .flood-reasons li{margin:3px 0}
 .flood-forecast-missing{margin:0 0 8px}
 @media(max-width:640px){.flood-headline-icon{font-size:22px}}
+/* ─── Irrigation advice ───────────────────────────────────────────────────
+   Sits above the pump switch: the recommendation is the decision, the switch
+   is the action taken on it. Colours are paired with an icon and a text label,
+   so "needs water" never depends on telling green from amber. */
+.irrigation-advice{margin-bottom:12px}
+.irrigation-headline{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;border-left:4px solid currentColor}
+.irrigation-headline-icon{font-size:22px;line-height:1.2}
+.irrigation-headline strong{display:block;font-size:14px}
+.irrigation-headline p{margin:3px 0 0;font-size:12px;line-height:1.5;opacity:.9}
+.irr-needs{color:#0b5fa5;background:rgba(11,95,165,.07)}
+.irr-watch{color:#b15c00;background:rgba(177,92,0,.08)}
+.irr-adequate{color:#1a6b3c;background:rgba(26,107,60,.08)}
+.irr-noreading{color:#4a5a52;background:rgba(74,90,82,.06)}
+.irrigation-basis{margin:6px 0 0;font-size:11px;line-height:1.45}
 /* ─── Voice-first assistant ───────────────────────────────────────────────
    The microphone is the primary control, so it gets a large target: a farmer
    using this is likely on a phone, possibly with soil on their hands. */

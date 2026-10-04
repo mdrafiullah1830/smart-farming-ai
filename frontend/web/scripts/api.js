@@ -209,6 +209,31 @@ export const flood = {
   recordAction: (body) => api.post('/api/v1/flood/actions', { body }),
 };
 
+/**
+ * Irrigation & Water Management.
+ *
+ * The advice is what turns a pump switch into irrigation management: it answers
+ * whether the field needs water at all, and how much. Kept in one place so the
+ * dashboard never hand-builds an irrigation URL.
+ */
+export const irrigation = {
+  advice: (params = {}) => {
+    const q = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null && value !== '') q.set(key, String(value));
+    }
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return api.get(`/api/v1/irrigation/advice${suffix}`);
+  },
+  usage: (season) =>
+    api.get(`/api/v1/irrigation/usage${season ? `?season=${encodeURIComponent(season)}` : ''}`),
+  recordEvent: (body) => api.post('/api/v1/irrigation/events', body),
+  schedules: () => api.get('/api/v1/irrigation/schedules'),
+  createSchedule: (body) => api.post('/api/v1/irrigation/schedules', body),
+  requirements: (season) =>
+    api.get(`/api/v1/irrigation/requirements${season ? `?season=${encodeURIComponent(season)}` : ''}`),
+};
+
 export function getCredentials() {
   try {
     const raw = typeof window !== 'undefined' ? window.localStorage?.getItem('sfAuth') : null;

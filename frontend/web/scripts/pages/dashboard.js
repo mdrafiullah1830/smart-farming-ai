@@ -9,6 +9,7 @@ import { formatTemp, formatPercent, formatCurrencyBdt, formatDateForLang } from 
 import { reportClientError } from '../telemetry.js';
 import { bindShell, requireAuth, isAuthenticated, openAuthModal, setUserChip } from '../shell.js';
 import { loadFloodPanel } from './flood.js';
+import { loadIrrigationAdvice } from './irrigation.js';
 import { withOptimistic } from '../optimistic.js';
 
 const TASKS_KEY = 'dashboard.tasks';
@@ -454,6 +455,7 @@ export function initDashboard() {
   void loadMarketMini();
   void loadFields();
   void loadIrrigation();
+  void loadIrrigationAdvice();
   void loadSensors();
   void loadNotifications(false);
   void syncTasksFromServer();
@@ -467,6 +469,7 @@ export function initDashboard() {
     renderTasks();
     void loadWeather();
     void loadIrrigation();
+    void loadIrrigationAdvice();
     void loadSensors();
     // The API sends both languages, so the panel has to be re-rendered rather
     // than merely re-translated.
@@ -475,6 +478,7 @@ export function initDashboard() {
   document.addEventListener('sf:auth', () => {
     void loadFields();
     void loadIrrigation();
+    void loadIrrigationAdvice();
     void loadSensors();
     // Signing in is what reveals the farmer's own exposures, so the panel has
     // to be reloaded on the auth event rather than left on its signed-out state.

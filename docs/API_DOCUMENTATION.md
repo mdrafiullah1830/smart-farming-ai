@@ -456,6 +456,154 @@ branch. Nothing here invents an answer.
 
 ---
 
+## Worker API — Irrigation & water management
+
+The pump switch in `/api/v1/devices/{id}/command` says on or off. It cannot say
+whether the field needed water, how much, or what the last season cost. Those
+two questions are what these routes answer.
+
+Every irrigation figure is **advisory**: `mmPerDay` and `litresPerDay` come from
+the seeded `water_requirements` table (a published crop-stage figure), not from
+a measurement of the farmer's own field. The API labels them as such and the
+dashboard repeats the disclaimer on the card.
+
+### GET /api/v1/irrigation/advice
+
+Auth required, because it embeds the farmer's own latest sensor reading.
+
+| Query | Notes |
+| --- | --- |
+| `crop` | Crop name, e.g. `Rice`. Defaults to `Rice`. |
+| `season` | `boro`, `aman`, `aus` or `other`. Defaults to `boro`. |
+| `days_since_sowing` | Derives the growth stage. Absent or nonsensical falls back to `60` (panicle), the peak-demand stage. |
+| `district_id` | A district override wins over the national default. |
+
+```json
+{
+  "success": true,
+  "crop": "Rice",
+  "season": "boro",
+  "stage": "panicle",
+  "daysSinceSowing": 65,
+  "areaAcres": 2,
+  "moisturePercent": 40,
+  "readingAt": "2026-10-04T09:12:00.000Z",
+  "districtSpecific": false,
+  "advice": {
+    "status": "needs_water",
+    "statusBn": "সেচ দরকার",
+    "stage": "panicle",
+    "guidance": true,
+    "mmPerDay": 9,
+    "litresPerDay": 73,
+    "headlineBn": "এখন সেচ দরকার",
+    "headlineEn": "Irrigation needed now",
+    "detailBn": "মাটির আর্দ্রতা ৪০% — ৯ মিমি/দিন প্রয়োজন, প্রায় ৭৩ লিটার। সকালে সেচ দিলে বাষ্পীভবন কম হয়।",
+    "detailEn": "Soil moisture is 40% — needs 9 mm/day, about 73 litres. Irrigation early in the morning loses less to evaporation."
+  }
+}
+```
+
+`status` is one of:
+
+| Status | Meaning |
+| --- | --- |
+| `needs_water` | Moisture below 60%. Irrigate. |
+| `watch` | 60–70%. Borderline; check again tomorrow. |
+| `adequate` | At or above 70%. Do not irrigate. |
+| `no_reading` | The requirement is known but no sensor has reported. **`mmPerDay` and `litresPerDay` are still returned** — the crop's demand is independent of the probe, so withholding it would waste the one useful number. The `no_reading` branch never fabricates a status. |
+| `no_requirement` | The crop/season/stage is not in the seed table. Distinct from `no_reading`: an unknown crop is not a missing sensor. Figures are `null`. |
+
+`litresPerDay` is a whole number, or `null` when the area is unknown. The advice
+still stands without it — a farmer can act on "needs water" without litres.
+1 mm over 1 acre is 4.047 L.
+
+### GET /api/v1/irrigation/requirements
+
+Public. The seeded crop-stage table, with the disclaimer.
+
+| Query | Notes |
+| --- | --- |
+| `season` | Optional; `boro`, `aman`, `aus` or `other`. |
+
+```json
+{
+  "success": true,
+  "disclaimer": "Advisory crop-stage figures in mm/day, not measurements of any field.",
+  "requirements": [
+    { "crop_name_en": "Rice", "crop_name_bn": "ধান", "season": "boro", "stage": "panicle", "mm_per_day": 9, "district_id": null }
+  ]
+}
+```
+
+### GET /api/v1/irrigation/usage
+
+Auth required. The history the pump switch cannot keep: `device_commands` holds
+one row per device and overwrites it, so this ledger is the only record of how
+much water a field got and what it cost.
+
+| Query | Notes |
+| --- | --- |
+| `season` | Optional filter. |
+
+```json
+{
+  "success": true,
+  "usage": {
+    "totalLitres": 5230,
+    "totalCostTaka": 180,
+    "runCount": 1,
+    "unconfirmedCount": 1
+  },
+  "events": []
+}
+```
+
+Only runs with a confirmed volume count toward `totalLitres` and `runCount`. An
+`on` command whose run was never reported has a `null` volume and is surfaced
+separately in `unconfirmedCount` — counting it as zero would make the total look
+authoritative when it is not.
+
+### POST /api/v1/irrigation/events
+
+Auth required. Record a confirmed run.
+
+```json
+{
+  "crop_name_en": "Rice",
+  "season": "boro",
+  "volume_litres": 5230,
+  "duration_minutes": 45,
+  "cost_taka": 180,
+  "note": "morning run"
+}
+```
+
+A negative `volume_litres` is a **400**. Omit `volume_litres` for an `on`
+command whose volume is not yet known; it is stored as unconfirmed.
+
+### GET /api/v1/irrigation/schedules
+
+Auth required. Shared-pump rotations. `start_time` is local wall-clock `HH:MM`
+and `interval_days` is 1–30.
+
+### POST /api/v1/irrigation/schedules
+
+```json
+{
+  "name": "মাঠ A",
+  "crop_name_en": "Rice",
+  "season": "boro",
+  "start_time": "06:00",
+  "interval_days": 3,
+  "target_litres": 5230
+}
+```
+
+An impossible time such as `99:99` is a **400**.
+
+---
+
 ## Error Responses
 
 ```json

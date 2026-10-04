@@ -37,6 +37,10 @@ import {
   floodZonesRoute, floodDistrictRoute
 } from './routes/flood.ts';
 import { voiceAskRoute, voiceCapabilitiesRoute } from './routes/voice.ts';
+import {
+  irrigationAdviceRoute, irrigationUsageRoute,
+  irrigationSchedulesRoute, waterRequirementsRoute
+} from './routes/irrigation.ts';
 
 async function body<T>(request: Request): Promise<T | null> {
   try { return await request.json<T>(); } catch { return null; }
@@ -176,6 +180,15 @@ async function route(request: Request, env: Env): Promise<Response> {
   // needs no account; the client holds the conversation context.
   if (path === '/api/v1/voice/ask' && method === 'POST') return voiceAskRoute(request, env);
   if (path === '/api/v1/voice/capabilities' && method === 'GET') return voiceCapabilitiesRoute(request, env);
+
+  // Irrigation & Water Management
+  if (path === '/api/v1/irrigation/advice' && method === 'GET') return irrigationAdviceRoute(request, env);
+  if (path === '/api/v1/irrigation/usage' && method === 'GET') return irrigationUsageRoute(request, env);
+  if (path === '/api/v1/irrigation/events' && method === 'POST') return irrigationUsageRoute(request, env);
+  if (path === '/api/v1/irrigation/schedules' && method === 'GET') return irrigationSchedulesRoute(request, env);
+  if (path === '/api/v1/irrigation/schedules' && method === 'POST') return irrigationSchedulesRoute(request, env);
+  // The requirement table is public reference data, like /locations/zillas.
+  if (path === '/api/v1/irrigation/requirements' && method === 'GET') return waterRequirementsRoute(request, env);
 
   // Location routes
   if (path === '/api/v1/districts' && method === 'GET') return districtsRoute(request, env);

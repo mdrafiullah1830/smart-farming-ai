@@ -88,6 +88,14 @@
       </article>
       <article class="panel summary-card" id="irrigationCard">
         <h3>💧 <span data-i18n="irrigation">Irrigation</span></h3>
+        <!--
+          The advice block sits above the switch on purpose: a farmer needs the
+          recommendation first. A switch without "does this field need water"
+          is a remote control, not irrigation management.
+        -->
+        <div class="irrigation-advice" id="irrigationAdvice" data-state="loading" aria-live="polite">
+          <p class="muted" data-i18n="loading">Loading…</p>
+        </div>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <b data-i18n="liveIrrigation">Live irrigation</b>
           <button class="switch" type="button" id="irrigationSwitch" role="switch" aria-checked="false" data-i18n-aria="irrigation" aria-label="Toggle irrigation" disabled></button>

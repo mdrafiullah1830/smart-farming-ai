@@ -4,10 +4,10 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Farm Dashboard — Smart Farming AI</title>
   <link rel="icon" href="/assets/favicon-BjCjT3Mi.svg" type="image/svg+xml">
-  <script type="module" crossorigin src="/assets/dashboard-COlvQBQT.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/shell-BzpkvN85.js">
+  <script type="module" crossorigin src="/assets/dashboard-Cq34BHSd.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/shell-BgGb4g8K.js">
   <link rel="modulepreload" crossorigin href="/assets/format-C0CBNkl6.js">
-  <link rel="stylesheet" crossorigin href="/assets/shell-CHfD8dIC.css">
+  <link rel="stylesheet" crossorigin href="/assets/shell-CL8GNC7J.css">
 </head>
 <body class="app-body">
   <aside class="sidebar">
@@ -92,6 +92,14 @@
       </article>
       <article class="panel summary-card" id="irrigationCard">
         <h3>💧 <span data-i18n="irrigation">Irrigation</span></h3>
+        <!--
+          The advice block sits above the switch on purpose: a farmer needs the
+          recommendation first. A switch without "does this field need water"
+          is a remote control, not irrigation management.
+        -->
+        <div class="irrigation-advice" id="irrigationAdvice" data-state="loading" aria-live="polite">
+          <p class="muted" data-i18n="loading">Loading…</p>
+        </div>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <b data-i18n="liveIrrigation">Live irrigation</b>
           <button class="switch" type="button" id="irrigationSwitch" role="switch" aria-checked="false" data-i18n-aria="irrigation" aria-label="Toggle irrigation" disabled></button>
