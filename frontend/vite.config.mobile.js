@@ -25,12 +25,17 @@ export default defineConfig({
   plugins: [
     viteStaticCopy({
       targets: [
-        { src: 'mobile/assets/*', dest: 'assets' },
-        { src: 'mobile/assets/fonts/*', dest: 'assets/fonts' },
-        { src: 'mobile/bd_districts.js', dest: '.' },
-        { src: 'mobile/scripts', dest: 'scripts' },
-        { src: 'mobile/mobile.css', dest: '.' },
-        { src: 'mobile/*.html', dest: '.' },
+        // Resolved against `root` (`mobile`); see the note in vite.config.js.
+        // Each stripBase matches its own glob depth -- see the explanation there.
+        { src: 'assets/*', dest: 'assets', rename: { stripBase: 1 } },
+        { src: 'assets/fonts/*', dest: 'assets/fonts', rename: { stripBase: 2 } },
+        { src: 'assets/images/*', dest: 'assets/images', rename: { stripBase: 2 } },
+        { src: 'bd_districts.js', dest: '.' },
+        // Directory copies need the same treatment: without stripBase the whole
+        // `scripts/` folder lands at `dist/mobile/scripts/scripts/`.
+        { src: 'scripts', dest: 'scripts', rename: { stripBase: 1 } },
+        { src: 'mobile.css', dest: '.' },
+        { src: '*.html', dest: '.' },
       ],
     }),
   ],
