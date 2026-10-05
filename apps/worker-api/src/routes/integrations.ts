@@ -13,6 +13,8 @@ export async function aiHealthRoute(request: Request, env: Env): Promise<Respons
     headers: {
       'Authorization': `Bearer ${env.AI_SERVICE_TOKEN}`,
     },
+    // Never let a slow AI backend hold the Worker open.
+    signal: AbortSignal.timeout(5000),
   });
   if (!upstream.ok) {
     console.error('ai_health_failed', { status: upstream.status });

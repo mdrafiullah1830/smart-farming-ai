@@ -131,7 +131,7 @@ export async function resetFailedLogins(email: string, env: Env): Promise<void> 
 export async function verifyGoogleJWT(token: string, clientId: string): Promise<{ sub: string; email: string; name?: string } | null> {
   try {
     // Fetch Google's public keys
-    const jwksResp = await fetch('https://www.googleapis.com/oauth2/v3/certs');
+    const jwksResp = await fetch('https://www.googleapis.com/oauth2/v3/certs', { signal: AbortSignal.timeout(5000) });
     const jwks = await jwksResp.json<{ keys: Array<{ kid: string; n: string; e: string; kty: string }> }>();
 
     const parts = token.split('.');

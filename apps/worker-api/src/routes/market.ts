@@ -32,13 +32,13 @@ async function fetchText(url: string): Promise<string> {
   try {
     cache = await caches.open(CACHE_NAME);
   } catch {
-    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(10000) });
     if (!r.ok) throw new Error(`upstream ${r.status} for ${url}`);
     return r.text();
   }
   const cached = await cache.match(url);
   if (cached) return cached.text();
-  const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+  const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(10000) });
   if (!r.ok) throw new Error(`upstream ${r.status} for ${url}`);
   const data = await r.text();
   await cache.put(url, new Response(data, {

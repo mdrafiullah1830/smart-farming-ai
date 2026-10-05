@@ -220,6 +220,7 @@ export async function fetchRainfall(lat: number, lon: number): Promise<Rainfall>
     const upstream = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
       '&daily=precipitation_sum,precipitation_hours&forecast_days=7&timezone=Asia%2FDhaka',
+      { signal: AbortSignal.timeout(8000) },
     );
     if (!upstream.ok) return { pressure: 0, rainMm7d: 0, peakDailyMm: 0, available: false };
     const data = await upstream.json<OpenMeteoForecast>();

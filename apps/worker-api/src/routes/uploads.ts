@@ -41,6 +41,8 @@ export async function diseaseAnalyzeRoute(request: Request, env: Env): Promise<R
     method: 'POST',
     headers: { 'Authorization': `Bearer ${env.AI_SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ job_id: crypto.randomUUID(), image_base64: `data:${image.type};base64,${bytesToBase64(await image.arrayBuffer())}` }),
+    // Inference can be slow; cap the wait so the request fails fast instead of hanging.
+    signal: AbortSignal.timeout(15000),
   });
   const result = await upstream.json<{ status?: string; message?: string; predictions?: Array<{ disease_en: string; disease_bn: string; confidence: number; severity: string }> }>();
   if (!upstream.ok) return error(request, env, upstream.status, result.message ?? 'Disease service unavailable');

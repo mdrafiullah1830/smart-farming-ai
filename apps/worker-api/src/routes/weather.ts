@@ -30,7 +30,7 @@ export async function weatherRoute(request: Request, env: Env): Promise<Response
   }
   const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'bn';
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return error(request, env, 400, 'Valid coordinates are required');
-  const upstream = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=Asia%2FDhaka&forecast_days=7`);
+  const upstream = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=Asia%2FDhaka&forecast_days=7`, { signal: AbortSignal.timeout(8000) });
   if (!upstream.ok) return error(request, env, 503, 'Weather service unavailable');
   const data = await upstream.json<OpenMeteo>();
   const info = weatherInfo(data.current.weather_code, lang);
