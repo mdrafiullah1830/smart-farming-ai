@@ -1,6 +1,5 @@
 import type { Env } from '../types.ts';
-import { corsHeaders, json, error } from '../http.ts';
-import { currentUser } from '../auth.ts';
+import { json, error } from '../http.ts';
 import { saveSensorReading } from '../sensors.ts';
 
 async function body<T>(request: Request): Promise<T | null> {

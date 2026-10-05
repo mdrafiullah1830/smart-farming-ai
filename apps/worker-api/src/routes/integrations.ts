@@ -1,5 +1,5 @@
 import type { Env } from '../types.ts';
-import { corsHeaders, json, error, isMissingRelation } from '../http.ts';
+import { json, error, isMissingRelation } from '../http.ts';
 import { currentUser } from '../auth.ts';
 
 async function body<T>(request: Request): Promise<T | null> {

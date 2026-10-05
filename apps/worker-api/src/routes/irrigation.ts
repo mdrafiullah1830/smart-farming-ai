@@ -81,10 +81,6 @@ export function pickRequirement(
  * Soil moisture above this counts as adequate. A rice field is a shallow-water
  * crop, so this sits well below saturation on purpose.
  */
-/**
- * Soil moisture above this counts as adequate. A rice field is a shallow-water
- * crop, so this sits well below saturation on purpose.
- */
 export const ADEQUATE_MOISTURE_PERCENT = 60;
 
 export type Advice = {

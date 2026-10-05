@@ -747,7 +747,7 @@ Crop Selection → Price Data (BBS/DAM/FAO)
 | MongoDB / Redis in compose but unused | ✅ MongoDB removed; Redis kept for Worker KV |
 | Report-generation debris in repo | ✅ Added to `.gitignore` |
 | Duplicate HTML/JS in `docs/` | ✅ Cleaned up; only `.md` remains |
-| No security headers | ✅ Added CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy |
+| No security headers | ✅ Added `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` on Worker JSON responses. CSP is also set (`http.ts`) but is only effective for HTML documents — the Worker serves JSON only, so browsers enforce CSP on the Vercel-hosted HTML/JS instead; HTML-side CSP should be configured in `vercel.json` if needed |
 | Test coverage < 5% | ✅ 19 unit tests + E2E Playwright suite (15 tests) |
 
 ### Resolved (v1.2)
