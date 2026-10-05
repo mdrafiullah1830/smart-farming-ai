@@ -36,4 +36,4 @@ structlog==24.1.0
 prometheus-client==0.20.0
 sentry-sdk[fastapi]==2.69.2
 bcrypt==4.1.2
-PyJWT==2.8.0
+PyJWT==2.15.1
