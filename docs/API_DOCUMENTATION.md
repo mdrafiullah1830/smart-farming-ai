@@ -247,8 +247,146 @@ Detect plant disease from image.
 ### GET /market/prices/{crop_id}
 Get historical crop prices.
 
-### GET /market/analysis/{district_id}
-Get comprehensive market analysis.
+### Market analysis
+
+Aggregated, source-attributed price information built from published
+government price feeds. Price information is public reference data; only
+`POST /analysis/refresh` requires an account.
+
+All analysis responses carry a `disclaimer` (English) and `disclaimerBn`
+(Bangla) alongside `warnings: string[]`. The disclaimer is part of the
+contract: these are aggregated figures, not a quote for any one market.
+
+Warnings are counted and named, for example `sources_disagree:2`,
+`unit_assumed:1` (a source published no unit, so ours was assumed),
+`expired:1`, `national_fallback`, `migration_pending`.
+
+#### GET /market/analysis
+
+List aggregated prices.
+
+**Query parameters:**
+
+| Name | Type | Notes |
+| --- | --- | --- |
+| `q` | string | Match against the normalized commodity name or id |
+| `category` | string | Exact category |
+| `commodity` | string | Exact commodity id |
+| `district_id` | string | Exact district id |
+| `division` | string | Exact division |
+| `freshness` | enum | `outdated`, `aged`, `recent`, `fresh`, `very_fresh`. Returns that level **or fresher** |
+| `min_confidence` | number | 0–100 |
+| `include_expired` | `true` | Serve rows past `expires_at` |
+| `limit` | number | 1–200, default 50 |
+| `offset` | number | default 0 |
+
+Expired aggregates are hidden unless `include_expired=true`, so a caller
+never sees a stale number presented as current.
+
+**Response:**
+```json
+{
+  "success": true,
+  "prices": [
+    {
+      "id": "agg:cm-rice:::kg",
+      "commodityId": "cm-rice",
+      "normalizedName": "ভাতের চাল (মিনিকেট)",
+      "category": "staple",
+      "priceMin": 72,
+      "priceMax": 75,
+      "priceAvg": 73.5,
+      "currency": "BDT",
+      "unit": "kg",
+      "sourceCount": 1,
+      "sources": ["dam_gov"],
+      "priceVariationPct": 4.1,
+      "hasDisagreement": false,
+      "overallConfidence": 61.5,
+      "overallFreshness": "fresh",
+      "aggregatedAt": "2026-10-07T06:00:00.000Z",
+      "expiresAt": "2026-10-07T12:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "sources": [ { "id": "dam_gov", "trustTier": 1 } ],
+  "warnings": ["unit_assumed:22"],
+  "disclaimer": "Aggregated from published sources...",
+  "disclaimerBn": "প্রকাশিত উৎস থেকে...",
+  "lastUpdated": "2026-10-07T06:00:00.000Z"
+}
+```
+
+`hasDisagreement` means contributing sources spread by more than 25%, in
+which case every contributing record is also marked `disputed`.
+
+#### GET /market/analysis/commodities
+
+The commodity catalog: id, English and Bangla names, category, the unit the
+catalog uses by default, the units the commodity accepts, and the aliases
+sources publish.
+
+**Query:** `category` (optional, exact).
+
+#### GET /market/analysis/sources
+
+Source health: what is collected from, when it last ran, and whether it
+worked. `headers` and `userAgent` are never returned — they describe how we
+authenticate to a publisher. Includes the last 50 fetch log entries.
+
+#### GET /market/analysis/{district}
+
+Prices for one district, which may be given as its id, its English name, or
+its Bangla name.
+
+District rows are returned when they exist. When they do not (the seeded
+national feed carries no place at all) the response serves national figures
+instead with `"scope": "national"` and a `national_fallback` warning, so a
+local price is never implied where none was published.
+
+**Response extras:** `district` (`id`, `nameEn`, `nameBn`, `division`),
+`scope` (`district` | `national`), `districtPricesAvailable`.
+
+**404** when the district is unknown.
+
+#### POST /market/analysis/refresh
+
+Requires `Authorization: Bearer <token>` (401 otherwise).
+
+**Request:**
+```json
+{ "source_ids": ["dam_gov"], "force": false, "max_sources": 3 }
+```
+
+| Field | Rules |
+| --- | --- |
+| `source_ids` | Optional; restricts the run to these sources |
+| `force` | Bypasses the freshness and rate gates — but **only** for sources named in `source_ids`. `force: true` without a list is rejected (400) |
+| `max_sources` | 1–10, default 3. Bounds the run so a request cannot become an open-ended crawler |
+
+**Response:**
+```json
+{
+  "success": true,
+  "startedAt": "2026-10-07T06:00:00.000Z",
+  "durationMs": 840,
+  "results": [
+    { "sourceId": "dam_gov", "status": "success", "recordsExtracted": 22, "recordsValid": 22 }
+  ],
+  "aggregatesWritten": 22,
+  "aggregatesRemoved": 0,
+  "recordsPruned": 0
+}
+```
+
+`status` is `success`, `failed`, or `skipped` (`already_fresh`,
+`rate_limited`). A `failed` source does not fail the request.
+
+`GET /market/analysis` will refresh by itself **only** when no unexpired
+aggregate exists, at most once per 60-second lock window, and only for up to
+two sources. Warm reads never make an outbound request.
+
+**503** if migration `0011` has not been applied to the binding.
 
 ### GET /market/profit-calculator
 Calculate farming profit.

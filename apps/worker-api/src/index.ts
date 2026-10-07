@@ -20,6 +20,10 @@ import {
   marketLiveRoute, marketUpazilaRoute, cropCalendarRoute, fertilizerRoute,
   groundwaterRoute, disasterAlertsRoute
 } from './routes/market.ts';
+import {
+  marketAnalysisRoute, marketCommoditiesRoute, marketSourcesRoute,
+  marketRefreshRoute, marketAnalysisDistrictRoute
+} from './routes/market-analysis.ts';
 import { 
   districtsRoute, districtDetailRoute, divisionsRoute, zillasRoute, unionsRoute 
 } from './routes/locations.ts';
@@ -123,6 +127,15 @@ async function route(request: Request, env: Env): Promise<Response> {
   }
   if (path === '/api/v1/market/prices/live' && method === 'GET') return marketLiveRoute(request, env);
   if (path === '/api/v1/market/prices/upazila' && method === 'GET') return marketUpazilaRoute(request, env);
+
+  // Aggregated market analysis (exact paths before the :district catch-all)
+  if (path === '/api/v1/market/analysis' && method === 'GET') return marketAnalysisRoute(request, env);
+  if (path === '/api/v1/market/analysis/commodities' && method === 'GET') return marketCommoditiesRoute(request, env);
+  if (path === '/api/v1/market/analysis/sources' && method === 'GET') return marketSourcesRoute(request, env);
+  if (path === '/api/v1/market/analysis/refresh' && method === 'POST') return marketRefreshRoute(request, env);
+  if (path.startsWith('/api/v1/market/analysis/') && method === 'GET') {
+    return marketAnalysisDistrictRoute(request, env, decodeURIComponent(path.slice('/api/v1/market/analysis/'.length)));
+  }
 
   // Crop calendar & fertilizer
   if (path === '/api/v1/crops/calendar' && method === 'GET') return cropCalendarRoute(request, env);
