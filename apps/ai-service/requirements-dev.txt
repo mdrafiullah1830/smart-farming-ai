@@ -3,7 +3,7 @@ httpx==0.28.1
 # pytest 9 needs pytest-asyncio >= 1.0; there are no async tests, so the
 # plugin is dropped instead of pulling a second async plugin.
 pytest==9.1.1
-pytest-mock==3.15.1
+pytest-mock==3.16.0
 # scripts/fetch_disaster_alerts.py parses an external CAP/RSS feed; defusedxml
 # keeps Bandit's B314 (xml.etree.ElementTree) check satisfied with a real fix.
 defusedxml==0.7.1
