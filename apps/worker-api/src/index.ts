@@ -1,4 +1,4 @@
-import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders, createRequestId } from './http.ts';
+import { corsHeaders, json, error, checkRateLimit, addRateLimitHeaders, addSecurityHeaders, createRequestId, publicCacheControl } from './http.ts';
 import { authenticateDevice } from './sensors.ts';
 import type { Env } from './types.ts';
 import { currentUser } from './auth.ts';
@@ -258,6 +258,8 @@ export default {
       const response = await route(request, env);
       const withId = new Headers(response.headers);
       withId.set('X-Request-Id', requestId);
+      const cacheControl = publicCacheControl(url.pathname, request.method, response.status);
+      if (cacheControl && !withId.has('Cache-Control')) withId.set('Cache-Control', cacheControl);
       const out = addSecurityHeaders(addRateLimitHeaders(
         new Response(response.body, {
           status: response.status,

@@ -27,6 +27,56 @@ export function error(request: Request, env: Env, status: number, message: strin
   return json(request, env, { error: message, requestId }, status, requestId);
 }
 
+/**
+ * Public reference endpoints whose payloads are identical for every caller and
+ * may be reused by the browser for 10 minutes. Personalised routes (farms,
+ * tasks, irrigation usage, marketplace, auth) must never be listed here: a
+ * cached response would outlive the session that produced it. Server-side
+ * responses are never cached by this header — only the client's HTTP cache is.
+ */
+const CACHEABLE_GET_PREFIXES = [
+  '/api/v1/weather',
+  '/api/v1/market/prices',
+  '/api/v1/market/districts',
+  '/api/v1/market/history/',
+  '/api/v1/market/analysis',
+  '/api/v1/soil/',
+  '/api/v1/irrigation/requirements',
+  '/api/v1/irrigation/groundwater',
+  '/api/v1/crops/',
+  '/api/v1/disaster/alerts',
+  '/api/v1/flood/zones',
+  '/api/v1/locations/',
+  '/api/v1/districts',
+];
+
+export const PUBLIC_CACHE_CONTROL = 'public, max-age=600, stale-while-revalidate=600';
+
+export function publicCacheControl(path: string, method: string, status: number): string | null {
+  if (method !== 'GET' || status !== 200) return null;
+  if (CACHEABLE_GET_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix))) {
+    return PUBLIC_CACHE_CONTROL;
+  }
+  return null;
+}
+
+export function parsePagination(
+  url: URL,
+  { defaultLimit, maxLimit }: { defaultLimit: number; maxLimit: number },
+): { limit: number; offset: number; invalid?: string } {
+  const rawLimit = url.searchParams.get('limit');
+  const rawOffset = url.searchParams.get('offset');
+  const limit = rawLimit === null ? defaultLimit : Number(rawLimit);
+  const offset = rawOffset === null ? 0 : Number(rawOffset);
+  if (!Number.isInteger(limit) || limit < 1 || limit > maxLimit) {
+    return { limit: defaultLimit, offset: 0, invalid: `limit must be an integer between 1 and ${maxLimit}` };
+  }
+  if (!Number.isInteger(offset) || offset < 0) {
+    return { limit, offset: 0, invalid: 'offset must be a non-negative integer' };
+  }
+  return { limit, offset };
+}
+
 export function createRequestId(request: Request): string {
   const incoming = request.headers.get('X-Request-Id');
   if (incoming && incoming.length <= 128) return incoming;

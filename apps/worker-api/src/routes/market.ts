@@ -1,5 +1,5 @@
 import type { Env } from '../types.ts';
-import { json, error } from '../http.ts';
+import { json, error, parsePagination } from '../http.ts';
 
 async function body<T>(request: Request): Promise<T | null> {
   try { return await request.json<T>(); } catch { return null; }
@@ -52,28 +52,46 @@ async function fetchJson(url: string): Promise<unknown> {
 }
 
 export async function marketRoute(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const { limit, offset, invalid } = parsePagination(url, { defaultLimit: 500, maxLimit: 1000 });
+  if (invalid) return error(request, env, 400, invalid);
   const result = await env.DB.prepare(`
     SELECT mp.crop_id, c.name_en, c.name_bn, mp.district_id, mp.market_name,
            mp.price_min, mp.price_max, mp.unit, mp.source, mp.recorded_at
     FROM market_prices mp LEFT JOIN crops c ON c.id = mp.crop_id
-    ORDER BY mp.recorded_at DESC LIMIT 500
-  `).all();
+    ORDER BY mp.recorded_at DESC LIMIT ? OFFSET ?
+  `).bind(limit, offset).all();
+  const rows = result.results as Array<Record<string, unknown>>;
   const prices: Record<string, unknown> = {};
-  for (const row of result.results as Array<Record<string, unknown>>) {
+  for (const row of rows) {
     const key = String(row.crop_id);
     if (!(key in prices)) prices[key] = { name: row.name_bn ?? row.name_en ?? key, nameEn: row.name_en ?? key, minPrice: row.price_min, maxPrice: row.price_max, unit: row.unit, source: row.source, updatedAt: row.recorded_at };
   }
-  return json(request, env, { success: true, prices, rows: result.results });
+  // `prices` only covers the current page; paging clients must merge it.
+  return json(request, env, {
+    success: true,
+    prices,
+    rows,
+    pagination: { limit, offset, returned: rows.length, hasMore: rows.length === limit },
+  });
 }
 
 export async function marketDailyRoute(request: Request, env: Env): Promise<Response> {
-  const crop = new URL(request.url).searchParams.get("crop");
+  const url = new URL(request.url);
+  const crop = url.searchParams.get("crop");
+  const { limit, offset, invalid } = parsePagination(url, { defaultLimit: crop ? 90 : 500, maxLimit: 1000 });
+  if (invalid) return error(request, env, 400, invalid);
   try {
     const statement = crop
-      ? env.DB.prepare("SELECT crop_key, label_bn, price_min, price_max, price_mid, change_pct, unit, recorded_at, source FROM market_prices_daily WHERE crop_key = ? ORDER BY recorded_at DESC LIMIT 90").bind(crop)
-      : env.DB.prepare("SELECT crop_key, label_bn, price_min, price_max, price_mid, change_pct, unit, recorded_at, source FROM market_prices_daily ORDER BY recorded_at DESC, crop_key LIMIT 500");
+      ? env.DB.prepare("SELECT crop_key, label_bn, price_min, price_max, price_mid, change_pct, unit, recorded_at, source FROM market_prices_daily WHERE crop_key = ? ORDER BY recorded_at DESC LIMIT ? OFFSET ?").bind(crop, limit, offset)
+      : env.DB.prepare("SELECT crop_key, label_bn, price_min, price_max, price_mid, change_pct, unit, recorded_at, source FROM market_prices_daily ORDER BY recorded_at DESC, crop_key LIMIT ? OFFSET ?").bind(limit, offset);
     const result = await statement.all();
-    return json(request, env, { success: true, rows: result.results });
+    const rows = result.results;
+    return json(request, env, {
+      success: true,
+      rows,
+      pagination: { limit, offset, returned: rows.length, hasMore: rows.length === limit },
+    });
   } catch (cause) {
     console.error('market_daily_error', cause);
     return error(request, env, 502, 'Market daily data unavailable');

@@ -278,3 +278,72 @@ describe('Worker API', () => {
     assert.equal(res.status, 401);
   });
 });
+
+describe('Public cache headers', () => {
+  it('caches public market prices for 10 minutes', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/market/prices'), env);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('Cache-Control'), 'public, max-age=600, stale-while-revalidate=600');
+  });
+
+  it('caches soil reference data', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/soil/districts'), env);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get('Cache-Control') ?? '', /max-age=600/);
+  });
+
+  it('never caches personalised farm responses', async () => {
+    const token = await bearerToken();
+    const res = await worker.fetch(
+      createRequest('/api/v1/farms', { headers: { Authorization: `Bearer ${token}` } }),
+      env,
+    );
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('Cache-Control'), null);
+  });
+
+  it('never caches error responses', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/market/prices?limit=0'), env);
+    assert.equal(res.status, 400);
+    assert.equal(res.headers.get('Cache-Control'), null);
+  });
+});
+
+describe('Market pagination', () => {
+  it('rejects an out-of-range limit', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/market/prices?limit=0'), env);
+    assert.equal(res.status, 400);
+    const body = await res.json();
+    assert.match(body.error, /limit/);
+  });
+
+  it('rejects a non-integer offset', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/market/prices?offset=abc'), env);
+    assert.equal(res.status, 400);
+    const body = await res.json();
+    assert.match(body.error, /offset/);
+  });
+
+  it('returns pagination meta with a custom window', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/market/prices?limit=5&offset=10'), env);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.deepEqual(body.pagination, { limit: 5, offset: 10, returned: 0, hasMore: false });
+    assert.ok(Array.isArray(body.rows));
+    assert.equal(typeof body.prices, 'object');
+  });
+
+  it('keeps the default window when no params are sent', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/market/prices'), env);
+    const body = await res.json();
+    assert.equal(body.pagination.limit, 500);
+    assert.equal(body.pagination.offset, 0);
+  });
+
+  it('paginates the daily series endpoint', async () => {
+    const res = await worker.fetch(createRequest('/api/v1/market/prices/daily?crop=rice&limit=10'), env);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.pagination.limit, 10);
+  });
+});
