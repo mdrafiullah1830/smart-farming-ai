@@ -4,7 +4,7 @@
 # same unbounded requirement, so the property this pin relies on still holds.
 # This pin and the one in backend/requirements-api.txt are bumped together: CI
 # installs both files in one pip command, so two exact pins cannot differ.
-fastapi==0.141.1
+fastapi==0.142.2
 uvicorn[standard]==0.54.0
 pydantic==2.13.5
 onnxruntime==1.28.0
