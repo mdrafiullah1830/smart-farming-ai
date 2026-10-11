@@ -17,7 +17,7 @@ numpy==1.26.4
 pandas==3.0.6
 scikit-learn==1.4.0
 xgboost==2.0.3
-tensorflow>=2.16.0
+tensorflow>=2.21.0
 torch>=2.2.0
 transformers>=5.17.0
 openai-whisper>=20231117
