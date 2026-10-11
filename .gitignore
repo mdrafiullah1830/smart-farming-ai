@@ -113,3 +113,7 @@ Thumbs.db
 *.swo
 .kilo/
 :memory:.ses
+
+# Hardware build-guide art — source/4K masters stay local; compressed jpgs are tracked
+frontend/web/assets/images/hardware/**/*-source.png
+frontend/web/assets/images/hardware/**/*-4k.png
