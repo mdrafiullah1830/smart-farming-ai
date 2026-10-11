@@ -221,3 +221,23 @@
 @media(max-width:640px){.btn-voice{width:100%;justify-content:center}.voice-form-row{flex-direction:column}.voice-form-row .btn{width:100%}}
 @media(prefers-reduced-motion:reduce){.btn-voice{transition:none!important}}
 @media(max-width:640px){.marketplace-qty{width:100%}.marketplace-actions .btn{flex:1 1 auto}}
+/* AI forecast (market) + yield estimate (soil) */
+.forecast-box{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.55)}
+.forecast-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.forecast-head b{font-size:14px}
+.forecast-hint{margin:4px 0 0;font-size:11px}
+.forecast-result,.yield-result{margin-top:12px}
+.forecast-values{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.yield-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-width:340px}
+.forecast-point,.yield-point{display:grid;gap:3px;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:#fbfcf9;text-align:center}
+.forecast-point small,.yield-point small{font-size:10px;letter-spacing:.04em;text-transform:uppercase}
+.forecast-point b,.yield-point b{font-size:15px}
+.forecast-meta{margin-top:10px}
+.forecast-caveat{margin:8px 0 0;font-size:11px}
+.yield-panel{margin-top:11px;padding:15px}
+.yield-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:11px;align-items:end;margin-top:12px}
+.yield-form label{display:grid;gap:5px;font-size:12px;font-weight:650}
+.yield-form input,.yield-form select{min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:inherit}
+.yield-check{display:flex!important;align-items:center;gap:8px;align-self:end;min-height:42px}
+.yield-check input{width:18px;height:18px;accent-color:var(--green)}
+@media(max-width:640px){.forecast-values{grid-template-columns:repeat(2,1fr)}.yield-form{grid-template-columns:1fr}}

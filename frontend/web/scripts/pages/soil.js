@@ -181,6 +181,7 @@ async function loadReport({ district, upazila }) {
     const flat = flattenFeatures(grouped);
     storageSet('soil.lastFeatures', flat);
     storageSet('soil.lastMeta', { district, upazila, fetchedAt: new Date().toISOString(), source: 'D1 BARC soil_features' });
+    prefillYieldInputs();
 
     renderMetrics(flat, grouped);
     renderReportHeader(district, upazila);
@@ -528,6 +529,108 @@ function bindGeo() {
   });
 }
 
+/**
+ * Yield estimate (POST /api/v1/yield/predict → AI service).
+ * pH is unitless; soil-report nitrogen arrives in kg/ha while the model is
+ * trained on kg/acre figures, so it is converted on the way in.
+ */
+let lastYield = null;
+
+function prefillYieldInputs() {
+  const flat = storageGet('soil.lastFeatures', null);
+  if (!flat) return;
+  const ph = parseFeatureValue(flat.ph);
+  const phInput = qs('#yieldPh');
+  if (phInput && ph != null) phInput.value = String(round(ph, 1));
+  const nitrogen = parseFeatureValue(flat.nitrogen);
+  const nInput = qs('#yieldNitrogen');
+  if (nInput && nitrogen != null) nInput.value = String(round(nitrogen / 2.471, 1));
+}
+
+function renderYieldResult(data) {
+  const node = qs('#yieldResult');
+  if (!node) return;
+  const lang = getLang();
+  clear(node);
+  node.append(
+    el('div', { className: 'yield-values' }, [
+      el('div', { className: 'yield-point' }, [
+        el('small', { className: 'muted', text: t('yieldPerAcre') }),
+        el('b', { text: String(round(Number(data.yield_per_acre), 2)) }),
+      ]),
+      el('div', { className: 'yield-point' }, [
+        el('small', { className: 'muted', text: t('yieldTotal') }),
+        el('b', { text: String(round(Number(data.total_yield), 2)) }),
+      ]),
+    ]),
+    el('p', { className: 'muted forecast-caveat', text: t('yieldCaveat') }),
+  );
+  setState(node, State.READY, { lang });
+}
+
+async function runYieldEstimate() {
+  const node = qs('#yieldResult');
+  const btn = qs('#yieldBtn');
+  if (!node) return;
+  const lang = getLang();
+  const payload = {
+    crop: qs('#yieldCrop')?.value || 'rice',
+    season: qs('#yieldSeason')?.value || 'kharif',
+    area_acres: Number(qs('#yieldArea')?.value),
+    irrigation_used: qs('#yieldIrrigation')?.checked === true,
+    temperature: Number(qs('#yieldTemperature')?.value),
+    humidity: Number(qs('#yieldHumidity')?.value),
+    rainfall: Number(qs('#yieldRainfall')?.value),
+    ph: Number(qs('#yieldPh')?.value),
+    nitrogen: Number(qs('#yieldNitrogen')?.value),
+  };
+  clear(node);
+  setState(node, State.LOADING, { lang });
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = t('yieldRunning');
+  }
+  try {
+    const { data } = await api.post('/api/v1/yield/predict', payload, { timeoutMs: 25000 });
+    lastYield = data;
+    renderYieldResult(data);
+  } catch (err) {
+    reportClientError(err, { component: 'soil-yield' });
+    lastYield = null;
+    clear(node);
+    if (err.status === 503 && err.body?.status === 'model_unavailable') {
+      setState(node, State.UNAVAILABLE, {
+        message: err.body?.message || t('yieldUnavailable'),
+        lang,
+        retry: runYieldEstimate,
+      });
+    } else {
+      setState(node, State.ERROR, { message: err.message || t('loadFailed'), lang, retry: runYieldEstimate });
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = t('yieldRun');
+    }
+  }
+}
+
+function bindYieldPanel() {
+  const form = qs('#yieldForm');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      void runYieldEstimate();
+    });
+  }
+  prefillYieldInputs();
+  const node = qs('#yieldResult');
+  if (node) {
+    clear(node);
+    setState(node, State.EMPTY, { message: t('yieldHint'), lang: getLang() });
+  }
+}
+
 export function initSoil() {
   bindShell();
   renderFieldSelect();
@@ -537,6 +640,7 @@ export function initSoil() {
   bindDownloadReport();
   bindReminder();
   bindGeo();
+  bindYieldPanel();
   renderReminder();
   qsa('a[href="#"]').forEach((a) => a.setAttribute('href', 'dashboard.html'));
 
@@ -562,6 +666,14 @@ export function initSoil() {
       renderMetrics(flat, null);
       renderFertilizer(flat);
       renderComparison(flat);
+    }
+    if (lastYield) renderYieldResult(lastYield);
+    else {
+      const yNode = qs('#yieldResult');
+      if (yNode && yNode.dataset.state === 'empty') {
+        clear(yNode);
+        setState(yNode, State.EMPTY, { message: t('yieldHint'), lang: getLang() });
+      }
     }
   });
 }

@@ -41,6 +41,7 @@ import {
   floodZonesRoute, floodDistrictRoute
 } from './routes/flood.ts';
 import { voiceAskRoute, voiceCapabilitiesRoute } from './routes/voice.ts';
+import { yieldPredictRoute, marketForecastRoute } from './routes/ml.ts';
 import {
   irrigationAdviceRoute, irrigationUsageRoute,
   irrigationSchedulesRoute, waterRequirementsRoute
@@ -117,6 +118,10 @@ async function route(request: Request, env: Env): Promise<Response> {
     const parts = path.slice('/api/v1/soil/crop-recommendation/'.length).split('/').map(decodeURIComponent);
     return soilCropRecommendationRoute(request, env, parts[0], parts[1]);
   }
+
+  // Model inference (AI service). Read-only predictions, no user data.
+  if (path === '/api/v1/yield/predict' && method === 'POST') return yieldPredictRoute(request, env);
+  if (path === '/api/v1/market/forecast' && method === 'POST') return marketForecastRoute(request, env);
 
   // Market routes
   if (path === '/api/v1/market/prices' && method === 'GET') return marketRoute(request, env);

@@ -21,6 +21,7 @@ let state = {
   range: '7',
   history: [],
   districts: [],
+  forecast: null,
 };
 
 function getWatchlist() {
@@ -123,6 +124,8 @@ function renderTicker() {
 
 async function selectCrop(crop) {
   state.crop = crop;
+  // The old forecast belongs to the previous commodity.
+  resetForecast();
   qsa('.commodity').forEach((b) => {
     const on = b.dataset.crop === crop;
     b.classList.toggle('active', on);
@@ -272,6 +275,114 @@ function drawChart(history) {
   });
 }
 
+/**
+ * 7-day forecast (POST /api/v1/market/forecast → AI service).
+ * The history sent is the very series the chart draws, so the forecast can
+ * never disagree with what the farmer is looking at.
+ */
+function historySeriesForForecast() {
+  return state.history
+    .map((row) => Number(row.price_mid ?? (Number(row.price_min) + Number(row.price_max)) / 2))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .reverse();
+}
+
+function renderForecast() {
+  const node = qs('#forecastResult');
+  const data = state.forecast;
+  if (!node || !data) return;
+  const lang = getLang();
+  const forecast = Array.isArray(data.forecast) ? data.forecast : [];
+  if (!forecast.length) {
+    setState(node, State.EMPTY, { message: t('forecastEmpty'), lang });
+    return;
+  }
+  const trendKey = data.trend === 'rising'
+    ? 'forecastTrendRising'
+    : data.trend === 'falling'
+      ? 'forecastTrendFalling'
+      : 'forecastTrendFlat';
+  clear(node);
+  const values = el('div', { className: 'forecast-values' });
+  forecast.forEach((value, index) => {
+    values.append(el('div', { className: 'forecast-point' }, [
+      el('small', { className: 'muted', text: `D+${index + 1}` }),
+      el('b', { text: formatCurrencyBdt(round(Number(value), 0)) }),
+    ]));
+  });
+  node.append(
+    values,
+    el('div', { className: 'forecast-meta' }, [
+      el('span', { className: 'chip', text: `${t('forecastTrend')}: ${t(trendKey)}` }),
+    ]),
+    el('p', { className: 'muted forecast-caveat', text: t('forecastCaveat') }),
+  );
+  setState(node, State.READY, { lang });
+}
+
+function resetForecast() {
+  state.forecast = null;
+  const node = qs('#forecastResult');
+  if (!node) return;
+  clear(node);
+  setState(node, State.EMPTY, { message: t('forecastHint'), lang: getLang() });
+}
+
+async function runForecast() {
+  const node = qs('#forecastResult');
+  const btn = qs('#forecastBtn');
+  if (!node) return;
+  const lang = getLang();
+  const series = historySeriesForForecast();
+  if (series.length < 7) {
+    state.forecast = null;
+    clear(node);
+    setState(node, State.EMPTY, { message: t('forecastEmpty'), lang });
+    return;
+  }
+  clear(node);
+  setState(node, State.LOADING, { lang });
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = t('forecastRunning');
+  }
+  try {
+    const { data } = await api.post(
+      '/api/v1/market/forecast',
+      { crop: state.crop, history: series, days: 7 },
+      { timeoutMs: 25000 },
+    );
+    state.forecast = data;
+    renderForecast();
+  } catch (err) {
+    reportClientError(err, { component: 'market-forecast' });
+    state.forecast = null;
+    clear(node);
+    if (err.status === 503 && err.body?.status === 'model_unavailable') {
+      setState(node, State.UNAVAILABLE, {
+        message: err.body?.message || t('forecastUnavailable'),
+        lang,
+        retry: runForecast,
+      });
+    } else if (err.status === 422) {
+      setState(node, State.EMPTY, { message: err.body?.message || t('forecastEmpty'), lang });
+    } else {
+      setState(node, State.ERROR, { message: err.message || t('loadFailed'), lang, retry: runForecast });
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = t('forecastRun');
+    }
+  }
+}
+
+function bindForecast() {
+  const btn = qs('#forecastBtn');
+  if (btn) btn.addEventListener('click', () => void runForecast());
+  resetForecast();
+}
+
 function bindRanges() {
   qsa('#rangeTabs button').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -282,6 +393,7 @@ function bindRanges() {
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       state.range = btn.getAttribute('data-range') || '7';
+      resetForecast();
       void loadHistory();
     });
   });
@@ -570,6 +682,7 @@ function renderAIRecommend() {
 export function initMarket() {
   bindShell();
   bindRanges();
+  bindForecast();
   bindWatchlistAdd();
   bindAlerts();
   bindExport();
@@ -594,6 +707,11 @@ export function initMarket() {
     renderAlerts();
     updatePriceSummary();
     renderAIRecommend();
+    if (state.forecast) renderForecast();
+    else {
+      const fNode = qs('#forecastResult');
+      if (fNode && (fNode.dataset.state === 'empty' || fNode.dataset.state === 'ready')) resetForecast();
+    }
   });
 }
 

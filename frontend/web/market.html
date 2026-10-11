@@ -64,6 +64,18 @@
         <div class="chart-wrap" id="chartWrap" data-state="loading">
           <svg id="priceChart" viewBox="0 0 700 230" role="img" aria-label="Price history chart"></svg>
         </div>
+
+        <div class="forecast-box" id="forecastBox">
+          <div class="forecast-head">
+            <div>
+              <b data-i18n="forecastTitle">7-Day Price Forecast</b>
+              <p class="muted forecast-hint" data-i18n="forecastHint">AI forecast from recent prices of the selected commodity.</p>
+            </div>
+            <button class="btn btn-soft" type="button" id="forecastBtn" data-i18n="forecastRun">Run forecast</button>
+          </div>
+          <div class="forecast-result" id="forecastResult" data-state="ready" aria-live="polite"></div>
+        </div>
+
         <button class="btn btn-soft" type="button" id="watchlistAdd" style="margin-top:10px" data-i18n="watchlist">Add to watchlist</button>
       </article>
 
