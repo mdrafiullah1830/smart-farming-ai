@@ -8,7 +8,7 @@
 # both files in one pip command, so two different exact pins of the same
 # package cannot resolve). pydantic and uvicorn use compatible-release ranges so
 # a Python 3.13/3.14 dev machine can still resolve wheels.
-fastapi==0.141.1
+fastapi==0.143.0
 uvicorn[standard]>=0.35.0,<1
 pydantic>=2.11.7,<3
 python-multipart==0.0.31
