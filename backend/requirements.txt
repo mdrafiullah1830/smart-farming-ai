@@ -1,5 +1,5 @@
 # Smart Farming AI Platform - Backend Dependencies
-fastapi==0.109.2
+fastapi==0.143.0
 uvicorn[standard]==0.27.1
 pydantic==2.6.1
 pydantic-settings==2.1.0
