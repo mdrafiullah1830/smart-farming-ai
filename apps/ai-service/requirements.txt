@@ -18,4 +18,4 @@ prometheus_client==0.26.0
 faiss-cpu==1.15.1
 # 0.3.4 is affected by PYSEC-2026-77/1520 and drags langchain-core 0.3.86
 # (PYSEC-2026-2193/2562); 1.1.2 fixes both.
-langchain-text-splitters==1.1.2
+langchain-text-splitters==1.1.3
