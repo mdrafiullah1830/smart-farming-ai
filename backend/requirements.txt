@@ -1,7 +1,7 @@
 # Smart Farming AI Platform - Backend Dependencies
 fastapi==0.109.2
 uvicorn[standard]==0.27.1
-pydantic==2.6.1
+pydantic==2.14.0
 pydantic-settings==2.1.0
 python-multipart==0.0.9
 python-dotenv==1.0.1
