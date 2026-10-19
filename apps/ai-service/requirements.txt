@@ -6,7 +6,7 @@
 # installs both files in one pip command, so two exact pins cannot differ.
 fastapi==0.142.2
 uvicorn[standard]==0.54.0
-pydantic==2.13.5
+pydantic==2.14.1
 onnxruntime==1.30.0
 # Pillow 10.4.0 carries PYSEC-2026-165/2249/2250/2252/2253/2255/2874/345x/349x.
 Pillow==12.3.0
