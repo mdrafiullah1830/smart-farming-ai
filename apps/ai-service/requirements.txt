@@ -9,7 +9,7 @@ uvicorn[standard]==0.54.0
 pydantic==2.13.5
 onnxruntime==1.30.0
 # Pillow 10.4.0 carries PYSEC-2026-165/2249/2250/2252/2253/2255/2874/345x/349x.
-Pillow==12.3.0
+Pillow==13.0.0
 numpy
 httpx==0.28.1
 prometheus_client==0.26.0
